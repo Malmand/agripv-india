@@ -1,0 +1,15 @@
+AgriPV India status  2026-10-28 14:02 UTC
+machine up 0.2 h this boot (about EUR 0 this boot)
+
+(no simulation progress yet: still downloading or converting)
+
+inputs: climate files 0/1800, soil cells 3/2977, converted 1/15
+
+[historical_recommended] 3 tasks finished
+  open-field median yield (kg/ha): {'chickpea': 348.0, 'groundnut': 4181.0, 'pearl_millet': 970.0, 'wheat': 4230.0}
+  RY at GCR 0.3, median: {'chickpea': {'ew_fixed': 0.75, 'south_fixed': 0.64, 'vertical': 0.72}, 'groundnut': {'ew_fixed': 0.79, 'south_fixed': 0.77, 'vertical': 0.78}, 'pearl_millet': {'ew_fixed': 1.15, 'south_fixed': 1.05, 'vertical': 1.03}, 'wheat': {'ew_fixed': 1.05, 'south_fixed': 0.93, 'vertical': 0.98}}
+[historical_recommended_open] 3 tasks finished
+  open-field median yield (kg/ha): {'chickpea': 348.0, 'groundnut': 4181.0, 'pearl_millet': 970.0, 'wheat': 4230.0}
+
+failed tasks so far: 0; tasks with DSSAT retries: 0
+HEALTH: OK

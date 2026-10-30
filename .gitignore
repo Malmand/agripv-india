@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.part
+runs/*/ry_all.csv
+update_india*.sh
+*.xls

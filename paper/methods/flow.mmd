@@ -1,0 +1,42 @@
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"DejaVu Sans","fontSize":"15px","primaryColor":"#ffffff","primaryBorderColor":"#333333","lineColor":"#333333"}}}%%
+flowchart TB
+  subgraph IN["1. Inputs (0.25° grid, 2977 cells)"]
+    direction LR
+    A1["Climate<br/>NEX-GDDP-CMIP6<br/>5 GCMs, 1995–2014<br/>2041–2060 SSP2-4.5, SSP5-8.5"]
+    A2["Crop area and irrigation<br/>MapSPAM 2010"]
+    A3["Sowing dates<br/>GGCMI Phase 3"]
+    A4["Soil<br/>SoilGrids 2.0"]
+    A5["Terrain slope<br/>Copernicus DEM GLO-90"]
+  end
+  subgraph LM["2. Light model"]
+    direction LR
+    B1["Daily irradiance to hourly<br/>clear-sky scaling, Erbs split"]
+    B2["2D infinite-row view factors<br/>3 layouts, GCR 0.05–0.7<br/>5 ground strips per pitch"]
+    B3["Daily light factor per strip<br/>(benchmarked against pvlib)"]
+    B1 --> B2 --> B3
+  end
+  subgraph CM["3. Crop model (DSSAT 4.8)"]
+    direction LR
+    C1["Open field and shaded strips<br/>4 crops, irrigated and rainfed<br/>CO2 per period"]
+    C2["N calibration by state<br/>(ICRISAT yields 1995–2014)"]
+    C3["Relative yield RY(GCR)<br/>per cell, crop, layout, GCM"]
+    C2 --> C1 --> C3
+  end
+  subgraph PO["4. Yield-constrained potential"]
+    direction LR
+    D1["GCR_max at RY ≥ 0.66, 0.80, 0.90"]
+    D2["Eligible land<br/>crop area × slope ≤ 5%<br/>double cropping counted once"]
+    D3["Capacity (GWp) and energy (TWh)<br/>pvlib bifacial, infinite sheds"]
+    D1 --> D2 --> D3
+  end
+  A1 --> B1
+  A1 --> C1
+  A2 --> C1
+  A3 --> C1
+  A4 --> C1
+  B3 --> C1
+  C3 --> D1
+  A2 --> D2
+  A5 --> D2
+  A1 --> D3
+  D3 --> E1["Maps, state and India totals<br/>median and range over 5 GCMs<br/>sensitivity cases"]

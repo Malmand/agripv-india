@@ -1,0 +1,4 @@
+cell_id,lat,lon,state,wheat_ha,wheat_irr_share,sim_wheat,pearl_millet_ha,pearl_millet_irr_share,sim_pearl_millet,chickpea_ha,chickpea_irr_share,sim_chickpea,groundnut_ha,groundnut_irr_share,sim_groundnut,wheat_sow_doy_ir,wheat_sow_doy_rf,pearl_millet_sow_doy_ir,pearl_millet_sow_doy_rf,chickpea_sow_doy_ir,chickpea_sow_doy_rf,groundnut_sow_doy_ir,groundnut_sow_doy_rf
+I02143,26.375,73.125,Rajasthan,133.0,0.515,False,39787.0,0.01,True,40.0,0.0,False,934.0,0.0,False,311.0,311.0,186.0,186.0,162.0,162.0,182.0,274.0
+I01478,23.875,73.375,Rajasthan,4152.0,0.983,True,2329.0,0.445,True,930.0,0.018,False,2463.0,0.178,True,320.0,320.0,181.0,181.0,177.0,177.0,182.0,274.0
+I01313,23.125,74.375,Rajasthan,5867.0,0.949,True,10.0,0.0,False,3405.0,0.019,True,225.0,0.027,False,311.0,311.0,186.0,186.0,162.0,162.0,182.0,274.0

@@ -1,0 +1,11 @@
+historical recommended: 2 tasks to run, 2 workers
+/usr/local/lib/python3.13/site-packages/DSSATTools/__init__.py:105: DeprecationWarning: DSSATTools version 3.0.0 is a major upgrade and will not be backwards compatible with previous versions. If you are running code that was developed  using a previous DSSATTools version, then install DSSATTools version 2.1.6
+  warnings.warn(
+/usr/local/lib/python3.13/site-packages/DSSATTools/__init__.py:105: DeprecationWarning: DSSATTools version 3.0.0 is a major upgrade and will not be backwards compatible with previous versions. If you are running code that was developed  using a previous DSSATTools version, then install DSSATTools version 2.1.6
+  warnings.warn(
+FAIL test_out/mp/historical_recommended/GFDL-ESM4/R0215.csv: FileNotFoundError(2, 'No such file or directory')
+2/2 done, 1 failed, 0.07 h elapsed, ETA 0.0 h, last task 250 s
+
+real	4m11.247s
+user	7m48.905s
+sys	0m6.798s

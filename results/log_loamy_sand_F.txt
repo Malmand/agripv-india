@@ -1,0 +1,692 @@
+/usr/local/lib/python3.13/site-packages/DSSATTools/__init__.py:105: DeprecationWarning: DSSATTools version 3.0.0 is a major upgrade and will not be backwards compatible with previous versions. If you are running code that was developed  using a previous DSSATTools version, then install DSSATTools version 2.1.6
+  warnings.warn(
+/tmp/dssatnwgkugdt created.
+/tmp/dssatnwgkugdt and its content has been removed.
+/tmp/dssatsxmuurfg created.
+/tmp/dssatsxmuurfg and its content has been removed.
+/tmp/dssatszxcnetn created.
+/tmp/dssatszxcnetn and its content has been removed.
+/tmp/dssatgpvyujni created.
+/tmp/dssatgpvyujni and its content has been removed.
+/tmp/dssatybwxlspr created.
+/tmp/dssatybwxlspr and its content has been removed.
+/tmp/dssatscqgflrw created.
+/tmp/dssatscqgflrw and its content has been removed.
+/tmp/dssatcnjiivfu created.
+/tmp/dssatcnjiivfu and its content has been removed.
+/tmp/dssatysoezzvm created.
+/tmp/dssatysoezzvm and its content has been removed.
+/tmp/dssatknbixyql created.
+/tmp/dssatknbixyql and its content has been removed.
+/tmp/dssatyfzypoqv created.
+/tmp/dssatyfzypoqv and its content has been removed.
+/tmp/dssatczwdjhhp created.
+/tmp/dssatczwdjhhp and its content has been removed.
+/tmp/dssateicgfjqf created.
+/tmp/dssateicgfjqf and its content has been removed.
+/tmp/dssatzpchkzta created.
+/tmp/dssatzpchkzta and its content has been removed.
+/tmp/dssatimbbcekb created.
+/tmp/dssatimbbcekb and its content has been removed.
+/tmp/dssatiipidhgb created.
+/tmp/dssatiipidhgb and its content has been removed.
+/tmp/dssatrafbalkd created.
+/tmp/dssatrafbalkd and its content has been removed.
+/tmp/dssatqikttnbi created.
+/tmp/dssatqikttnbi and its content has been removed.
+/tmp/dssatrodqamho created.
+/tmp/dssatrodqamho and its content has been removed.
+/tmp/dssatajzcpkdd created.
+/tmp/dssatajzcpkdd and its content has been removed.
+/tmp/dssatlwcairwf created.
+/tmp/dssatlwcairwf and its content has been removed.
+/tmp/dssatexuaiktd created.
+/tmp/dssatexuaiktd and its content has been removed.
+/tmp/dssatudurgraf created.
+/tmp/dssatudurgraf and its content has been removed.
+/tmp/dssatarawysgb created.
+/tmp/dssatarawysgb and its content has been removed.
+/tmp/dssatsbyqtxou created.
+/tmp/dssatsbyqtxou and its content has been removed.
+done south_fixed GCR 0.1
+/tmp/dssatuzbkkzpi created.
+/tmp/dssatuzbkkzpi and its content has been removed.
+/tmp/dssatvjdfbecr created.
+/tmp/dssatvjdfbecr and its content has been removed.
+/tmp/dssateudydvpa created.
+/tmp/dssateudydvpa and its content has been removed.
+/tmp/dssatqrenbixg created.
+/tmp/dssatqrenbixg and its content has been removed.
+/tmp/dssatlomswyfz created.
+/tmp/dssatlomswyfz and its content has been removed.
+/tmp/dssatkhaudejo created.
+/tmp/dssatkhaudejo and its content has been removed.
+/tmp/dssatwaewlnbi created.
+/tmp/dssatwaewlnbi and its content has been removed.
+/tmp/dssatmzdbjibh created.
+/tmp/dssatmzdbjibh and its content has been removed.
+/tmp/dssatmtuflral created.
+/tmp/dssatmtuflral and its content has been removed.
+/tmp/dssatzaenobzw created.
+/tmp/dssatzaenobzw and its content has been removed.
+/tmp/dssatbzwlbpqc created.
+/tmp/dssatbzwlbpqc and its content has been removed.
+/tmp/dssatnfaefpkv created.
+/tmp/dssatnfaefpkv and its content has been removed.
+/tmp/dssatetcdlbdn created.
+/tmp/dssatetcdlbdn and its content has been removed.
+/tmp/dssatqqzwydoi created.
+/tmp/dssatqqzwydoi and its content has been removed.
+/tmp/dssatxuzptrni created.
+/tmp/dssatxuzptrni and its content has been removed.
+/tmp/dssatzaninjjx created.
+/tmp/dssatzaninjjx and its content has been removed.
+/tmp/dssatfjvukilf created.
+/tmp/dssatfjvukilf and its content has been removed.
+/tmp/dssatgcssjgcn created.
+/tmp/dssatgcssjgcn and its content has been removed.
+/tmp/dssatcxpogxjh created.
+/tmp/dssatcxpogxjh and its content has been removed.
+/tmp/dssatumcvmfir created.
+/tmp/dssatumcvmfir and its content has been removed.
+done south_fixed GCR 0.2
+/tmp/dssatshqxghfu created.
+/tmp/dssatshqxghfu and its content has been removed.
+/tmp/dssatummpqwug created.
+/tmp/dssatummpqwug and its content has been removed.
+/tmp/dssatbrdifcpk created.
+/tmp/dssatbrdifcpk and its content has been removed.
+/tmp/dssatreqpbczj created.
+/tmp/dssatreqpbczj and its content has been removed.
+/tmp/dssatbkoknkrr created.
+/tmp/dssatbkoknkrr and its content has been removed.
+/tmp/dssatbbdtogqk created.
+/tmp/dssatbbdtogqk and its content has been removed.
+/tmp/dssatkkrnutas created.
+/tmp/dssatkkrnutas and its content has been removed.
+/tmp/dssatzwqfobxq created.
+/tmp/dssatzwqfobxq and its content has been removed.
+/tmp/dssatcbhegucl created.
+/tmp/dssatcbhegucl and its content has been removed.
+/tmp/dssatrxgsnhph created.
+/tmp/dssatrxgsnhph and its content has been removed.
+/tmp/dssatjthsjetx created.
+/tmp/dssatjthsjetx and its content has been removed.
+/tmp/dssatpahlaces created.
+/tmp/dssatpahlaces and its content has been removed.
+/tmp/dssatqfhsqgjk created.
+/tmp/dssatqfhsqgjk and its content has been removed.
+/tmp/dssatkafodtsw created.
+/tmp/dssatkafodtsw and its content has been removed.
+/tmp/dssatgfnqnewl created.
+/tmp/dssatgfnqnewl and its content has been removed.
+/tmp/dssateriyywhh created.
+/tmp/dssateriyywhh and its content has been removed.
+/tmp/dssatorlfijjg created.
+/tmp/dssatorlfijjg and its content has been removed.
+/tmp/dssatcxbbnrmm created.
+/tmp/dssatcxbbnrmm and its content has been removed.
+/tmp/dssatdpmquluh created.
+/tmp/dssatdpmquluh and its content has been removed.
+/tmp/dssatftxdypbt created.
+/tmp/dssatftxdypbt and its content has been removed.
+done south_fixed GCR 0.3
+/tmp/dssatvrfenutr created.
+/tmp/dssatvrfenutr and its content has been removed.
+/tmp/dssathdwhafzx created.
+/tmp/dssathdwhafzx and its content has been removed.
+/tmp/dssatetiakiwp created.
+/tmp/dssatetiakiwp and its content has been removed.
+/tmp/dssatewepdkib created.
+/tmp/dssatewepdkib and its content has been removed.
+/tmp/dssatlipqpcqk created.
+/tmp/dssatlipqpcqk and its content has been removed.
+/tmp/dssatvhngurck created.
+/tmp/dssatvhngurck and its content has been removed.
+/tmp/dssatyoahdfhi created.
+/tmp/dssatyoahdfhi and its content has been removed.
+/tmp/dssattkyaejwx created.
+/tmp/dssattkyaejwx and its content has been removed.
+/tmp/dssatdmxgyzfh created.
+/tmp/dssatdmxgyzfh and its content has been removed.
+/tmp/dssatlzmehlxp created.
+/tmp/dssatlzmehlxp and its content has been removed.
+/tmp/dssatagogxrcz created.
+/tmp/dssatagogxrcz and its content has been removed.
+/tmp/dssatoddxzniq created.
+/tmp/dssatoddxzniq and its content has been removed.
+/tmp/dssatqsekjtus created.
+/tmp/dssatqsekjtus and its content has been removed.
+/tmp/dssatmwyxkirm created.
+/tmp/dssatmwyxkirm and its content has been removed.
+/tmp/dssatpnkgvaow created.
+/tmp/dssatpnkgvaow and its content has been removed.
+/tmp/dssatirktoauu created.
+/tmp/dssatirktoauu and its content has been removed.
+/tmp/dssatxcucdlhw created.
+/tmp/dssatxcucdlhw and its content has been removed.
+/tmp/dssatgfrhtvyq created.
+/tmp/dssatgfrhtvyq and its content has been removed.
+/tmp/dssatjgqvzbrb created.
+/tmp/dssatjgqvzbrb and its content has been removed.
+/tmp/dssatzgtquhzb created.
+/tmp/dssatzgtquhzb and its content has been removed.
+done south_fixed GCR 0.4
+/tmp/dssatppvxfjpl created.
+/tmp/dssatppvxfjpl and its content has been removed.
+/tmp/dssatbnclcsga created.
+/tmp/dssatbnclcsga and its content has been removed.
+/tmp/dssatgjungmus created.
+/tmp/dssatgjungmus and its content has been removed.
+/tmp/dssatsdyqtmew created.
+/tmp/dssatsdyqtmew and its content has been removed.
+/tmp/dssatdemlxfpk created.
+/tmp/dssatdemlxfpk and its content has been removed.
+/tmp/dssatjpmjiitf created.
+/tmp/dssatjpmjiitf and its content has been removed.
+/tmp/dssatbzxwszpa created.
+/tmp/dssatbzxwszpa and its content has been removed.
+/tmp/dssatahuezhvq created.
+/tmp/dssatahuezhvq and its content has been removed.
+/tmp/dssataecthysf created.
+/tmp/dssataecthysf and its content has been removed.
+/tmp/dssatxfvcupih created.
+/tmp/dssatxfvcupih and its content has been removed.
+/tmp/dssatlgchyxfe created.
+/tmp/dssatlgchyxfe and its content has been removed.
+/tmp/dssatrnkythbh created.
+/tmp/dssatrnkythbh and its content has been removed.
+/tmp/dssatqhzbzagb created.
+/tmp/dssatqhzbzagb and its content has been removed.
+/tmp/dssatkklirgav created.
+/tmp/dssatkklirgav and its content has been removed.
+/tmp/dssatcqujpvqf created.
+/tmp/dssatcqujpvqf and its content has been removed.
+/tmp/dssatuoxlbicx created.
+/tmp/dssatuoxlbicx and its content has been removed.
+/tmp/dssatztrvouqq created.
+/tmp/dssatztrvouqq and its content has been removed.
+/tmp/dssatttmmackc created.
+/tmp/dssatttmmackc and its content has been removed.
+/tmp/dssatbpugxhhs created.
+/tmp/dssatbpugxhhs and its content has been removed.
+/tmp/dssatkmnopzal created.
+/tmp/dssatkmnopzal and its content has been removed.
+done south_fixed GCR 0.5
+/tmp/dssatifjcrvgf created.
+/tmp/dssatifjcrvgf and its content has been removed.
+/tmp/dssatligwdgpq created.
+/tmp/dssatligwdgpq and its content has been removed.
+/tmp/dssathcjyqizb created.
+/tmp/dssathcjyqizb and its content has been removed.
+/tmp/dssatrrpnotjb created.
+/tmp/dssatrrpnotjb and its content has been removed.
+/tmp/dssaterjfvczk created.
+/tmp/dssaterjfvczk and its content has been removed.
+/tmp/dssatfesvyhwg created.
+/tmp/dssatfesvyhwg and its content has been removed.
+/tmp/dssatrkwcjapa created.
+/tmp/dssatrkwcjapa and its content has been removed.
+/tmp/dssatmxeusxzi created.
+/tmp/dssatmxeusxzi and its content has been removed.
+/tmp/dssatpbqumntw created.
+/tmp/dssatpbqumntw and its content has been removed.
+/tmp/dssatjwtzcfdk created.
+/tmp/dssatjwtzcfdk and its content has been removed.
+/tmp/dssatvqrmwwit created.
+/tmp/dssatvqrmwwit and its content has been removed.
+/tmp/dssatezhnkjxb created.
+/tmp/dssatezhnkjxb and its content has been removed.
+/tmp/dssatbndwytng created.
+/tmp/dssatbndwytng and its content has been removed.
+/tmp/dssattwlwygqm created.
+/tmp/dssattwlwygqm and its content has been removed.
+/tmp/dssatvayamcjl created.
+/tmp/dssatvayamcjl and its content has been removed.
+/tmp/dssatdzklosqd created.
+/tmp/dssatdzklosqd and its content has been removed.
+/tmp/dssatoiwmwppd created.
+/tmp/dssatoiwmwppd and its content has been removed.
+/tmp/dssattpysqqkq created.
+/tmp/dssattpysqqkq and its content has been removed.
+/tmp/dssatfahtcumk created.
+/tmp/dssatfahtcumk and its content has been removed.
+/tmp/dssatomwyawzh created.
+/tmp/dssatomwyawzh and its content has been removed.
+done ew_fixed GCR 0.1
+/tmp/dssatzggabdin created.
+/tmp/dssatzggabdin and its content has been removed.
+/tmp/dssatlqkguizf created.
+/tmp/dssatlqkguizf and its content has been removed.
+/tmp/dssatokcmkbgf created.
+/tmp/dssatokcmkbgf and its content has been removed.
+/tmp/dssatbhprjxhx created.
+/tmp/dssatbhprjxhx and its content has been removed.
+/tmp/dssatqzmshnvq created.
+/tmp/dssatqzmshnvq and its content has been removed.
+/tmp/dssatpvhkyhsj created.
+/tmp/dssatpvhkyhsj and its content has been removed.
+/tmp/dssatgffbvphr created.
+/tmp/dssatgffbvphr and its content has been removed.
+/tmp/dssatmmnamnkw created.
+/tmp/dssatmmnamnkw and its content has been removed.
+/tmp/dssatpzcqaccd created.
+/tmp/dssatpzcqaccd and its content has been removed.
+/tmp/dssatgfwkqdxq created.
+/tmp/dssatgfwkqdxq and its content has been removed.
+/tmp/dssatndiwmadv created.
+/tmp/dssatndiwmadv and its content has been removed.
+/tmp/dssattnmbvwro created.
+/tmp/dssattnmbvwro and its content has been removed.
+/tmp/dssatyitvnmcp created.
+/tmp/dssatyitvnmcp and its content has been removed.
+/tmp/dssatgvquhxlo created.
+/tmp/dssatgvquhxlo and its content has been removed.
+/tmp/dssatdnzndwcc created.
+/tmp/dssatdnzndwcc and its content has been removed.
+/tmp/dssatigiivdwg created.
+/tmp/dssatigiivdwg and its content has been removed.
+/tmp/dssatvytmhfqk created.
+/tmp/dssatvytmhfqk and its content has been removed.
+/tmp/dssatbussuoxl created.
+/tmp/dssatbussuoxl and its content has been removed.
+/tmp/dssatqdxdwtxo created.
+/tmp/dssatqdxdwtxo and its content has been removed.
+/tmp/dssatcyilmryb created.
+/tmp/dssatcyilmryb and its content has been removed.
+done ew_fixed GCR 0.2
+/tmp/dssatfawylrdf created.
+/tmp/dssatfawylrdf and its content has been removed.
+/tmp/dssatbbflcnsy created.
+/tmp/dssatbbflcnsy and its content has been removed.
+/tmp/dssatwclojtlv created.
+/tmp/dssatwclojtlv and its content has been removed.
+/tmp/dssatytryenqs created.
+/tmp/dssatytryenqs and its content has been removed.
+/tmp/dssatuyemwcym created.
+/tmp/dssatuyemwcym and its content has been removed.
+/tmp/dssatdyddmplc created.
+/tmp/dssatdyddmplc and its content has been removed.
+/tmp/dssatfqlzwmcz created.
+/tmp/dssatfqlzwmcz and its content has been removed.
+/tmp/dssatyoizdwge created.
+/tmp/dssatyoizdwge and its content has been removed.
+/tmp/dssatewynpyjq created.
+/tmp/dssatewynpyjq and its content has been removed.
+/tmp/dssatktfhfnmv created.
+/tmp/dssatktfhfnmv and its content has been removed.
+/tmp/dssatayptlovh created.
+/tmp/dssatayptlovh and its content has been removed.
+/tmp/dssatnqvvljpk created.
+/tmp/dssatnqvvljpk and its content has been removed.
+/tmp/dssatsoulcxdt created.
+/tmp/dssatsoulcxdt and its content has been removed.
+/tmp/dssatvxwsnblj created.
+/tmp/dssatvxwsnblj and its content has been removed.
+/tmp/dssatgwpxnysd created.
+/tmp/dssatgwpxnysd and its content has been removed.
+/tmp/dssatlvgelata created.
+/tmp/dssatlvgelata and its content has been removed.
+/tmp/dssatucoaboez created.
+/tmp/dssatucoaboez and its content has been removed.
+/tmp/dssatuwdkxmgc created.
+/tmp/dssatuwdkxmgc and its content has been removed.
+/tmp/dssatirshgnjz created.
+/tmp/dssatirshgnjz and its content has been removed.
+/tmp/dssatmaqxwmsa created.
+/tmp/dssatmaqxwmsa and its content has been removed.
+done ew_fixed GCR 0.3
+/tmp/dssatkbyrboww created.
+/tmp/dssatkbyrboww and its content has been removed.
+/tmp/dssatlfdoetfm created.
+/tmp/dssatlfdoetfm and its content has been removed.
+/tmp/dssatqcwktzoc created.
+/tmp/dssatqcwktzoc and its content has been removed.
+/tmp/dssathonnbvzd created.
+/tmp/dssathonnbvzd and its content has been removed.
+/tmp/dssatqbivmxmz created.
+/tmp/dssatqbivmxmz and its content has been removed.
+/tmp/dssatdjiakoni created.
+/tmp/dssatdjiakoni and its content has been removed.
+/tmp/dssatnengtxrp created.
+/tmp/dssatnengtxrp and its content has been removed.
+/tmp/dssatnnsuetfa created.
+/tmp/dssatnnsuetfa and its content has been removed.
+/tmp/dssatwnfhmncy created.
+/tmp/dssatwnfhmncy and its content has been removed.
+/tmp/dssatnnslftsi created.
+/tmp/dssatnnslftsi and its content has been removed.
+/tmp/dssatekdfjxvt created.
+/tmp/dssatekdfjxvt and its content has been removed.
+/tmp/dssatijsuceew created.
+/tmp/dssatijsuceew and its content has been removed.
+/tmp/dssatznaudhrb created.
+/tmp/dssatznaudhrb and its content has been removed.
+/tmp/dssatiuzixcar created.
+/tmp/dssatiuzixcar and its content has been removed.
+/tmp/dssattfuyftzm created.
+/tmp/dssattfuyftzm and its content has been removed.
+/tmp/dssatpslrdale created.
+/tmp/dssatpslrdale and its content has been removed.
+/tmp/dssatofuuxvlx created.
+/tmp/dssatofuuxvlx and its content has been removed.
+/tmp/dssatswfktmvv created.
+/tmp/dssatswfktmvv and its content has been removed.
+/tmp/dssatbgraillb created.
+/tmp/dssatbgraillb and its content has been removed.
+/tmp/dssatrqlsunrt created.
+/tmp/dssatrqlsunrt and its content has been removed.
+done ew_fixed GCR 0.4
+/tmp/dssataskmuamn created.
+/tmp/dssataskmuamn and its content has been removed.
+/tmp/dssattqslotvf created.
+/tmp/dssattqslotvf and its content has been removed.
+/tmp/dssatfflsmolc created.
+/tmp/dssatfflsmolc and its content has been removed.
+/tmp/dssathnnpbfoq created.
+/tmp/dssathnnpbfoq and its content has been removed.
+/tmp/dssatquujtxke created.
+/tmp/dssatquujtxke and its content has been removed.
+/tmp/dssatknszcmps created.
+/tmp/dssatknszcmps and its content has been removed.
+/tmp/dssatjwvpuhnm created.
+/tmp/dssatjwvpuhnm and its content has been removed.
+/tmp/dssatqafqvbxe created.
+/tmp/dssatqafqvbxe and its content has been removed.
+/tmp/dssatebtlugnf created.
+/tmp/dssatebtlugnf and its content has been removed.
+/tmp/dssatblsbgxpi created.
+/tmp/dssatblsbgxpi and its content has been removed.
+/tmp/dssatwypyizib created.
+/tmp/dssatwypyizib and its content has been removed.
+/tmp/dssathvutgwyg created.
+/tmp/dssathvutgwyg and its content has been removed.
+/tmp/dssatiaetvjev created.
+/tmp/dssatiaetvjev and its content has been removed.
+/tmp/dssatdlwvwguu created.
+/tmp/dssatdlwvwguu and its content has been removed.
+/tmp/dssatlyfkyyxe created.
+/tmp/dssatlyfkyyxe and its content has been removed.
+/tmp/dssataljvptpk created.
+/tmp/dssataljvptpk and its content has been removed.
+/tmp/dssatgtbrenvd created.
+/tmp/dssatgtbrenvd and its content has been removed.
+/tmp/dssatkgcnlxhk created.
+/tmp/dssatkgcnlxhk and its content has been removed.
+/tmp/dssatuednmtfn created.
+/tmp/dssatuednmtfn and its content has been removed.
+/tmp/dssatlnsqiwqo created.
+/tmp/dssatlnsqiwqo and its content has been removed.
+done ew_fixed GCR 0.5
+/tmp/dssatnnobdola created.
+/tmp/dssatnnobdola and its content has been removed.
+/tmp/dssatylckcqng created.
+/tmp/dssatylckcqng and its content has been removed.
+/tmp/dssatptmjojvw created.
+/tmp/dssatptmjojvw and its content has been removed.
+/tmp/dssatsbsybsbs created.
+/tmp/dssatsbsybsbs and its content has been removed.
+/tmp/dssatbdemmnxt created.
+/tmp/dssatbdemmnxt and its content has been removed.
+/tmp/dssatpflbpycx created.
+/tmp/dssatpflbpycx and its content has been removed.
+/tmp/dssatsuuxrups created.
+/tmp/dssatsuuxrups and its content has been removed.
+/tmp/dssatjvtirlsm created.
+/tmp/dssatjvtirlsm and its content has been removed.
+/tmp/dssatcdlcwnbw created.
+/tmp/dssatcdlcwnbw and its content has been removed.
+/tmp/dssatxhvswbqe created.
+/tmp/dssatxhvswbqe and its content has been removed.
+/tmp/dssatjfgcvjwf created.
+/tmp/dssatjfgcvjwf and its content has been removed.
+/tmp/dssatlhatdffo created.
+/tmp/dssatlhatdffo and its content has been removed.
+/tmp/dssatunahpuyy created.
+/tmp/dssatunahpuyy and its content has been removed.
+/tmp/dssatpmrajpwd created.
+/tmp/dssatpmrajpwd and its content has been removed.
+/tmp/dssatycvbktqt created.
+/tmp/dssatycvbktqt and its content has been removed.
+/tmp/dssatdynfpaqm created.
+/tmp/dssatdynfpaqm and its content has been removed.
+/tmp/dssatterreflo created.
+/tmp/dssatterreflo and its content has been removed.
+/tmp/dssaticesbpmy created.
+/tmp/dssaticesbpmy and its content has been removed.
+/tmp/dssatxunbgrth created.
+/tmp/dssatxunbgrth and its content has been removed.
+/tmp/dssatjuskhvoi created.
+/tmp/dssatjuskhvoi and its content has been removed.
+done vertical GCR 0.1
+/tmp/dssatlslbfeiz created.
+/tmp/dssatlslbfeiz and its content has been removed.
+/tmp/dssatlewkwmen created.
+/tmp/dssatlewkwmen and its content has been removed.
+/tmp/dssatfuyfdwhe created.
+/tmp/dssatfuyfdwhe and its content has been removed.
+/tmp/dssatxpemlion created.
+/tmp/dssatxpemlion and its content has been removed.
+/tmp/dssatahiobdhh created.
+/tmp/dssatahiobdhh and its content has been removed.
+/tmp/dssatgctpohse created.
+/tmp/dssatgctpohse and its content has been removed.
+/tmp/dssatvdvgcakk created.
+/tmp/dssatvdvgcakk and its content has been removed.
+/tmp/dssatvnbubtwy created.
+/tmp/dssatvnbubtwy and its content has been removed.
+/tmp/dssatmmqezsxj created.
+/tmp/dssatmmqezsxj and its content has been removed.
+/tmp/dssatjeknubzd created.
+/tmp/dssatjeknubzd and its content has been removed.
+/tmp/dssatydffedvo created.
+/tmp/dssatydffedvo and its content has been removed.
+/tmp/dssatjlzswqzk created.
+/tmp/dssatjlzswqzk and its content has been removed.
+/tmp/dssatjenlmjza created.
+/tmp/dssatjenlmjza and its content has been removed.
+/tmp/dssatzcvwwbsz created.
+/tmp/dssatzcvwwbsz and its content has been removed.
+/tmp/dssatrarcitcg created.
+/tmp/dssatrarcitcg and its content has been removed.
+/tmp/dssatssteqnji created.
+/tmp/dssatssteqnji and its content has been removed.
+/tmp/dssatjthcmrmt created.
+/tmp/dssatjthcmrmt and its content has been removed.
+/tmp/dssattnivpkdb created.
+/tmp/dssattnivpkdb and its content has been removed.
+/tmp/dssatrdgctqfa created.
+/tmp/dssatrdgctqfa and its content has been removed.
+/tmp/dssatyfuabyvy created.
+/tmp/dssatyfuabyvy and its content has been removed.
+done vertical GCR 0.2
+/tmp/dssatialminht created.
+/tmp/dssatialminht and its content has been removed.
+/tmp/dssatxitjkbah created.
+/tmp/dssatxitjkbah and its content has been removed.
+/tmp/dssatpnbkapkn created.
+/tmp/dssatpnbkapkn and its content has been removed.
+/tmp/dssatywyjppvi created.
+/tmp/dssatywyjppvi and its content has been removed.
+/tmp/dssatgrgchyzr created.
+/tmp/dssatgrgchyzr and its content has been removed.
+/tmp/dssatthpzzdaq created.
+/tmp/dssatthpzzdaq and its content has been removed.
+/tmp/dssatobbhoezp created.
+/tmp/dssatobbhoezp and its content has been removed.
+/tmp/dssatalsnszce created.
+/tmp/dssatalsnszce and its content has been removed.
+/tmp/dssatgdzixnsm created.
+/tmp/dssatgdzixnsm and its content has been removed.
+/tmp/dssatwpvclvqe created.
+/tmp/dssatwpvclvqe and its content has been removed.
+/tmp/dssatgvkpiafq created.
+/tmp/dssatgvkpiafq and its content has been removed.
+/tmp/dssattoffxgjm created.
+/tmp/dssattoffxgjm and its content has been removed.
+/tmp/dssatmwtvjoye created.
+/tmp/dssatmwtvjoye and its content has been removed.
+/tmp/dssatvoimgivy created.
+/tmp/dssatvoimgivy and its content has been removed.
+/tmp/dssatutlyucoc created.
+/tmp/dssatutlyucoc and its content has been removed.
+/tmp/dssatomzvodjk created.
+/tmp/dssatomzvodjk and its content has been removed.
+/tmp/dssatpglnxili created.
+/tmp/dssatpglnxili and its content has been removed.
+/tmp/dssatvupllosk created.
+/tmp/dssatvupllosk and its content has been removed.
+/tmp/dssatbybtckya created.
+/tmp/dssatbybtckya and its content has been removed.
+/tmp/dssatredttogp created.
+/tmp/dssatredttogp and its content has been removed.
+done vertical GCR 0.3
+/tmp/dssatvmxrdemy created.
+/tmp/dssatvmxrdemy and its content has been removed.
+/tmp/dssatdylxwbys created.
+/tmp/dssatdylxwbys and its content has been removed.
+/tmp/dssatifeihjpm created.
+/tmp/dssatifeihjpm and its content has been removed.
+/tmp/dssatshjaxpvb created.
+/tmp/dssatshjaxpvb and its content has been removed.
+/tmp/dssatxkhowhjv created.
+/tmp/dssatxkhowhjv and its content has been removed.
+/tmp/dssatseapjlmu created.
+/tmp/dssatseapjlmu and its content has been removed.
+/tmp/dssatcjzlfjpx created.
+/tmp/dssatcjzlfjpx and its content has been removed.
+/tmp/dssatfzguhwxe created.
+/tmp/dssatfzguhwxe and its content has been removed.
+/tmp/dssatigxkfnhq created.
+/tmp/dssatigxkfnhq and its content has been removed.
+/tmp/dssatyjgunfzx created.
+/tmp/dssatyjgunfzx and its content has been removed.
+/tmp/dssatmevildvk created.
+/tmp/dssatmevildvk and its content has been removed.
+/tmp/dssatxlldbvwu created.
+/tmp/dssatxlldbvwu and its content has been removed.
+/tmp/dssatptjzurdp created.
+/tmp/dssatptjzurdp and its content has been removed.
+/tmp/dssatbogyfinm created.
+/tmp/dssatbogyfinm and its content has been removed.
+/tmp/dssatbjwmywlz created.
+/tmp/dssatbjwmywlz and its content has been removed.
+/tmp/dssatzvtvlokg created.
+/tmp/dssatzvtvlokg and its content has been removed.
+/tmp/dssatrzfpepaz created.
+/tmp/dssatrzfpepaz and its content has been removed.
+/tmp/dssathphswwat created.
+/tmp/dssathphswwat and its content has been removed.
+/tmp/dssatcsghyqny created.
+/tmp/dssatcsghyqny and its content has been removed.
+/tmp/dssatofxmwosb created.
+/tmp/dssatofxmwosb and its content has been removed.
+done vertical GCR 0.4
+/tmp/dssatmftblrsa created.
+/tmp/dssatmftblrsa and its content has been removed.
+/tmp/dssatklsjdbkz created.
+/tmp/dssatklsjdbkz and its content has been removed.
+/tmp/dssathrakgedx created.
+/tmp/dssathrakgedx and its content has been removed.
+/tmp/dssatjecpgofa created.
+/tmp/dssatjecpgofa and its content has been removed.
+/tmp/dssatjrxvdfmw created.
+/tmp/dssatjrxvdfmw and its content has been removed.
+/tmp/dssatorktkxug created.
+/tmp/dssatorktkxug and its content has been removed.
+/tmp/dssattqchuxqk created.
+/tmp/dssattqchuxqk and its content has been removed.
+/tmp/dssatnlfnlinl created.
+/tmp/dssatnlfnlinl and its content has been removed.
+/tmp/dssatjycjmcgf created.
+/tmp/dssatjycjmcgf and its content has been removed.
+/tmp/dssateevcwwxb created.
+/tmp/dssateevcwwxb and its content has been removed.
+/tmp/dssatohfmluxj created.
+/tmp/dssatohfmluxj and its content has been removed.
+/tmp/dssatyvmxnksw created.
+/tmp/dssatyvmxnksw and its content has been removed.
+/tmp/dssatybbqaedl created.
+/tmp/dssatybbqaedl and its content has been removed.
+/tmp/dssatbykddptd created.
+/tmp/dssatbykddptd and its content has been removed.
+/tmp/dssatwatsartv created.
+/tmp/dssatwatsartv and its content has been removed.
+/tmp/dssatwgenzbne created.
+/tmp/dssatwgenzbne and its content has been removed.
+/tmp/dssatkqbtlqum created.
+/tmp/dssatkqbtlqum and its content has been removed.
+/tmp/dssatdtgjhegs created.
+/tmp/dssatdtgjhegs and its content has been removed.
+/tmp/dssathqrhijnw created.
+/tmp/dssathqrhijnw and its content has been removed.
+/tmp/dssatomhchyav created.
+/tmp/dssatomhchyav and its content has been removed.
+done vertical GCR 0.5
+                mean    std   min   max
+crop                                   
+chickpea      3129.0  262.0  2531  3722
+groundnut     2837.0  882.0  1089  4070
+pearl_millet   583.0  453.0    54  1388
+wheat         4482.0  120.0  4214  4642
+            crop       config  gcr     ry  ry_sd  ry_p10  n_valid     n  pass_66  pass_80  pass_90
+0       chickpea     ew_fixed  0.1  0.898  0.013   0.885     19.0  19.0     True     True    False
+1       chickpea     ew_fixed  0.2  0.781  0.024   0.748     19.0  19.0     True    False    False
+2       chickpea     ew_fixed  0.3  0.662  0.030   0.622     19.0  19.0     True    False    False
+3       chickpea     ew_fixed  0.4  0.538  0.033   0.502     19.0  19.0    False    False    False
+4       chickpea     ew_fixed  0.5  0.402  0.037   0.360     19.0  19.0    False    False    False
+5       chickpea  south_fixed  0.1  0.857  0.019   0.838     19.0  19.0     True     True    False
+6       chickpea  south_fixed  0.2  0.676  0.034   0.634     19.0  19.0     True    False    False
+7       chickpea  south_fixed  0.3  0.499  0.022   0.474     19.0  19.0    False    False    False
+8       chickpea  south_fixed  0.4  0.335  0.019   0.315     19.0  19.0    False    False    False
+9       chickpea  south_fixed  0.5  0.166  0.014   0.148     19.0  19.0    False    False    False
+10      chickpea     vertical  0.1  0.891  0.018   0.876     19.0  19.0     True     True    False
+11      chickpea     vertical  0.2  0.782  0.027   0.746     19.0  19.0     True    False    False
+12      chickpea     vertical  0.3  0.674  0.033   0.647     19.0  19.0     True    False    False
+13      chickpea     vertical  0.4  0.582  0.029   0.547     19.0  19.0    False    False    False
+14      chickpea     vertical  0.5  0.488  0.029   0.448     19.0  19.0    False    False    False
+15     groundnut     ew_fixed  0.1  0.936  0.015   0.919     20.0  20.0     True     True     True
+16     groundnut     ew_fixed  0.2  0.857  0.026   0.840     20.0  20.0     True     True    False
+17     groundnut     ew_fixed  0.3  0.763  0.038   0.727     20.0  20.0     True    False    False
+18     groundnut     ew_fixed  0.4  0.679  0.048   0.632     20.0  20.0     True    False    False
+19     groundnut     ew_fixed  0.5  0.568  0.051   0.523     20.0  20.0    False    False    False
+20     groundnut  south_fixed  0.1  0.929  0.014   0.915     20.0  20.0     True     True     True
+21     groundnut  south_fixed  0.2  0.829  0.022   0.809     20.0  20.0     True     True    False
+22     groundnut  south_fixed  0.3  0.715  0.039   0.677     20.0  20.0     True    False    False
+23     groundnut  south_fixed  0.4  0.592  0.051   0.558     20.0  20.0    False    False    False
+24     groundnut  south_fixed  0.5  0.456  0.054   0.416     20.0  20.0    False    False    False
+25     groundnut     vertical  0.1  0.927  0.016   0.911     20.0  20.0     True     True     True
+26     groundnut     vertical  0.2  0.850  0.024   0.826     20.0  20.0     True     True    False
+27     groundnut     vertical  0.3  0.782  0.035   0.736     20.0  20.0     True    False    False
+28     groundnut     vertical  0.4  0.714  0.043   0.681     20.0  20.0     True    False    False
+29     groundnut     vertical  0.5  0.637  0.044   0.600     20.0  20.0    False    False    False
+30  pearl_millet     ew_fixed  0.1  0.982  0.074   0.939     19.0  20.0     True     True     True
+31  pearl_millet     ew_fixed  0.2  0.929  0.143   0.854     19.0  20.0     True     True     True
+32  pearl_millet     ew_fixed  0.3  0.872  0.225   0.756     19.0  20.0     True     True    False
+33  pearl_millet     ew_fixed  0.4  0.785  0.307   0.612     19.0  20.0     True    False    False
+34  pearl_millet     ew_fixed  0.5  0.653  0.325   0.471     19.0  20.0    False    False    False
+35  pearl_millet  south_fixed  0.1  0.986  0.072   0.943     19.0  20.0     True     True     True
+36  pearl_millet  south_fixed  0.2  0.936  0.137   0.860     19.0  20.0     True     True     True
+37  pearl_millet  south_fixed  0.3  0.869  0.212   0.755     19.0  20.0     True     True    False
+38  pearl_millet  south_fixed  0.4  0.766  0.255   0.622     19.0  20.0     True    False    False
+39  pearl_millet  south_fixed  0.5  0.625  0.279   0.472     19.0  20.0    False    False    False
+40  pearl_millet     vertical  0.1  0.971  0.056   0.937     19.0  20.0     True     True     True
+41  pearl_millet     vertical  0.2  0.931  0.108   0.871     19.0  20.0     True     True     True
+42  pearl_millet     vertical  0.3  0.883  0.162   0.794     19.0  20.0     True     True    False
+43  pearl_millet     vertical  0.4  0.822  0.213   0.709     19.0  20.0     True     True    False
+44  pearl_millet     vertical  0.5  0.753  0.246   0.607     19.0  20.0     True    False    False
+45         wheat     ew_fixed  0.1  0.963  0.029   0.937     19.0  19.0     True     True     True
+46         wheat     ew_fixed  0.2  0.895  0.034   0.852     19.0  19.0     True     True    False
+47         wheat     ew_fixed  0.3  0.814  0.059   0.734     19.0  19.0     True     True    False
+48         wheat     ew_fixed  0.4  0.711  0.064   0.643     19.0  19.0     True    False    False
+49         wheat     ew_fixed  0.5  0.568  0.059   0.499     19.0  19.0    False    False    False
+50         wheat  south_fixed  0.1  0.939  0.022   0.913     19.0  19.0     True     True     True
+51         wheat  south_fixed  0.2  0.816  0.040   0.768     19.0  19.0     True     True    False
+52         wheat  south_fixed  0.3  0.627  0.052   0.568     19.0  19.0    False    False    False
+53         wheat  south_fixed  0.4  0.415  0.042   0.373     19.0  19.0    False    False    False
+54         wheat  south_fixed  0.5  0.210  0.030   0.176     19.0  19.0    False    False    False
+55         wheat     vertical  0.1  0.957  0.025   0.924     19.0  19.0     True     True     True
+56         wheat     vertical  0.2  0.904  0.049   0.841     19.0  19.0     True     True     True
+57         wheat     vertical  0.3  0.833  0.062   0.771     19.0  19.0     True     True    False
+58         wheat     vertical  0.4  0.747  0.056   0.689     19.0  19.0     True    False    False
+59         wheat     vertical  0.5  0.653  0.053   0.589     19.0  19.0    False    False    False

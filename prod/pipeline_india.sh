@@ -1,0 +1,124 @@
+#!/bin/bash
+# AgriPV India pipeline on the VM. Idempotent: every step skips finished work, so a
+# reboot (or re-running this script) resumes where it stopped.
+# Metadata "mode": test  -> inputs, India-wide open-field validation, 40-cell APV test, then shut down
+#                  full  -> the four production stages, then shut down
+set -u
+APP=/opt/agripv
+DATA=/data
+md() { curl -s -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/attributes/$1"; }
+BUCKET=$(md bucket)
+MODE=$(md mode); MODE=${MODE:-test}
+PY=$APP/venv/bin/python
+LOG=$DATA/pipeline.log
+GRID=$APP/grid_india_025.csv
+MODELS=(GFDL-ESM4 IPSL-CM6A-LR MPI-ESM1-2-HR MRI-ESM2-0 UKESM1-0-LL)
+export PYTHONWARNINGS=ignore
+export AGRIPV_BBOX="37.25,6.5,68.0,97.5"
+mkdir -p $DATA/nex $DATA/cells $DATA/soil $DATA/out
+exec >>"$LOG" 2>&1
+say() { echo "[$(date -u +%F' '%T)] $*"; }
+push() { gsutil -q -m rsync -r -x '.*\.part$' $DATA/out "gs://$BUCKET/out"; gsutil -q cp "$LOG" "gs://$BUCKET/pipeline.log"; }
+status() {  # progress + health report to the bucket; halts the run if results look wrong
+  $PY $APP/status_india.py; rc=$?
+  gsutil -q cp $DATA/status.txt "gs://$BUCKET/status.txt"
+  if [ $rc -eq 3 ]; then
+    say "HALT: $(cat $DATA/HALT | tr '\n' ' ')"
+    pkill -f run_cells_india; push
+    gsutil -q cp $DATA/HALT "gs://$BUCKET/HALT"
+    shutdown -h now
+  fi
+}
+
+say "=== pipeline start ($(nproc) vCPU), mode=$MODE"
+( sleep 300; status; while sleep 1200; do status; push; done ) &
+SYNC_PID=$!
+trap 'kill $SYNC_PID 2>/dev/null' EXIT
+
+# 1. climate download and soil fetch in parallel (explicit PIDs: never a bare wait)
+PIDS=""
+if [ ! -f $DATA/nex/.done ]; then
+  cp $APP/get_nex_gddp.py $DATA/nex/
+  sed -i 's/^WORKERS = .*/WORKERS = 8/' $DATA/nex/get_nex_gddp.py
+  ( cd $DATA/nex && for i in 1 2 3 4 5; do
+      $PY get_nex_gddp.py | tee last_try.log | tail -3
+      grep -q "Finished. 0 missing" last_try.log && touch .done && break
+    done ) > $DATA/nex/download.log 2>&1 &
+  PIDS="$PIDS $!"
+fi
+if [ ! -f $DATA/soil/.done ]; then
+  ( for i in 1 2 3; do
+      $PY $APP/fetch_soil.py --grid $GRID --out $DATA/soil && touch $DATA/soil/.done && break
+    done ) > $DATA/soil/fetch.log 2>&1 &
+  PIDS="$PIDS $!"
+fi
+for p in $PIDS; do wait $p; done
+say "download: $(ls $DATA/nex/.done 2>/dev/null || echo INCOMPLETE), soil: $(ls $DATA/soil/.done 2>/dev/null || echo INCOMPLETE)"
+tail -2 $DATA/nex/download.log $DATA/soil/fetch.log
+gsutil -q cp $DATA/nex/download.log $DATA/soil/fetch.log "gs://$BUCKET/logs/"
+gsutil -q -m rsync -r $DATA/soil "gs://$BUCKET/soil"
+if [ ! -f $DATA/nex/.done ] || [ ! -f $DATA/soil/.done ]; then
+  say "STOP: inputs incomplete, see logs. Machine shuts down; start it again to retry."
+  push; shutdown -h now; exit 1
+fi
+
+# 2. NetCDF -> per-cell arrays (uncompressed .npy, memory-mapped by the workers)
+for m in "${MODELS[@]}"; do for s in historical ssp245 ssp585; do
+  [ -f $DATA/cells/cells_${m}_${s}.npy ] && continue
+  echo "$m $s"
+done; done | xargs -P 3 -L 1 bash -c \
+  "$PY $APP/nex_to_cells.py --data $DATA/nex/data --model \$0 --scen \$1 --grid $GRID --out $DATA/cells --format npy"
+say "cells: $(ls $DATA/cells/*.npy | grep -v part | wc -l)/15"
+
+run() {  # run <period> <mgmt> [extra args]: one stage, retried once for failed tasks
+  for try in 1 2; do
+    say "stage $* (try $try)"
+    $PY $APP/run_cells_india.py --cells $DATA/cells --grid $GRID --soil $DATA/soil --out $DATA/out \
+      --period $1 --mgmt $2 "${@:3}" --workers $(nproc) && break
+  done
+}
+
+if [ "$MODE" = "test" ]; then
+  # 3a. India-wide open-field validation (farmer practice, all cells, all models; ~1/60 of a stage)
+  run historical farmer --open-only
+  $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage historical_farmer_open | tail -3
+  # 3b. full APV simulation on 40 test cells, recommended practice, all models
+  run historical recommended --only $APP/test_cells.txt
+  $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage historical_recommended | tail -40
+  status; push
+  touch $DATA/TEST_DONE && gsutil -q cp $DATA/TEST_DONE "gs://$BUCKET/TEST_DONE"
+  say "=== test finished; shutting down. Set metadata mode=full and start the machine for the full run."
+  push; shutdown -h now; exit 0
+fi
+
+if [ "$MODE" = "calib" ]; then
+  # 3c. nitrogen calibration sweep: open field, wheat and pearl millet, two climate models
+  for n in 30 60 90 120 180; do
+    run historical n$n --open-only --crops wheat,pearl_millet --models GFDL-ESM4,MPI-ESM1-2-HR
+    $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage historical_n${n}_open | tail -2
+  done
+  status; push
+  touch $DATA/CALIB_DONE && gsutil -q cp $DATA/CALIB_DONE "gs://$BUCKET/CALIB_DONE"
+  say "=== calibration sweep finished; shutting down"
+  push; shutdown -h now; exit 0
+fi
+
+# 4. production stages, most important first (a stop part-way still leaves usable results)
+#    current = state-calibrated N (main case); recommended = adequate N (sensitivity)
+for stage in historical:current ssp585:current ssp245:current historical:recommended; do
+  p=${stage%:*}; g=${stage#*:}
+  run $p $g
+  $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage ${p}_${g} | tail -40
+  # PV specific yield for this climate period (once per period, ~2 h)
+  if [ ! -f $DATA/out/summary/energy_${p}.csv ]; then
+    say "energy $p"
+    ( cd $APP && $PY energy_india.py --cells $DATA/cells --grid $GRID --period $p --out $DATA/out/summary ) | tail -2
+  fi
+  status; push
+  say "stage ${p}_${g} uploaded"
+done
+say "=== pipeline finished; shutting down"
+touch $DATA/ALL_DONE
+push
+gsutil -q cp $DATA/ALL_DONE "gs://$BUCKET/ALL_DONE"
+shutdown -h now

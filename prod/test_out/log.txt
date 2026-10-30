@@ -1,0 +1,7 @@
+/usr/local/lib/python3.13/site-packages/DSSATTools/__init__.py:105: DeprecationWarning: DSSATTools version 3.0.0 is a major upgrade and will not be backwards compatible with previous versions. If you are running code that was developed  using a previous DSSATTools version, then install DSSATTools version 2.1.6
+  warnings.warn(
+6552
+
+real	6m28.161s
+user	6m17.355s
+sys	0m5.036s
