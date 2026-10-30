@@ -2,7 +2,7 @@
 
 Three panels, left to right, with the result taking about half the width:
   problem  small sketch, solar and farmland competing for land
-  method   one RY-vs-GCR curve with the yield threshold tau and GCR_max marked (light model + DSSAT)
+  method   shade model -> crop model icons, one RY-vs-GCR curve with tau and GCR_max, simulation scope
   result   India map of GCR_max at RY >= tau, headline capacity, mid-century change badge and a row of
            four crop icons with the national mean GCR_max of each crop
 
@@ -164,6 +164,24 @@ def icon_groundnut(ax, cx, y0, h):
         ax.add_patch(Ellipse((cx + dx * h, y0 + 0.13 * h), 0.24 * h, 0.12 * h, angle=10, color=ORANGE, lw=0))
 
 
+def icon_shade(ax, cx, y0, h):
+    """Shade model: sun ray hitting a tilted panel, shadow on the ground."""
+    ax.add_patch(Rectangle((cx - 0.55 * h, y0), 1.1 * h, 0.14 * h, color=SOIL, lw=0))
+    ax.add_patch(Rectangle((cx - 0.05 * h, y0), 0.6 * h, 0.14 * h, color="0.55", lw=0))
+    ax.plot([cx - 0.15 * h, cx + 0.45 * h], [y0 + 0.5 * h, y0 + 0.72 * h], color=BLUE, lw=1.6, solid_capstyle="butt")
+    ax.plot([cx + 0.15 * h, cx + 0.15 * h], [y0 + 0.14 * h, y0 + 0.6 * h], color="0.45", lw=0.5)
+    ax.add_patch(Circle((cx - 0.4 * h, y0 + 0.85 * h), 0.13 * h, color=ORANGE, lw=0))
+    ax.annotate("", (cx - 0.25 * h, y0 + 0.2 * h), (cx - 0.33 * h, y0 + 0.68 * h),
+                arrowprops=dict(arrowstyle="-|>", color=ORANGE, lw=0.6, mutation_scale=4))
+
+
+def icon_cropmodel(ax, cx, y0, h):
+    """Crop model: a plant inside a model box."""
+    ax.add_patch(FancyBboxPatch((cx - 0.5 * h, y0), h, h, boxstyle=f"round,pad=0,rounding_size={0.15 * h}",
+                                fc="#E3F3EE", ec=GREEN, lw=0.7))
+    sprout(ax, cx, y0 + 0.12 * h, 0.72 * h, lw=0.8)
+
+
 ICONS = {"wheat": icon_wheat, "chickpea": icon_chickpea, "pearl_millet": icon_millet, "groundnut": icon_groundnut}
 
 
@@ -177,33 +195,41 @@ def main():
         return fig.add_axes([x / W, y / H, w / W, h / H])
 
     # panel frames, titles and arrows between panels
-    panels = [(1.0, 21.0, "Problem"), (25.0, 38.5, "Method"), (66.5, 62.5, "Result")]
+    panels = [(1.0, 19.2, "Problem"), (22.6, 40.9, "Method"), (66.5, 62.5, "Result")]
     for x, w, t in panels:
         ax.add_patch(FancyBboxPatch((x, 1.0), w, 48, boxstyle="round,pad=0,rounding_size=1.8", fc="white",
                                     ec="0.6", lw=0.6))
         ax.text(x + 1.8, 45.6, t, fontsize=9, fontweight="bold", va="center")
-    for x0, x1 in ((22.3, 24.7), (63.8, 66.2)):
+    for x0, x1 in ((20.4, 22.4), (63.8, 66.2)):
         ax.add_patch(FancyArrowPatch((x0, 25), (x1, 25), arrowstyle="-|>", mutation_scale=8, lw=1.2,
                                      color=GREY, shrinkA=0, shrinkB=0))
 
     # ---- problem: solar rows and crops competing for the same land
     ax.text(2.8, 41.2, "Solar or food\non one field?", fontsize=7, color="0.15", va="top", linespacing=1.2)
     gy = 13.0
-    ax.add_patch(Rectangle((2.5, gy - 3.0), 18.0, 3.0, color=SOIL, lw=0))
-    sun(ax, 11.5, 29.0, 1.9)
+    ax.add_patch(Rectangle((2.3, gy - 3.0), 15.9, 3.0, color=SOIL, lw=0))
+    sun(ax, 10.25, 29.0, 1.8)
     for k in range(2):
-        x = 3.3 + 4.2 * k
-        ax.add_patch(Polygon([[x, gy + 2.6], [x + 3.6, gy + 4.6], [x + 3.6, gy + 5.4], [x, gy + 3.4]], color=BLUE, lw=0))
-        ax.plot([x + 2.0, x + 2.0], [gy, gy + 3.6], color="0.45", lw=0.6)
+        x = 2.9 + 3.6 * k
+        ax.add_patch(Polygon([[x, gy + 2.6], [x + 3.2, gy + 4.4], [x + 3.2, gy + 5.2], [x, gy + 3.4]], color=BLUE, lw=0))
+        ax.plot([x + 1.8, x + 1.8], [gy, gy + 3.5], color="0.45", lw=0.6)
     for k in range(4):
-        sprout(ax, 13.6 + 2.0 * k, gy, 5.0)
-    ax.plot([11.8, 11.8], [gy - 2.5, gy + 9.5], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
-    ax.text(11.5, 5.2, "competing\nfor land", ha="center", va="center", fontsize=7, color="0.15",
+        sprout(ax, 11.6 + 1.85 * k, gy, 4.6)
+    ax.plot([10.0, 10.0], [gy - 2.5, gy + 9.5], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
+    ax.text(10.25, 5.2, "competing\nfor land", ha="center", va="center", fontsize=7, color="0.15",
             linespacing=1.2)
 
     # ---- method: one RY-GCR curve with tau and GCR_max
-    ax.text(26.8, 41.2, "light model + DSSAT", fontsize=7, color="0.15", va="center")
-    b = axes_mm(33.5, 10.0, 27.5, 27.5)
+    # "shade model -> crop model", each part under its icon (icons sit right of the panel title)
+    xr = 61.8
+    ax.text(xr, 40.8, "crop model", ha="right", va="center", fontsize=7, color="0.15")
+    ax.text(xr - 14.6, 40.8, "→", ha="right", va="center", fontsize=7, color="0.15")
+    ax.text(xr - 18.0, 40.8, "shade model", ha="right", va="center", fontsize=7, color="0.15")
+    icon_shade(ax, 41.5, 43.2, 4.6)
+    icon_cropmodel(ax, xr - 6.6, 43.2, 4.6)
+    ax.text(42.75, 6.0, "simulated for every 0.25° cell\n4 crops · 3 layouts\n5 climate models", ha="center",
+            va="center", fontsize=7, color="0.2", linespacing=1.15)
+    b = axes_mm(33.0, 17.5, 28.0, 20.5)
     g = np.linspace(0, 0.7, 80); ry = 1 - 0.45 * g - 0.45 * g ** 2
     gm = g[np.argmin(abs(ry - a.thr))]
     b.fill_between(g[g <= gm], 0.4, ry[g <= gm], color=SKY, alpha=0.35, lw=0)
@@ -215,12 +241,12 @@ def main():
     b.text(gm + 0.025, 0.43, "GCR$_{max}$", fontsize=7, va="bottom", fontweight="bold")
     b.text(0.03, 0.43, "keeps\nyield", fontsize=7, va="bottom", color=BLUE, linespacing=1.1)
     b.set_xlim(0, 0.72); b.set_ylim(0.4, 1.05)
-    b.set_xticks([0, 0.35, 0.7], ["0", "0.35", "0.7"]); b.set_yticks([0.4, 0.7, 1.0], ["0.4", "0.7", "1"])
+    b.set_xticks([0, 0.7], ["0", "0.7"]); b.set_yticks([0.4, 0.7, 1.0], ["0.4", "0.7", "1"])
     b.tick_params(labelsize=7, length=2, width=0.5, pad=1)
     for s in ("top", "right"):
         b.spines[s].set_visible(False)
     b.set_xlabel("panel cover, GCR [–]", fontsize=7, labelpad=1)
-    b.set_ylabel("relative yield, RY [–]", fontsize=7, labelpad=1)
+    b.set_ylabel("rel. yield, RY [–]", fontsize=7, labelpad=1)
 
     # ---- result: India map of GCR_max at RY >= tau
     ax.text(85.0, 45.6, f"GCR$_{{max}}$ at RY ≥ {a.thr:.1f}", fontsize=7, va="center", color="0.15")
