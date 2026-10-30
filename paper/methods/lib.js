@@ -41,6 +41,7 @@ const REF = {
   dinesh: "Dinesh H, Pearce JM. The potential of agrivoltaic systems. Renew Sustain Energy Rev 2016;54:299–308. https://doi.org/10.1016/j.rser.2015.10.024.",
   adeh: "Adeh EH, Good SP, Calaf M, Higgins CW. Solar PV power potential is greatest over croplands. Sci Rep 2019;9:11442. https://doi.org/10.1038/s41598-019-47803-3.",
   iec61724: "IEC 61724-1:2021. Photovoltaic system performance – Part 1: Monitoring. Geneva: International Electrotechnical Commission; 2021.",
+  santra: "Santra P, Meena HM, Yadav OP. Spatial and temporal variation of photosynthetic photon flux density within agrivoltaic system in hot arid region of India. Biosyst Eng 2021;209:74–93. https://doi.org/10.1016/j.biosystemseng.2021.06.017.",
   dobos: "Dobos AP. PVWatts Version 5 Manual. NREL/TP-6A20-62641. Golden, CO: National Renewable Energy Laboratory; 2014. https://doi.org/10.2172/1158421.",
   // Discussion (Section 4)
   justes: "Justes E, Mary B, Meynard JM, Machet JM, Thelier-Huché L. Determination of a critical nitrogen dilution curve for winter wheat crops. Ann Bot 1994;74:397–407. https://doi.org/10.1006/anbo.1994.1133.",
