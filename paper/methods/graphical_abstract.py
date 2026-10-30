@@ -1,19 +1,25 @@
-"""Graphical abstract (Elsevier spec: landscape 5:2, 13 x 5.2 cm, >= 1328 x 531 px).
+"""Graphical abstract (Elsevier spec: readable at 13 x 5 cm, >= 1328 x 531 px).
 
-Three panels, left to right: problem (solar vs farmland), method (light model + crop model,
-yield threshold) and result (India map of GCR_max at RY >= tau with the headline capacity).
+Three panels, left to right, with the result taking about half the width:
+  problem  small sketch, solar and farmland competing for land
+  method   one RY-vs-GCR curve with the yield threshold tau and GCR_max marked (light model + DSSAT)
+  result   India map of GCR_max at RY >= tau, headline capacity, mid-century change badge and a row of
+           four crop icons with the national mean GCR_max of each crop
 
 Result panel is filled from postprocess_india.py outputs when they exist:
   <pp>/map_gcr_<stage>.csv.gz        cell GCR_max (5-GCM median), per crop and layout
   <pp>/india_combined_<stage>.csv    India capacity (crops combined), median and GCM range
-Cell value = GCR_max averaged over crops, weighted by eligible area (slope <= 5%).
+  <pp>/india_combined_<future>.csv   same for the mid-century run (2050 badge = change of the median)
+Map cell value = GCR_max averaged over crops, weighted by eligible area (slope <= 5%).
+Crop value = GCR_max of that crop averaged over cells, weighted by eligible area.
 Headline = crops-combined capacity, slope <= 5%, same layout and tau.
-Without these files the map and numbers are drawn as marked placeholders.
+Without these files the map and numbers are drawn as marked placeholders ([X]).
 
 Usage (from paper/methods):
   python graphical_abstract.py [--pp ../../results/potential] [--stage historical_current]
-                               [--config ew_fixed] [--thr 0.8]
-Writes graphical_abstract.pdf and graphical_abstract.png (600 dpi, 3071 x 1228 px).
+                               [--future ssp245_current] [--config ew_fixed] [--thr 0.8]
+Writes graphical_abstract.pdf and graphical_abstract.png (600 dpi, 3071 x 1181 px).
+All text is >= 7 pt at the final 13 x 5 cm size.
 """
 import argparse
 from pathlib import Path
@@ -23,24 +29,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.colors import BoundaryNorm, ListedColormap
-from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch, Polygon, Rectangle
+from matplotlib.patches import Circle, Ellipse, FancyArrowPatch, FancyBboxPatch, Polygon, Rectangle
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 7, "pdf.fonttype": 42,
                      "axes.linewidth": 0.6, "xtick.direction": "out", "ytick.direction": "out"})
-BLUE, SKY, GREEN, ORANGE, VERM, YEL = "#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00", "#F0E442"
+BLUE, SKY, GREEN, ORANGE, VERM = "#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00"
 SOIL, GREY = "#C9B79C", "0.25"
 LAYOUT_NAME = {"ew_fixed": "east-west", "south_fixed": "south-facing", "vertical": "vertical"}
+CROPS = [("wheat", "wheat"), ("chickpea", "chickpea"), ("pearl_millet", "pearl millet"), ("groundnut", "groundnut")]
 MIN_HA = 1000      # same blank rule as fig_india.py
 CM = 1 / 2.54
-W, H = 13.0, 5.2   # cm; drawing units below are mm (0-130 x 0-52)
+W, H = 130, 50     # mm; the base axes use mm units, so 1 x unit = 1 y unit
 
 
 def parse():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pp", type=Path, default=ROOT / "results" / "potential")
     ap.add_argument("--stage", default="historical_current")
+    ap.add_argument("--future", default="ssp245_current", help="mid-century stage for the 2050 badge")
     ap.add_argument("--config", default="ew_fixed", choices=list(LAYOUT_NAME))
     ap.add_argument("--thr", type=float, default=0.8)
     ap.add_argument("--grid", type=Path, default=ROOT / "data" / "grid_india_025.csv")
@@ -49,146 +57,186 @@ def parse():
     return ap.parse_args()
 
 
+def headline(a, stage):
+    f = a.pp / f"india_combined_{stage}.csv"
+    if not f.exists():
+        return None
+    t = pd.read_csv(f)
+    t = t[(t.config == a.config) & (t.thr.round(2) == round(a.thr, 2)) & (t.slope_rule == "le5")]
+    if not len(t):
+        return None
+    r = t.iloc[0]
+    return r.cap_mwp_median, r.cap_mwp_min, r.cap_mwp_max
+
+
 def load_results(a):
-    """Cell map and headline capacity, or None where the files are missing."""
-    fm, fi = a.pp / f"map_gcr_{a.stage}.csv.gz", a.pp / f"india_combined_{a.stage}.csv"
-    cells = head = None
+    """Cell map, per-crop mean GCR_max, headline capacity and 2050 change; None where files are missing."""
+    fm = a.pp / f"map_gcr_{a.stage}.csv.gz"
+    cells, crop = None, {}
     if fm.exists():
         m = pd.read_csv(fm)
         m = m[(m.config == a.config) & (m.thr.round(2) == round(a.thr, 2)) & (m.elig_ha > 0)]
+        crop = {c: np.average(d.gcr_med, weights=d.elig_ha) for c, d in m.groupby("crop")}
         m = m.groupby("cell").apply(lambda d: pd.Series({
             "gcr": np.average(d.gcr_med, weights=d.elig_ha), "ha": d.elig_ha.sum()}), include_groups=False)
         m = m[m.ha >= MIN_HA]
         g = pd.read_csv(a.grid).set_index("cell_id").loc[m.index]
         cells = (g.lon.values, g.lat.values, m.gcr.values)
-    if fi.exists():
-        t = pd.read_csv(fi)
-        t = t[(t.config == a.config) & (t.thr.round(2) == round(a.thr, 2)) & (t.slope_rule == "le5")]
-        if len(t):
-            r = t.iloc[0]
-            head = (r.cap_mwp_median, r.cap_mwp_min, r.cap_mwp_max)
-    return cells, head
+    head, fut = headline(a, a.stage), headline(a, a.future)
+    change = None if head is None or fut is None else 100 * (fut[0] / head[0] - 1)
+    return cells, crop, head, change
 
 
 def fmt_cap(head):
     if head is None:
-        return "[X] GWp", "range [X]–[X] GWp"
+        return "[X] GWp", "GCM range [X]–[X]"
     med, lo, hi = head
     if med >= 1e6:  # MWp -> TWp
-        return f"{med / 1e6:.1f} TWp", f"range {lo / 1e6:.1f}–{hi / 1e6:.1f} TWp"
-    return f"{med / 1e3:.0f} GWp", f"range {lo / 1e3:.0f}–{hi / 1e3:.0f} GWp"
+        return f"{med / 1e6:.1f} TWp", f"GCM range {lo / 1e6:.1f}–{hi / 1e6:.1f}"
+    return f"{med / 1e3:.0f} GWp", f"GCM range {lo / 1e3:.0f}–{hi / 1e3:.0f}"
+
+
+# ---- drawing helpers, all in mm on the base axes
+def sun(ax, x, y, r, n=8, ray=0.8):
+    ax.add_patch(Circle((x, y), r, color=ORANGE, lw=0))
+    for k in range(n):
+        t = 2 * np.pi * k / n
+        ax.plot([x + 1.35 * r * np.cos(t), x + (1.35 * r + ray) * np.cos(t)],
+                [y + 1.35 * r * np.sin(t), y + (1.35 * r + ray) * np.sin(t)], color=ORANGE, lw=0.8)
+
+
+def sprout(ax, x, y0, h, lw=0.9):
+    ax.plot([x, x], [y0, y0 + h], color=GREEN, lw=lw, solid_capstyle="round")
+    for f, s in ((0.45, 1), (0.7, -1)):
+        ax.plot([x, x + s * 0.35 * h], [y0 + f * h, y0 + (f + 0.2) * h], color=GREEN, lw=lw,
+                solid_capstyle="round")
+
+
+def leaf(ax, x, y, dx, dy, lw=0.9):
+    """Curved leaf from (x, y) towards (x + dx, y + dy)."""
+    t = np.linspace(0, 1, 12)
+    ax.plot(x + dx * t, y + dy * t + 0.6 * dy * t * (1 - t), color=GREEN,
+            lw=lw, solid_capstyle="round")
+
+
+# Crop icons share one style: green stem and leaves, orange harvested part, height h from (cx, y0).
+def icon_wheat(ax, cx, y0, h):
+    ax.plot([cx, cx], [y0, y0 + 0.62 * h], color=GREEN, lw=0.9, solid_capstyle="round")
+    leaf(ax, cx, y0 + 0.2 * h, 0.28 * h, 0.25 * h); leaf(ax, cx, y0 + 0.32 * h, -0.28 * h, 0.22 * h)
+    for k in range(4):          # ear: paired grains
+        y = y0 + (0.62 + 0.09 * k) * h
+        for s in (-1, 1):
+            ax.add_patch(Ellipse((cx + s * 0.07 * h, y), 0.1 * h, 0.16 * h, angle=-s * 30, color=ORANGE, lw=0))
+    ax.add_patch(Ellipse((cx, y0 + 0.97 * h), 0.08 * h, 0.13 * h, color=ORANGE, lw=0))
+
+
+def icon_chickpea(ax, cx, y0, h):
+    ax.plot([cx, cx], [y0, y0 + 0.75 * h], color=GREEN, lw=0.9, solid_capstyle="round")
+    for f, s in ((0.3, -1), (0.48, 1), (0.66, -1)):      # side branches with small round leaflets
+        y = y0 + f * h
+        ax.plot([cx, cx + s * 0.3 * h], [y, y + 0.12 * h], color=GREEN, lw=0.7, solid_capstyle="round")
+        for u in (0.45, 0.8):
+            ax.add_patch(Circle((cx + s * u * 0.3 * h, y + u * 0.12 * h + 0.05 * h), 0.045 * h, color=GREEN, lw=0))
+    for y in (0.8, 0.9):
+        ax.add_patch(Circle((cx + (0.05 if y == 0.8 else -0.05) * h, y0 + y * h), 0.045 * h, color=GREEN, lw=0))
+    ax.add_patch(Ellipse((cx + 0.22 * h, y0 + 0.32 * h), 0.2 * h, 0.15 * h, angle=20, color=ORANGE, lw=0))
+    ax.plot([cx, cx + 0.15 * h], [y0 + 0.4 * h, y0 + 0.36 * h], color=GREEN, lw=0.6)
+
+
+def icon_millet(ax, cx, y0, h):
+    ax.plot([cx, cx], [y0, y0 + 0.62 * h], color=GREEN, lw=0.9, solid_capstyle="round")
+    leaf(ax, cx, y0 + 0.15 * h, 0.34 * h, 0.35 * h); leaf(ax, cx, y0 + 0.3 * h, -0.34 * h, 0.3 * h)
+    ax.add_patch(FancyBboxPatch((cx - 0.075 * h, y0 + 0.6 * h), 0.15 * h, 0.4 * h,
+                                boxstyle=f"round,pad=0,rounding_size={0.07 * h}", fc=ORANGE, ec="none"))
+
+
+def icon_groundnut(ax, cx, y0, h):
+    gy = y0 + 0.4 * h                                    # soil surface
+    ax.add_patch(Rectangle((cx - 0.4 * h, y0), 0.8 * h, 0.4 * h, color=SOIL, lw=0))
+    ax.plot([cx, cx], [gy, gy + 0.42 * h], color=GREEN, lw=0.9, solid_capstyle="round")
+    for dx, y in ((-0.17, 0.3), (0.17, 0.3), (0, 0.5)):   # leaves: pairs of ovals
+        x = cx + dx * h
+        ax.plot([cx, x], [gy + (y - 0.12) * h, gy + y * h], color=GREEN, lw=0.6)
+        for s in (-1, 1):
+            ax.add_patch(Ellipse((x + s * 0.05 * h, gy + y * h), 0.09 * h, 0.13 * h, angle=s * 25, color=GREEN, lw=0))
+    for dx in (-0.2, 0.18):                              # pegs and pods under ground
+        ax.plot([cx, cx + dx * h], [gy, y0 + 0.18 * h], color=GREEN, lw=0.6)
+        ax.add_patch(Ellipse((cx + dx * h, y0 + 0.13 * h), 0.24 * h, 0.12 * h, angle=10, color=ORANGE, lw=0))
+
+
+ICONS = {"wheat": icon_wheat, "chickpea": icon_chickpea, "pearl_millet": icon_millet, "groundnut": icon_groundnut}
 
 
 def main():
     a = parse()
-    cells, head = load_results(a)
-    fig = plt.figure(figsize=(W * CM, H * CM))
-    ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, 130); ax.set_ylim(0, 52); ax.axis("off")
+    cells, crop, head, change = load_results(a)
+    fig = plt.figure(figsize=(W / 10 * CM, H / 10 * CM))
+    ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, W); ax.set_ylim(0, H); ax.axis("off")
 
-    def inset(x, y, w, h):
-        b = fig.add_axes([x / 130, y / 52, w / 130, h / 52]); b.set_facecolor("none")
-        for s in b.spines.values():
-            s.set_visible(False)
-        b.set_xticks([]); b.set_yticks([])
-        return b
-
-    def sun(b, x, y, r, n=8, ray=0.9):
-        b.add_patch(Circle((x, y), r, color=ORANGE, lw=0))
-        for k in range(n):
-            t = 2 * np.pi * k / n
-            b.plot([x + 1.35 * r * np.cos(t), x + (1.35 * r + ray) * np.cos(t)],
-                   [y + 1.35 * r * np.sin(t), y + (1.35 * r + ray) * np.sin(t)], color=ORANGE, lw=0.8)
-
-    def plant(b, x, y0, h, c=GREEN, lw=0.9):
-        b.plot([x, x], [y0, y0 + h], color=c, lw=lw, solid_capstyle="round")
-        for f, s in ((0.45, 1), (0.7, -1)):
-            b.plot([x, x + s * 0.35 * h], [y0 + f * h, y0 + (f + 0.2) * h], color=c, lw=lw, solid_capstyle="round")
+    def axes_mm(x, y, w, h):
+        return fig.add_axes([x / W, y / H, w / W, h / H])
 
     # panel frames, titles and arrows between panels
-    px = [(1.5, 38.5), (44.5, 41.5), (91.5, 37.0)]
-    titles = [("Problem", "Solar or food on one field?"), ("Method", "Shade the crop, keep the yield"),
-              ("Result", "Where agrivoltaics fit in India")]
-    for (x, w), (t, s) in zip(px, titles):
-        ax.add_patch(FancyBboxPatch((x, 1.5), w, 49, boxstyle="round,pad=0,rounding_size=2", fc="white",
+    panels = [(1.0, 21.0, "Problem"), (25.0, 38.5, "Method"), (66.5, 62.5, "Result")]
+    for x, w, t in panels:
+        ax.add_patch(FancyBboxPatch((x, 1.0), w, 48, boxstyle="round,pad=0,rounding_size=1.8", fc="white",
                                     ec="0.6", lw=0.6))
-        ax.text(x + 2.2, 47.3, t, fontsize=9, fontweight="bold", va="center")
-        ax.text(x + 2.2, 42.9, s, fontsize=6.5, color="0.2", va="center")
-    for x0, x1 in ((40.3, 44.2), (86.3, 91.2)):
-        ax.add_patch(FancyArrowPatch((x0, 26), (x1, 26), arrowstyle="-|>", mutation_scale=10, lw=1.4,
+        ax.text(x + 1.8, 45.6, t, fontsize=9, fontweight="bold", va="center")
+    for x0, x1 in ((22.3, 24.7), (63.8, 66.2)):
+        ax.add_patch(FancyArrowPatch((x0, 25), (x1, 25), arrowstyle="-|>", mutation_scale=8, lw=1.2,
                                      color=GREY, shrinkA=0, shrinkB=0))
 
-    # ---- A: problem. Ground-mounted solar (left) against cropland (right)
-    b = inset(3, 9, 35.5, 31)
-    b.set_xlim(0, 36); b.set_ylim(0, 30)
-    b.add_patch(Rectangle((0, 0), 36, 5, color=SOIL, lw=0))
-    sun(b, 18, 24, 2.3)
-    for k in range(3):     # dense solar rows
-        x = 1.2 + 5.2 * k
-        b.add_patch(Polygon([[x, 7.6], [x + 4.4, 10.6], [x + 4.4, 11.5], [x, 8.5]], color=BLUE, lw=0))
-        b.plot([x + 2.6, x + 2.6], [5, 9.5], color="0.45", lw=0.6)
-    for k in range(6):     # crop field
-        plant(b, 20.5 + 2.6 * k, 5, 6.5)
-    b.plot([17.8, 17.8], [1, 15], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
-    b.text(8.6, 2.5, "solar", ha="center", va="center", fontsize=7, color="white", fontweight="bold")
-    b.text(27.0, 2.5, "farmland", ha="center", va="center", fontsize=7, color="white", fontweight="bold")
-    b.text(18, 17.2, "competing for land", ha="center", va="center", fontsize=6.5, color="0.15")
-    ax.text(20.7, 5.4, "Agrivoltaics: panels above crops", ha="center", va="center", fontsize=6,
-            color=BLUE, fontweight="bold")
+    # ---- problem: solar rows and crops competing for the same land
+    ax.text(2.8, 41.2, "Solar or food\non one field?", fontsize=7, color="0.15", va="top", linespacing=1.2)
+    gy = 13.0
+    ax.add_patch(Rectangle((2.5, gy - 3.0), 18.0, 3.0, color=SOIL, lw=0))
+    sun(ax, 11.5, 29.0, 1.9)
+    for k in range(2):
+        x = 3.3 + 4.2 * k
+        ax.add_patch(Polygon([[x, gy + 2.6], [x + 3.6, gy + 4.6], [x + 3.6, gy + 5.4], [x, gy + 3.4]], color=BLUE, lw=0))
+        ax.plot([x + 2.0, x + 2.0], [gy, gy + 3.6], color="0.45", lw=0.6)
+    for k in range(4):
+        sprout(ax, 13.6 + 2.0 * k, gy, 5.0)
+    ax.plot([11.8, 11.8], [gy - 2.5, gy + 9.5], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
+    ax.text(11.5, 5.2, "competing\nfor land", ha="center", va="center", fontsize=7, color="0.15",
+            linespacing=1.2)
 
-    # ---- B: method. Light model + crop model -> relative yield vs GCR, threshold tau
-    b = inset(46, 26.5, 16.5, 14)        # light model sketch
-    b.set_xlim(0, 10); b.set_ylim(0, 8.5)
-    sun(b, 8.6, 7.4, 0.55, ray=0.4)
-    b.add_patch(Rectangle((0, 0), 10, 0.8, color=SOIL, lw=0))
-    for x in (0.7, 5.6):
-        b.plot([x, x + 2.6], [3.8, 4.9], color=BLUE, lw=2.2, solid_capstyle="butt")
-        b.plot([x + 1.3, x + 1.3], [0.8, 4.3], color="0.45", lw=0.6)
-    for x in (3.4, 5.0):
-        b.annotate("", (x - 1.6, 1.2), (x + 1.2, 6.8), arrowprops=dict(arrowstyle="-|>", color=ORANGE, lw=0.7,
-                                                                        mutation_scale=5))
-    for i, x in enumerate(np.linspace(0.6, 9.4, 9)):
-        plant(b, x, 0.8, 1.4 + 0.5 * np.sin(i), lw=0.7)
-    ax.text(54.2, 25.0, "light model", ha="center", va="center", fontsize=6.5)
-    ax.text(63.8, 33.5, "+", ha="center", va="center", fontsize=10, color=GREY, fontweight="bold")
-    b = inset(66, 26.5, 18, 14)          # crop model sketch
-    b.set_xlim(0, 10); b.set_ylim(0, 8.5)
-    b.add_patch(FancyBboxPatch((0.6, 1.0), 8.8, 6.6, boxstyle="round,pad=0,rounding_size=0.8", fc="#E3F3EE",
-                               ec=GREEN, lw=0.8))
-    for i, x in enumerate((2.6, 5.0, 7.4)):
-        plant(b, x, 1.9, 3.2 + 0.6 * i, lw=1.0)
-    b.text(5, 6.6, "DSSAT", ha="center", va="center", fontsize=6.5, color=GREEN, fontweight="bold")
-    ax.text(75, 25.0, "crop model", ha="center", va="center", fontsize=6.5)
-
-    b = fig.add_axes([54.5 / 130, 9.0 / 52, 29 / 130, 13 / 52])   # RY-GCR curve, L-frame axes
-    g = np.linspace(0, 0.7, 60); ry = 1 - 0.45 * g - 0.45 * g ** 2
+    # ---- method: one RY-GCR curve with tau and GCR_max
+    ax.text(26.8, 41.2, "light model + DSSAT", fontsize=7, color="0.15", va="center")
+    b = axes_mm(33.5, 10.0, 27.5, 27.5)
+    g = np.linspace(0, 0.7, 80); ry = 1 - 0.45 * g - 0.45 * g ** 2
     gm = g[np.argmin(abs(ry - a.thr))]
     b.fill_between(g[g <= gm], 0.4, ry[g <= gm], color=SKY, alpha=0.35, lw=0)
-    b.plot(g, ry, color=VERM, lw=1.3)
+    b.plot(g, ry, color=VERM, lw=1.4)
     b.axhline(a.thr, color="0.2", lw=0.6, ls="--")
     b.plot([gm, gm], [0.4, a.thr], color="0.2", lw=0.6, ls="--")
-    b.plot(gm, a.thr, "o", ms=3, color="0.1")
-    b.text(0.70, a.thr + 0.03, f"yield limit {a.thr:.1f}", ha="right", va="bottom", fontsize=6)
-    b.text(gm + 0.02, 0.45, "GCR$_{max}$", fontsize=6.5, va="bottom")
+    b.plot(gm, a.thr, "o", ms=3.5, color="0.1", zorder=5)
+    b.text(0.71, a.thr + 0.025, f"RY = {a.thr:.1f}", ha="right", va="bottom", fontsize=7)
+    b.text(gm + 0.025, 0.43, "GCR$_{max}$", fontsize=7, va="bottom", fontweight="bold")
+    b.text(0.03, 0.43, "keeps\nyield", fontsize=7, va="bottom", color=BLUE, linespacing=1.1)
     b.set_xlim(0, 0.72); b.set_ylim(0.4, 1.05)
-    b.set_xticks([0, 0.35, 0.7], ["0", "0.35", "0.7"]); b.set_yticks([0.5, 1.0], ["0.5", "1"])
-    b.tick_params(labelsize=6, length=2, width=0.5, pad=1)
+    b.set_xticks([0, 0.35, 0.7], ["0", "0.35", "0.7"]); b.set_yticks([0.4, 0.7, 1.0], ["0.4", "0.7", "1"])
+    b.tick_params(labelsize=7, length=2, width=0.5, pad=1)
     for s in ("top", "right"):
         b.spines[s].set_visible(False)
-    b.set_xlabel("panel cover (GCR) [–]", fontsize=6.5, labelpad=1)
-    b.set_ylabel("rel. yield [–]", fontsize=6.5, labelpad=1)
+    b.set_xlabel("panel cover, GCR [–]", fontsize=7, labelpad=1)
+    b.set_ylabel("relative yield, RY [–]", fontsize=7, labelpad=1)
 
-    # ---- C: result. India map of GCR_max at RY >= tau, headline capacity
-    b = inset(92.5, 2.5, 22.5, 39)
+    # ---- result: India map of GCR_max at RY >= tau
+    ax.text(85.0, 45.6, f"GCR$_{{max}}$ at RY ≥ {a.thr:.1f}", fontsize=7, va="center", color="0.15")
+    b = axes_mm(76.0, 16.0, 24.5, 27.5)
+    b.set_facecolor("none")
+    for s in b.spines.values():
+        s.set_visible(False)
     states = gpd.read_file(a.boundaries)
     india = states.dissolve().simplify(0.03)
     bounds = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7001]
     cmap = ListedColormap(plt.colormaps["viridis"](np.linspace(0, 1, len(bounds) - 1)))
     norm = BoundaryNorm(bounds, cmap.N)
     if cells is None:
-        india.plot(ax=b, color="0.88", edgecolor="0.4", lw=0.4, hatch="////")
-        b.text(82, 22, "[PLACEHOLDER]\nGCR$_{max}$ map\nfills from\nresults/potential", ha="center",
-               va="center", fontsize=5.5, color="0.1",
-               bbox=dict(boxstyle="square,pad=0.3", fc="white", ec="0.1", lw=0.5, ls="--"))
+        india.plot(ax=b, color="0.9", edgecolor="0.4", lw=0.4, hatch="////")
+        b.text(80.5, 21.5, "[map]", ha="center", va="center", fontsize=7, color="0.1",
+               bbox=dict(boxstyle="square,pad=0.25", fc="white", ec="0.1", lw=0.5, ls="--"))
     else:
         india.plot(ax=b, color="0.93", edgecolor="none")
         lon, lat, v = cells
@@ -200,23 +248,40 @@ def main():
         india.boundary.plot(ax=b, color="0.35", lw=0.4)
     b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3); b.set_aspect(1 / np.cos(np.radians(22)))
     b.set_xticks([]); b.set_yticks([]); b.set_xlabel(""); b.set_ylabel("")
-    cb_ax = fig.add_axes([119.5 / 130, 15.0 / 52, 1.6 / 130, 20 / 52])
+    cb_ax = axes_mm(69.0, 18.0, 1.5, 20.0)
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=[0, 0.35, 0.7])
-    cb.ax.set_yticklabels(["0", "0.35", "0.7"]); cb.ax.tick_params(labelsize=6, length=1.5, width=0.5, pad=1)
+    cb.ax.set_yticklabels(["0", "0.35", "0.7"]); cb.ax.tick_params(labelsize=7, length=1.5, width=0.5, pad=1)
     cb.outline.set_linewidth(0.5)
-    ax.text(120.3, 36.6, "GCR$_{max}$", ha="center", va="bottom", fontsize=6.5)
+
+    # headline capacity and 2050 badge
     big, rng = fmt_cap(head)
-    ax.text(127.0, 4.4, big, ha="right", va="bottom", fontsize=10, fontweight="bold", color=BLUE)
-    ax.text(127.0, 2.6, f"{LAYOUT_NAME[a.config]}, RY ≥ {a.thr:.1f}", ha="right", va="bottom", fontsize=5.5,
-            color="0.2")
+    xr = 114.5
+    ax.text(xr, 38.0, big, ha="center", va="center", fontsize=14, fontweight="bold", color=BLUE)
+    ax.text(xr, 30.0, f"{LAYOUT_NAME[a.config]} panels\nslope ≤ 5%\n{rng}", ha="center", va="center",
+            fontsize=7, color="0.2", linespacing=1.15)
     if head is None:
-        ax.add_patch(Rectangle((107.0, 2.0), 21.0, 7.6, fill=False, ec="0.1", lw=0.5, ls="--"))
+        ax.add_patch(Rectangle((xr - 12.5, 35.0), 25.0, 6.0, fill=False, ec="0.1", lw=0.5, ls="--"))
+    badge = "2050: [±X]%" if change is None else f"2050: {change:+.0f}%".replace("-", "−")
+    ax.add_patch(FancyBboxPatch((xr - 12.0, 20.6), 24.0, 5.0, boxstyle="round,pad=0,rounding_size=2.5",
+                                fc=ORANGE, ec="none"))
+    ax.text(xr, 23.1, badge, ha="center", va="center", fontsize=9, fontweight="bold", color="black")
+    ax.text(xr, 18.0, "SSP2-4.5, median", ha="center", va="center", fontsize=7, color="0.2")
+
+    # crop icons with national mean GCR_max
+    ax.plot([68.5, 127.0], [15.2, 15.2], color="0.8", lw=0.5)
+    for (c, name), cx in zip(CROPS, (73.5, 87.5, 103.0, 120.0)):   # slots sized to the crop names
+        ICONS[c](ax, cx - 3.4, 7.6, 6.0)
+        ax.text(cx - 0.4, 10.6, "[X]" if c not in crop else f"{crop[c]:.2f}", ha="left", va="center",
+                fontsize=8, fontweight="bold", color="0.1")
+        ax.text(cx - 1.0, 4.3, name, ha="center", va="center", fontsize=7, color="0.2")
+    ax.text(97.75, 15.2, "mean GCR$_{max}$ per crop", ha="center", va="center", fontsize=7, color="0.2",
+            bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none"))
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(a.out.with_suffix(".pdf"))
     fig.savefig(a.out.with_suffix(".png"), dpi=600)
     print("wrote", a.out.with_suffix(".pdf"), "map:", "filled" if cells else "placeholder",
-          "| headline:", big, rng)
+          "| headline:", big, rng, "|", badge, "| crops:", {c: round(v, 2) for c, v in crop.items()})
 
 
 if __name__ == "__main__":

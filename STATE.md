@@ -89,6 +89,10 @@
   (3070 x 1228 px) + PDF. Result map and headline fill from results/potential/{map_gcr,india_combined}_<stage>
   when present (default historical_current, ew_fixed, tau 0.8, slope le5); otherwise marked placeholders.
   Fill path tested on the 40-cell test run. Rerun after task D: `cd paper/methods && python graphical_abstract.py`.
+- Graphical abstract redesign 2: 13 x 5 cm (3070 x 1181 px). Result panel ~50% width: map, headline GWp,
+  "2050: +-X%" badge (median change of india_combined_<--future, default ssp245_current> vs stage), row of 4 crop
+  icons with area-weighted mean GCR_max per crop (map_gcr). Method = one RY-GCR curve. All text >= 7 pt.
+  Fill path tested with synthetic files.
 - paper/methods/highlights.txt: 5 highlights, each <= 85 characters, [X] placeholders.
 
 ## 2026-10-30 Supplementary validation figures (task B)
