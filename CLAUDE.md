@@ -27,7 +27,9 @@ state, decisions and findings. `TASKS.md` lists the open tasks, one per cloud se
   (10-12 pt bold), axis titles 8-10 pt with units in brackets, tick/legend 6-8 pt, colour-blind safe
   (Okabe-Ito or viridis, no red-green), strictly 2D, one clear message per figure, export PDF (rasters
   300-600 dpi). Error bars or ranges on averages.
-- Git: commit and push to `main` of this repo. Commit messages must NOT contain Claude co-author or
+- Git: before the first commit run `git config user.name "Mohamed Al-Mandhari"` and
+  `git config user.email "almandharimohammed90@gmail.com"`, so commits are authored by MO, not Claude.
+  Commit and push to `main` of this repo (pull --rebase first). Commit messages must NOT contain Claude co-author or
   session trailers; Claude must not appear as a contributor.
 - Results numbers in the text come from `results/potential/headline_numbers.md` once it exists;
   until then use placeholders like [X GW].
