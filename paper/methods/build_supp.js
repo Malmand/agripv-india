@@ -1,13 +1,13 @@
 // Supplementary Material for the Methodology
 const L = require("./lib.js");
-const { cite, P, H1, H2, R, sub, frac, sum, EQ, TABLE, refsList, save, Paragraph, TextRun, FONT } = L;
+const { cite, P, H1, H2, R, sub, frac, sum, EQ, TABLE, FIG, refsList, save, Paragraph, TextRun, FONT } = L;
 L.resetCounters();
 L.setPrefix("S", "S", "S");
 const body = [];
 const add = (...x) => x.flat().forEach(e => body.push(e));
 
 add(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Supplementary Material", bold: true, size: 32, font: FONT })] }));
-add(P("Yield-constrained agrivoltaic potential of India under current and mid-century climate. Sections S1 to S7 give the detail behind Section 2 of the main text."));
+add(P("Yield-constrained agrivoltaic potential of India under current and mid-century climate. Sections S1 to S7 give the detail behind Section 2 of the main text, and Section S8 shows the validation of the crop and light models."));
 
 // S1
 add(H1("S1. Layout geometry and light model"));
@@ -102,6 +102,13 @@ add(TABLE("Parameters of the PV energy model.",
 // S7
 add(H1("S7. Implementation and quality control"));
 add(P(`The workflow was written in Python. Crop simulations, one task per cell, GCM, period and management case, ran on a 12-core cloud virtual machine. Each task wrote its results only on completion, so an interrupted run resumed without duplicates, and DSSAT runs that stopped with an error were retried up to three times. A report every 20 minutes checked three rules and stopped the run on a breach: failed tasks above 2%; median open-field yield of a crop outside a plausible range for India (wheat 800–7000, chickpea 200–3000, groundnut 200–5000 and pearl millet 150–4500 kg ha^−1^, applied after a full pass over all cells); and more than 5% of irrigated open-field seasons with zero yield.`));
+
+// S8
+add(H1("S8. Validation figures"));
+add(P(`Figs. S1 to S3 compare the crop model with observed state yields and the light model with an analytical reference and with field measurements. Fig. S1 uses the states with at least 50 kha of the crop. Fig. S2 repeats Table S2 in graphical form. Fig. S3 uses the PPFD measured by Santra et al. ${cite("santra")} at the 105 kW~p~ agrivoltaic plant of ICAR-CAZRI, Jodhpur, on clear days of 20 to 24 December 2018, 10 cm above the ground. Rows run east-west, modules face south at 26° tilt with the lower edge at 0.5 m, and the three blocks differ in the number of module rows (one, one and a half, two and a half) and in the interspace (2.95, 5.55 and 8.90 m). Measured and modelled values are both relative to the unshaded interspace, which removes the conversion between irradiance and photon flux.`));
+add(FIG("../../results/figures/figS1_yield_calibration.png", 460, 442, "State mean open-field yields, simulated against observed (ICRISAT District Level Database, 1995–2014), before and after nitrogen calibration. (A, B) Wheat. (C, D) Pearl millet. Before calibration all states used farmer nitrogen (wheat 60, pearl millet 10 kg N ha^−1^); after calibration each state used its calibrated level (Table S6). Simulated yields are the mean of GFDL-ESM4 and MPI-ESM1-2-HR. Marker area is proportional to observed harvested area; only states with at least 50 kha are shown. The dashed line is 1:1. r is the Pearson correlation and MAPE the mean absolute percentage error weighted by harvested area. Pearl millet in the southern states (Karnataka, Tamil Nadu, Andhra Pradesh) stays over-predicted even at 10 kg N ha^−1^."));
+add(FIG("../../results/figures/figS2_light_vs_pvlib.png", 600, 289, "Light model against the analytical view-factor functions of pvlib for single-segment rows at 26.4°N, 73.1°E (hourly sun positions of 2010, solar zenith below 85°). (A) Sky view factor of the ground averaged across the pitch. (B) Sunlit fraction of the ground averaged over all daylight hours. Lines are this model and open markers pvlib, for the south-facing layout (tilt 25°) and the vertical bifacial layout. The largest pointwise difference in sky view factor is 0.017 and the mean absolute error of the hourly sunlit fraction is 0.0009 to 0.0015."));
+add(FIG("../../results/figures/figS3_light_vs_cazri.png", 600, 328, `Modelled relative irradiance against measured relative PPFD at ICAR-CAZRI, Jodhpur ${cite("santra")}, by block (colour) and time window (marker). (A) Whole system, averaged over the row pitch: bias −0.044, RMSE 0.053. (B) Ground below the PV array: bias +0.147, RMSE 0.199. The model used clear-sky beam and diffuse irradiance with a broadband diffuse fraction. The dashed line is 1:1. The model reproduces the pitch-mean light but over-estimates the light directly below the modules, most strongly under the single-row Block 1. In late December the noon solar elevation at Jodhpur is about 40°, so below-array light is over-estimated for low winter sun: modelled beam reaches the ground under the low modules more often than measured, and the model includes neither frames, supports nor reflection from the ground and the array. The crop model uses light averaged over strips that span the cultivated pitch, which corresponds to panel A.`));
 
 add(H1("Supplementary references"));
 add(refsList());

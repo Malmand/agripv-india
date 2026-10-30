@@ -73,3 +73,10 @@
 - 2026-10-29 21:30: Introduction written (paper/methods/intro.js, ~1150 words + Table 1 of prior studies); manuscript
   now built as Manuscript_AgriPV_India.docx (title, 1 Intro, 2 Methods). All intro refs checked via Crossref/publisher.
   To confirm: MNRE solar figure (>160 GW mid-2026, taken from trade press), PLFS report title, PM-KUSUM guideline title.
+
+## 2026-10-30 Supplementary validation figures (task B)
+- src/fig_supp_validation.py -> results/figures/figS1_yield_calibration, figS2_light_vs_pvlib, figS3_light_vs_cazri (PDF + PNG).
+  S1 numbers (obs_area >= 50 kha, area-weighted MAPE): wheat r 0.01 -> 0.74, MAPE 29 -> 12%; millet r 0.04 -> 0.28, MAPE 31 -> 24%.
+  S3: whole system bias -0.044 / RMSE 0.053; below array +0.147 / 0.199.
+- build_supp.js: new Section S8 with Figs. S1-S3; Santra et al. 2021 added to REF (DOI 10.1016/j.biosystemseng.2021.06.017
+  confirmed via X-MOL and AGRIS; Crossref blocked from the session, volume/pages marked [verify]).
