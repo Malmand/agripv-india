@@ -83,3 +83,10 @@
   Lopez 2012 (NREL), MNRE PM-KUSUM FAQ (URL). Riaz 2021 DOI added.
 - [verify] items in text: Mehta & Betz overlap share; CO2 x shade interaction in RY (check model output).
 - postprocess_india.py does not drop vertical GCR > 0.6 (DIN 15% land loss); Discussion reports the share as [X].
+
+## 2026-10-30 graphical abstract and highlights (task C)
+- paper/methods/graphical_abstract.py redesigned: 13 x 5.2 cm, 3 panels (problem / method / result), PNG 600 dpi
+  (3070 x 1228 px) + PDF. Result map and headline fill from results/potential/{map_gcr,india_combined}_<stage>
+  when present (default historical_current, ew_fixed, tau 0.8, slope le5); otherwise marked placeholders.
+  Fill path tested on the 40-cell test run. Rerun after task D: `cd paper/methods && python graphical_abstract.py`.
+- paper/methods/highlights.txt: 5 highlights, each <= 85 characters, [X] placeholders.
