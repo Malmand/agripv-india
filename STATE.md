@@ -73,3 +73,13 @@
 - 2026-10-29 21:30: Introduction written (paper/methods/intro.js, ~1150 words + Table 1 of prior studies); manuscript
   now built as Manuscript_AgriPV_India.docx (title, 1 Intro, 2 Methods). All intro refs checked via Crossref/publisher.
   To confirm: MNRE solar figure (>160 GW mid-2026, taken from trade press), PLFS report title, PM-KUSUM guideline title.
+
+## 2026-10-30 Discussion drafted (Task A)
+- paper/methods/discussion.js: Section 4 (4.1-4.6, ~1500 words), called from build_methods.js after a Section 3
+  Results placeholder. Result numbers are [X]; fill from results/potential/headline_numbers.md (Task D).
+- Pilot evidence used: Rajasthan wheat south GCR 0.3 RY 1.13 (farmer N60) vs 0.90 (recommended), GCR 0.5 0.86 vs 0.51;
+  Jodhpur millet texture test (SoilGrids vs loamy sand): open yield 886 vs 583 kg/ha, RY south GCR 0.3 1.02 vs 0.87.
+- New refs (Crossref-checked): Justes 1994, Ainsworth & Long 2005, Long 2006, Marrou 2013, Weselek 2021, Folberth 2016,
+  Lopez 2012 (NREL), MNRE PM-KUSUM FAQ (URL). Riaz 2021 DOI added.
+- [verify] items in text: Mehta & Betz overlap share; CO2 x shade interaction in RY (check model output).
+- postprocess_india.py does not drop vertical GCR > 0.6 (DIN 15% land loss); Discussion reports the share as [X].

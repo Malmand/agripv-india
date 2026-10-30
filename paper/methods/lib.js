@@ -33,7 +33,7 @@ const REF = {
   fao2005: "FAO. Fertilizer use by crop in India. Rome: Food and Agriculture Organization of the United Nations; 2005. https://www.fao.org/4/a0257e/a0257e00.htm.",
   faiman: "Faiman D. Assessing the outdoor operating temperature of photovoltaic modules. Prog Photovolt Res Appl 2008;16:307–15. https://doi.org/10.1002/pip.813.",
   meehl: "Meehl GA, Senior CA, Eyring V, Flato G, Lamarque JF, Stouffer RJ, et al. Context for interpreting equilibrium climate sensitivity and transient climate response from the CMIP6 Earth system models. Sci Adv 2020;6:eaba1981. https://doi.org/10.1126/sciadv.aba1981.",
-  riaz: "Riaz MH, Imran H, Younas R, Butt NZ. The optimization of vertical bifacial photovoltaic farms for efficient agrivoltaic systems. Sol Energy 2021;230:1004–12.",
+  riaz: "Riaz MH, Imran H, Younas R, Butt NZ. The optimization of vertical bifacial photovoltaic farms for efficient agrivoltaic systems. Sol Energy 2021;230:1004–12. https://doi.org/10.1016/j.solener.2021.10.051.",
   nassar: "Nassar YF, El-Khozondar HJ, Belhaj SO, Alsadi SY, Abuhamoud NM. View factors in horizontal plane fixed-mode solar PV fields. Front Energy Res 2022;10:859075. https://doi.org/10.3389/fenrg.2022.859075.",
   weselek: "Weselek A, Ehmann A, Zikeli S, Lewandowski I, Schindele S, Högy P. Agrophotovoltaic systems: applications, challenges, and opportunities. A review. Agron Sustain Dev 2019;39:35. https://doi.org/10.1007/s13593-019-0581-3.",
   dupraz24: "Dupraz C. Assessment of the ground coverage ratio of agrivoltaic systems as a proxy for potential crop productivity. Agrofor Syst 2024;98:2679–96. https://doi.org/10.1007/s10457-023-00906-3.",
@@ -42,6 +42,15 @@ const REF = {
   adeh: "Adeh EH, Good SP, Calaf M, Higgins CW. Solar PV power potential is greatest over croplands. Sci Rep 2019;9:11442. https://doi.org/10.1038/s41598-019-47803-3.",
   iec61724: "IEC 61724-1:2021. Photovoltaic system performance – Part 1: Monitoring. Geneva: International Electrotechnical Commission; 2021.",
   dobos: "Dobos AP. PVWatts Version 5 Manual. NREL/TP-6A20-62641. Golden, CO: National Renewable Energy Laboratory; 2014. https://doi.org/10.2172/1158421.",
+  // Discussion (Section 4)
+  justes: "Justes E, Mary B, Meynard JM, Machet JM, Thelier-Huché L. Determination of a critical nitrogen dilution curve for winter wheat crops. Ann Bot 1994;74:397–407. https://doi.org/10.1006/anbo.1994.1133.",
+  ainsworth: "Ainsworth EA, Long SP. What have we learned from 15 years of free-air CO2 enrichment (FACE)? A meta-analytic review of the responses of photosynthesis, canopy properties and plant production to rising CO2. New Phytol 2005;165:351–72. https://doi.org/10.1111/j.1469-8137.2004.01224.x.",
+  long06: "Long SP, Ainsworth EA, Leakey ADB, Nösberger J, Ort DR. Food for thought: lower-than-expected crop yield stimulation with rising CO2 concentrations. Science 2006;312:1918–21. https://doi.org/10.1126/science.1114722.",
+  marrou: "Marrou H, Guilioni L, Dufour L, Dupraz C, Wéry J. Microclimate under agrivoltaic systems: Is crop growth rate affected in the partial shade of solar panels? Agric For Meteorol 2013;177:117–32. https://doi.org/10.1016/j.agrformet.2013.04.012.",
+  weselek21: "Weselek A, Bauerle A, Hartung J, Zikeli S, Lewandowski I, Högy P. Agrivoltaic system impacts on microclimate and yield of different crops within an organic crop rotation in a temperate climate. Agron Sustain Dev 2021;41:59. https://doi.org/10.1007/s13593-021-00714-y.",
+  folberth: "Folberth C, Skalský R, Moltchanova E, Balkovič J, Azevedo LB, Obersteiner M, et al. Uncertainty in soil data can outweigh climate impact signals in global crop yield simulations. Nat Commun 2016;7:11872. https://doi.org/10.1038/ncomms11872.",
+  lopez: "Lopez A, Roberts B, Heimiller D, Blair N, Porro G. U.S. renewable energy technical potentials: a GIS-based analysis. NREL/TP-6A20-51946. Golden, CO: National Renewable Energy Laboratory; 2012. https://doi.org/10.2172/1219777.",
+  kusumfaq: "Ministry of New and Renewable Energy. PM-KUSUM: frequently asked questions. https://pmkusum.mnre.gov.in/landing-faq.html [accessed October 2026].",
 };
 let order = [];
 function cite(...keys) {
