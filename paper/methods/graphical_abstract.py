@@ -2,7 +2,7 @@
 
 Three panels, left to right, with the result taking about half the width:
   problem  small sketch, solar and farmland competing for land
-  method   shade model -> crop model icons, one RY-vs-GCR curve with tau and GCR_max, simulation scope
+  method   icon row (shade model -> crop model), one RY-vs-GCR curve with tau and GCR_max, simulation scope
   result   India map of GCR_max at RY >= tau, headline capacity, mid-century change badge and a row of
            four crop icons with the national mean GCR_max of each crop
 
@@ -195,17 +195,18 @@ def main():
         return fig.add_axes([x / W, y / H, w / W, h / H])
 
     # panel frames, titles and arrows between panels
-    panels = [(1.0, 19.2, "Problem"), (22.6, 40.9, "Method"), (66.5, 62.5, "Result")]
+    panels = [(1.0, 19.2, "Solar vs\nfood on\nfarmland"), (22.6, 40.9, "Simulate shade → yield"),
+              (66.5, 62.5, f"Where agrivoltaics keeps ≥ {a.thr:.0%} yield")]
     for x, w, t in panels:
         ax.add_patch(FancyBboxPatch((x, 1.0), w, 48, boxstyle="round,pad=0,rounding_size=1.8", fc="white",
                                     ec="0.6", lw=0.6))
-        ax.text(x + 1.8, 45.6, t, fontsize=9, fontweight="bold", va="center")
+        ax.text(x + w / 2, 47.4, t, fontsize=8, fontweight="bold", ha="center", va="top", linespacing=1.15,
+                multialignment="center")
     for x0, x1 in ((20.4, 22.4), (63.8, 66.2)):
         ax.add_patch(FancyArrowPatch((x0, 25), (x1, 25), arrowstyle="-|>", mutation_scale=8, lw=1.2,
                                      color=GREY, shrinkA=0, shrinkB=0))
 
     # ---- problem: solar rows and crops competing for the same land
-    ax.text(2.8, 41.2, "Solar or food\non one field?", fontsize=7, color="0.15", va="top", linespacing=1.2)
     gy = 13.0
     ax.add_patch(Rectangle((2.3, gy - 3.0), 15.9, 3.0, color=SOIL, lw=0))
     sun(ax, 10.25, 29.0, 1.8)
@@ -220,16 +221,15 @@ def main():
             linespacing=1.2)
 
     # ---- method: one RY-GCR curve with tau and GCR_max
-    # "shade model -> crop model", each part under its icon (icons sit right of the panel title)
-    xr = 61.8
-    ax.text(xr, 40.8, "crop model", ha="right", va="center", fontsize=7, color="0.15")
-    ax.text(xr - 14.6, 40.8, "→", ha="right", va="center", fontsize=7, color="0.15")
-    ax.text(xr - 18.0, 40.8, "shade model", ha="right", va="center", fontsize=7, color="0.15")
-    icon_shade(ax, 41.5, 43.2, 4.6)
-    icon_cropmodel(ax, xr - 6.6, 43.2, 4.6)
-    ax.text(42.75, 6.0, "simulated for every 0.25° cell\n4 crops · 3 layouts\n5 climate models", ha="center",
-            va="center", fontsize=7, color="0.2", linespacing=1.15)
-    b = axes_mm(33.0, 17.5, 28.0, 20.5)
+    # icon row: shade model -> crop model, each icon centred above its label
+    for cx, label, icon in ((34.5, "shade model", icon_shade), (53.0, "crop model", icon_cropmodel)):
+        icon(ax, cx, 38.6, 4.0)
+        ax.text(cx, 36.4, label, ha="center", va="center", fontsize=7, color="0.15")
+    ax.add_patch(FancyArrowPatch((38.6, 40.6), (48.9, 40.6), arrowstyle="-|>", mutation_scale=6, lw=0.9,
+                                 color=GREY, shrinkA=0, shrinkB=0))
+    ax.text(42.9, 5.2, "simulated for every 0.25° cell\n4 crops · 3 layouts\n5 climate models", ha="center",
+            va="center", fontsize=7, color="0.2", linespacing=1.05)
+    b = axes_mm(33.0, 17.4, 28.0, 16.8)
     g = np.linspace(0, 0.7, 80); ry = 1 - 0.45 * g - 0.45 * g ** 2
     gm = g[np.argmin(abs(ry - a.thr))]
     b.fill_between(g[g <= gm], 0.4, ry[g <= gm], color=SKY, alpha=0.35, lw=0)
@@ -247,9 +247,9 @@ def main():
         b.spines[s].set_visible(False)
     b.set_xlabel("panel cover, GCR [–]", fontsize=7, labelpad=1)
     b.set_ylabel("rel. yield, RY [–]", fontsize=7, labelpad=1)
+    b.yaxis.set_label_coords(-0.21, 0.46)
 
     # ---- result: India map of GCR_max at RY >= tau
-    ax.text(85.0, 45.6, f"GCR$_{{max}}$ at RY ≥ {a.thr:.1f}", fontsize=7, va="center", color="0.15")
     b = axes_mm(76.0, 16.0, 24.5, 27.5)
     b.set_facecolor("none")
     for s in b.spines.values():
@@ -278,6 +278,7 @@ def main():
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=[0, 0.35, 0.7])
     cb.ax.set_yticklabels(["0", "0.35", "0.7"]); cb.ax.tick_params(labelsize=7, length=1.5, width=0.5, pad=1)
     cb.outline.set_linewidth(0.5)
+    ax.text(68.4, 40.2, "GCR$_{max}$", ha="left", va="center", fontsize=7, color="0.15")
 
     # headline capacity and 2050 badge
     big, rng = fmt_cap(head)
