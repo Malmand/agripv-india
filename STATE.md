@@ -101,3 +101,10 @@
   S3: whole system bias -0.044 / RMSE 0.053; below array +0.147 / 0.199.
 - build_supp.js: new Section S8 with Figs. S1-S3; Santra et al. 2021 added to REF (DOI 10.1016/j.biosystemseng.2021.06.017
   confirmed via X-MOL and AGRIS; Crossref blocked from the session, volume/pages marked [verify]).
+
+## 2026-11-01 submission package (task I)
+- paper/submission/: cover_letter.md (novelty in 3 sentences, [X] numbers, EiC name [verify]), credit_statement.md
+  (two authors, roles [MO to confirm with Aritra]), data_code_availability.md (statement + input/source table),
+  competing_interests.md (competing interests, funding placeholder, Elsevier generative-AI declaration draft).
+- README.md rewritten for the Zenodo release (old pilot README content summarised under "root *.py").
+- Before release: choose LICENSE; ICRISAT Kaggle CSV and Admin2 boundaries have unknown licence/source; Zenodo DOI.
