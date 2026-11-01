@@ -54,3 +54,35 @@ Each session reads CLAUDE.md and STATE.md, works in its own files, and pushes to
 > and minor comments, every claim that lacks support or a citation, every number that does not match
 > the tables, reference problems (check DOIs on Crossref), and a recommendation. Do not edit the
 > manuscript. Push.
+
+## F. Rehearse task D (tonight)
+> Read CLAUDE.md. Rehearse task D: build a fake runs/s1/summary from runs/india_test/it/summary (ry_crop
+> for historical_current and historical_recommended, plus a synthetic energy_historical.csv with plausible
+> kWh/kWp by layout and GCR: south ~1900-1750, ew ~1850-1680, vertical ~1480-1080 from GCR 0.05 to 0.7).
+> Run prod/postprocess_india.py (plain and --robust-with historical_recommended), src/fig_india.py,
+> src/results_summary.py and paper/methods/graphical_abstract.py. Fix every error, check every figure
+> visually against the figure rules, write a one-command script run_results.sh (input: path to s1.zip)
+> for Monday, then delete the fake data so nothing fake stays in the repo. Push.
+
+## G. Reconcile national estimates (waterfall figure)
+> Read CLAUDE.md and STATE.md. Write src/reconcile.py: on our grid and four crops compute capacity
+> (1) with a fixed 0.42 and 0.75 MW/ha on all crop area (TERI / Fraunhofer style, no yield check),
+> (2) plus the slope <= 5% rule, (3) plus double-cropped land counted once, (4) with our yield-constrained
+> GCR_max (calibrated N), (5) with the robust management case. Produce a journal-style waterfall figure
+> results/figures/fig_reconcile.pdf (one message: which assumption explains the gap). Test on the 40-cell
+> data so it runs unchanged on stage 1 data. Push.
+
+## H. Novelty audit
+> Read CLAUDE.md. Search the literature (2024-2026) for national or regional agrivoltaic potential studies
+> that use process-based crop models, a yield threshold or future climate, with special attention to
+> India. Check whether the Nagaraju et al. SSRN preprint (India APV national assessment) is now published
+> in a journal. Write review/novelty_audit.md: each study, what it does, how it compares with Table 1 in
+> paper/methods/intro.js, and whether any "first" claim must be softened. Verify every DOI. Push.
+
+## I. Submission package
+> Read CLAUDE.md and the manuscript. Draft paper/submission/: cover letter to the Applied Energy editor
+> (novelty in three sentences, no overclaiming), CRediT statement with two authors only: Mohamed
+> Al-Mandhari (Conceptualization, Methodology, Software, Formal analysis, Investigation, Data curation,
+> Visualization, Writing - original draft) and Aritra Ghosh, University of Exeter (Conceptualization,
+> Supervision, Writing - review & editing) [MO to confirm roles with Aritra], data and code availability
+> statement, declaration of competing interests, and a repo README suitable for a Zenodo release. Push.
