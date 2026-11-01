@@ -108,3 +108,15 @@
   competing_interests.md (competing interests, funding placeholder, Elsevier generative-AI declaration draft).
 - README.md rewritten for the Zenodo release (old pilot README content summarised under "root *.py").
 - Before release: choose LICENSE; ICRISAT Kaggle CSV and Admin2 boundaries have unknown licence/source; Zenodo DOI.
+
+## 2026-11-01 reconciliation waterfall (task G)
+- src/reconcile.py: same grid, same 4 crops, simulated cell-crop pairs only. Steps: (1) fixed 0.42 / 0.75 MW/ha on all
+  crop area, (2) slope <= 5%, (3) double-cropped land once (max of rabi, kharif area per cell), (4) GCR_max at RY >= thr
+  (--stage, calibrated N), (5) robust = min with --robust-with. Reuses gcr_table/ETA from prod/postprocess_india.py;
+  step 5 reproduces india_combined_*_robust exactly (checked). Outputs results/potential/reconcile.csv (all layouts,
+  thresholds, both densities) and results/figures/fig_reconcile.pdf (default ew_fixed, RY 0.8; 0.42 chain as diamonds).
+- Tested on the 40-cell run (historical_recommended plus a synthetic "current" stage in scratch, not committed). No
+  figure committed yet. After task D: `python src/reconcile.py --summary runs/s1/summary` (defaults: historical_current,
+  robust with historical_recommended; step 5 skipped if that file is missing).
+- 40-cell test (not a result): ew at RY 0.8 gives GCR_max above 0.34 on average, so the yield step raises capacity
+  versus 0.75 MW/ha; the fixed 0.42 MW/ha path sits far below. Slope -8%, double cropping -13% of the step-1 total.
