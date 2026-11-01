@@ -109,24 +109,31 @@ def main():
     g["energy_gwh"] = g.cap_mwp * g.yield_kwh_kwp / 1000
     g.to_csv(os.path.join(a.outdir, f"cell_crop_{a.stage}.csv.gz"), index=False, float_format="%.5g")
 
-    # crops combined, double-cropped overlap counted once
+    # crops combined, double-cropped overlap counted once (vectorised over cell x model x layout x thr x rule)
     k = ["cell", "state", "model", "config", "thr", "slope_rule"]
-    rows = []
-    for key, d in g.groupby(k):
-        s = {}
-        for name, crops in (("rabi", RABI), ("kharif", KHARIF)):
-            e = d[d.crop.isin(crops) & (d.elig_ha > 0)]
-            A = e.elig_ha.sum()
-            s[name] = (A, (e.gcr_max * e.elig_ha).sum() / A if A > 0 else 0.0,
-                       (e.yield_kwh_kwp * e.elig_ha).sum() / A if A > 0 else np.nan)
-        (Ar, gr, yr), (Ak, gk, yk) = s["rabi"], s["kharif"]
-        ov = min(Ar, Ak)
-        parts = [(ov, min(gr, gk)), (Ar - ov, gr), (Ak - ov, gk)]
-        land = Ar + Ak - ov
-        cap = sum(A_ * g_ for A_, g_ in parts) * ETA * 10
-        ysp = np.nanmean([yr, yk]) if land > 0 else np.nan
-        rows.append(key + (land, cap, cap * ysp / 1000 if land > 0 else 0.0))
-    comb = pd.DataFrame(rows, columns=k + ["land_ha", "cap_mwp", "energy_gwh"])
+    e = g[g.elig_ha > 0].assign(season=lambda d: np.where(d.crop.isin(RABI), "rabi", "kharif"))
+    e = e.assign(ga=e.gcr_max * e.elig_ha, ya=e.yield_kwh_kwp * e.elig_ha)
+    s = e.groupby(k + ["season"]).agg(A=("elig_ha", "sum"), ga=("ga", "sum"), ya=("ya", "sum")).unstack("season")
+    s.columns = [f"{v}_{c}" for v, c in s.columns]
+    for c in ("rabi", "kharif"):
+        for v in ("A", "ga", "ya"):
+            s[f"{v}_{c}"] = s.get(f"{v}_{c}", pd.Series(0.0, index=s.index)).fillna(0.0)
+        A = s[f"A_{c}"]
+        s[f"g_{c}"] = np.where(A > 0, s[f"ga_{c}"] / A.where(A > 0, 1), 0.0)
+        # area-weighted specific yield of the season (NaN if no energy table)
+        s[f"y_{c}"] = np.where(A > 0, s[f"ya_{c}"] / A.where(A > 0, 1), np.nan) if en is not None else np.nan
+    ov = np.minimum(s.A_rabi, s.A_kharif)
+    # overlap: both seasons on one field, lower GCR_max; its yield is that of the limiting season
+    rabi_lim = s.g_rabi <= s.g_kharif
+    g_ov = np.minimum(s.g_rabi, s.g_kharif)
+    y_ov = np.where(rabi_lim, s.y_rabi, s.y_kharif)
+    cap_parts = [ov * g_ov, (s.A_rabi - ov) * s.g_rabi, (s.A_kharif - ov) * s.g_kharif]
+    y_parts = [y_ov, s.y_rabi, s.y_kharif]
+    s["land_ha"] = s.A_rabi + s.A_kharif - ov
+    s["cap_mwp"] = sum(cap_parts) * ETA * 10
+    s["energy_gwh"] = sum(np.nan_to_num(c * ETA * 10 * y / 1000) for c, y in zip(cap_parts, y_parts)) \
+        if en is not None else 0.0
+    comb = s[["land_ha", "cap_mwp", "energy_gwh"]].reset_index()
     comb.to_csv(os.path.join(a.outdir, f"cell_combined_{a.stage}.csv.gz"), index=False, float_format="%.5g")
 
     # India and state totals: per model, then median and range over models

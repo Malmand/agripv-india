@@ -91,8 +91,9 @@ def fmt_cap(head):
     if head is None:
         return "[X] GWp", "GCM range [X]–[X]"
     med, lo, hi = head
-    if med >= 1e6:  # MWp -> TWp
-        return f"{med / 1e6:.1f} TWp", f"GCM range {lo / 1e6:.1f}–{hi / 1e6:.1f}"
+    if med >= 1e6:  # MWp -> TWp; two decimals in the range if one would hide it
+        nd = 1 if round(lo / 1e6, 1) != round(hi / 1e6, 1) else 2
+        return f"{med / 1e6:.1f} TWp", f"GCM range {lo / 1e6:.{nd}f}–{hi / 1e6:.{nd}f}"
     return f"{med / 1e3:.0f} GWp", f"GCM range {lo / 1e3:.0f}–{hi / 1e3:.0f}"
 
 

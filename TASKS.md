@@ -42,6 +42,7 @@ Each session reads CLAUDE.md and STATE.md, works in its own files, and pushes to
 
 ## D. Results pipeline (Monday, when stage 1 is done)
 > MO uploads s1.zip (ry_crop_historical_current.csv.gz and energy_historical.csv from the GCP bucket).
+> Shortcut (rehearsed in task F): `bash run_results.sh /path/to/s1.zip` does the unzip, postprocess, figures, summary.
 > Put the files in runs/s1/summary/. Run prod/postprocess_india.py for historical_current (with energy),
 > src/fig_india.py and src/results_summary.py (see headers). If ry_crop_historical_recommended exists, also
 > run postprocess with --robust-with historical_recommended. Check numbers for sanity (open-field yields

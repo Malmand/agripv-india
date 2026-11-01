@@ -9,6 +9,7 @@ Usage: python fig_india.py --pp results/potential --stage historical_current --g
        --boundaries Admin2.shp --out results/figures [--thr 0.8] [--future ssp585_current]
 """
 import argparse
+import warnings
 from pathlib import Path
 
 import geopandas as gpd
@@ -60,9 +61,22 @@ def draw_cells(ax, lon, lat, val, cmap, norm):
                          np.ma.masked_invalid(z), cmap=cmap, norm=norm, edgecolors="none", rasterized=True)
 
 
+def mean_range(pp, stage, thr):
+    """Area-weighted mean GCR_max per crop and layout for each GCM -> {(crop, cfg): (min, max)}."""
+    f = pp / f"cell_crop_{stage}.csv.gz"
+    if not f.exists():
+        return {}
+    c = pd.read_csv(f, usecols=["cell", "model", "crop", "config", "thr", "slope_rule", "gcr_max", "elig_ha"])
+    c = c[(c.slope_rule == "le5") & (c.thr.round(2) == thr) & (c.elig_ha >= MIN_HA)]
+    w = c.groupby(["crop", "config", "model"]).apply(lambda d: np.average(d.gcr_max, weights=d.elig_ha),
+                                                     include_groups=False)
+    return {k: (v.min(), v.max()) for k, v in w.groupby(["crop", "config"])}
+
+
 def fig_gcrmax(pp, stage, grid, states, thr, out):
     m = pd.read_csv(pp / f"map_gcr_{stage}.csv.gz")
     m = m[(m.thr.round(2) == thr) & (m.elig_ha >= MIN_HA)]
+    rng = mean_range(pp, stage, thr)
     bounds = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7001]
     cmap = ListedColormap(mpl.colormaps["viridis"](np.linspace(0, 1, len(bounds) - 1)))
     norm = BoundaryNorm(bounds, cmap.N)
@@ -75,8 +89,10 @@ def fig_gcrmax(pp, stage, grid, states, thr, out):
             india_axes(ax, states, i == 3, j == 0)
             if len(d):
                 w = np.average(d.gcr_med, weights=d.elig_ha)
-                ax.text(0.98, 0.04, f"area-weighted\nmean {w:.2f}", transform=ax.transAxes, ha="right",
-                        va="bottom", fontsize=6)
+                lo, hi = rng.get((crop, cfg), (np.nan, np.nan))
+                # area-weighted mean of the 5-GCM median map (range of the per-GCM means)
+                txt = f"{w:.2f}" + (f" ({lo:.2f}–{hi:.2f})" if np.isfinite(lo) else "")
+                ax.text(0.02, 0.01, txt, transform=ax.transAxes, ha="left", va="bottom", fontsize=6)
             if i == 0:
                 ax.set_title(ll, fontsize=8)
             if j == 0:
@@ -85,7 +101,7 @@ def fig_gcrmax(pp, stage, grid, states, thr, out):
     cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.5, aspect=35, pad=0.01)
     cb.set_label(f"Maximum ground coverage ratio with relative yield ≥ {thr:.2f} (–)", fontsize=8)
     cb.ax.tick_params(labelsize=7)
-    fig.savefig(out / f"fig_india_gcrmax_{stage}_thr{int(thr * 100)}.pdf")
+    fig.savefig(out / f"fig_india_gcrmax_{stage}_thr{int(thr * 100)}.pdf", dpi=400)
     plt.close(fig)
 
 
@@ -143,6 +159,7 @@ def fig_delta(pp, hist, fut, grid, states, thr, out):
     m["d"] = m.gcr_med_f - m.gcr_med_h
     bounds = [-0.3, -0.2, -0.1, -0.025, 0.025, 0.1, 0.2, 0.3]
     cols = mpl.colormaps["PuOr"](np.linspace(0.05, 0.95, len(bounds) + 1))
+    cols[len(cols) // 2] = mpl.colors.to_rgba("0.85")   # no-change class grey, so it differs from no data
     cmap = ListedColormap(cols[1:-1]).with_extremes(under=cols[0], over=cols[-1])
     norm = BoundaryNorm(bounds, cmap.N)
     fig, axs = plt.subplots(4, 3, figsize=(6.3, 8.6), constrained_layout=True)
@@ -158,8 +175,10 @@ def fig_delta(pp, hist, fut, grid, states, thr, out):
                 ax.text(-0.38, 0.5, cl, transform=ax.transAxes, rotation=90, va="center", fontsize=8)
             panel_label(ax, "ABCDEFGHIJKL"[3 * i + j])
     cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.5, aspect=35, pad=0.01, extend="both")
+    cb.set_ticks([-0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3], labels=["−0.3", "−0.2", "−0.1", "0", "0.1", "0.2", "0.3"])
+    cb.ax.tick_params(labelsize=7)
     cb.set_label(f"Change in maximum GCR at RY ≥ {thr:.2f}, 2041–2060 minus 1995–2014 (–)", fontsize=8)
-    fig.savefig(out / f"fig_india_delta_{fut}_thr{int(thr * 100)}.pdf")
+    fig.savefig(out / f"fig_india_delta_{fut}_thr{int(thr * 100)}.pdf", dpi=400)
     plt.close(fig)
 
 
@@ -176,6 +195,10 @@ if __name__ == "__main__":
     a.out.mkdir(parents=True, exist_ok=True)
     grid = pd.read_csv(a.grid)
     states = gpd.read_file(a.boundaries)
+    warnings.filterwarnings("ignore", message="Geometry is in a geographic CRS")
+    # outline only for orientation: close the narrow channels between delta islands (Sundarbans),
+    # drop islets and simplify (~2 km), else they draw as dark blobs and bloat the PDF
+    states["geometry"] = states.geometry.buffer(0.03).buffer(-0.03).simplify(0.02, preserve_topology=True)
     fig_gcrmax(a.pp, a.stage, grid, states, a.thr, a.out)
     fig_capacity(a.pp, a.stage, a.out)
     fig_states(a.pp, a.stage, a.thr, a.out)
