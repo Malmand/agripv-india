@@ -120,3 +120,18 @@
   robust with historical_recommended; step 5 skipped if that file is missing).
 - 40-cell test (not a result): ew at RY 0.8 gives GCR_max above 0.34 on average, so the yield step raises capacity
   versus 0.75 MW/ha; the fixed 0.42 MW/ha path sits far below. Slope -8%, double cropping -13% of the step-1 total.
+
+## 2026-11-01 task D rehearsed (task F)
+- Fake s1 (40-cell test run, synthetic energy) run through the full chain; all fake data deleted afterwards.
+- Monday: `bash run_results.sh /path/to/s1.zip` (unzips to runs/s1/summary, postprocess for every *_current stage with
+  energy_<period>.csv, robust case if ry_crop_historical_recommended is in the zip, figures, headline_numbers.md,
+  graphical abstract). ~2 min on 40 cells; postprocess scales with cells (gcr_table ~1-2 min on 2977 cells).
+- postprocess_india.py: crops-combined step vectorised (8 s -> 1.3 s on 40 cells, capacity identical); energy now
+  per land part (overlap uses the specific yield of the limiting season) instead of the mean of the two seasons.
+- results_summary.py: new robust-vs-calibrated table and "Sanity checks" (capacity density, kWh/kWp, vertical share with
+  GCR_max > 0.6 for the DIN 15% point in the Discussion, open-field yields by state vs calibration with --summary).
+- fig_india.py: boundaries simplified and delta islands closed (map PDF 3.1 -> 0.65 MB, no dark blobs), map rasters
+  400 dpi, area-weighted mean per panel now with the GCM range "0.35 (0.33-0.37)" bottom-left (caption must say so),
+  delta map: no-change class grey (differs from no data), clean colourbar ticks.
+- graphical_abstract.py: GCM range gets 2 decimals when 1 decimal would show "1.1-1.1".
+- Note: legumes are simulated to GCR 0.5, cereals to 0.7, so "at simulated GCR limit" means 0.5 for legumes.
