@@ -8,6 +8,8 @@ const {
 } = d;
 
 const FONT = "Arial";
+const path = require("path");
+process.chdir(__dirname);   // builders work from any directory (figures and outputs are relative to here)
 // ---------- citations, numbered by first use ----------
 const REF = {
   dupraz: "Dupraz C, Marrou H, Talbot G, Dufour L, Nogier A, Ferard Y. Combining solar photovoltaic panels and food crops for optimising land use: Towards new agrivoltaic schemes. Renew Energy 2011;36:2725–32. https://doi.org/10.1016/j.renene.2011.03.005.",
@@ -85,9 +87,9 @@ function runs(text, base = {}) {
 }
 const SP = { line: 360, lineRule: LineRuleType.AUTO };   // 1.5 line spacing
 const P = (t, o = {}) => new Paragraph({ children: runs(t), spacing: { after: 140, ...SP }, alignment: AlignmentType.JUSTIFIED, ...o });
-const H1 = t => new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun({ text: t, font: FONT })], spacing: { before: 240, after: 160 } });
-const H2 = t => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun({ text: t, font: FONT })], spacing: { before: 220, after: 120 } });
-const H3 = t => new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun({ text: t, font: FONT })], spacing: { before: 160, after: 100 } });
+const H1 = t => new Paragraph({ heading: HeadingLevel.HEADING_1, children: runs(t), spacing: { before: 240, after: 160 } });
+const H2 = t => new Paragraph({ heading: HeadingLevel.HEADING_2, children: runs(t), spacing: { before: 220, after: 120 } });
+const H3 = t => new Paragraph({ heading: HeadingLevel.HEADING_3, children: runs(t), spacing: { before: 160, after: 100 } });
 
 // ---------- equations ----------
 const R = t => new MathRun(t);
@@ -129,6 +131,42 @@ function TABLE(title, header, rows, widths, notes, label) {
   if (notes) out.push(new Paragraph({ spacing: { before: 60, after: 200 }, children: runs(notes, { size: 16 }) }));
   return out;
 }
+// ---------- result numbers: {key} placeholders filled from results/potential/numbers.json ----------
+// fill(text): {key} -> numbers.json values[key], or [pending] when the key is missing.
+// {? ... ?} marks an optional sentence: it is dropped when any key inside it is missing
+// (use it for 2050 and robust-case sentences). Keys always contain a dot, e.g. {main.cap_twp}.
+// NUMBERS=<file> overrides the default path. fill.has(...keys) tests for keys; fill.missing lists
+// the keys that were shown as [pending] (printed by save()).
+const NUM_FILE = process.env.NUMBERS || path.join(__dirname, "..", "..", "results", "potential", "numbers.json");
+const KEY = /\{([a-z][a-z0-9_]*(?:\.[a-z0-9_]+)+)\}/g;
+let NUM = null;
+function numbers() {
+  if (NUM === null) NUM = fs.existsSync(NUM_FILE) ? JSON.parse(fs.readFileSync(NUM_FILE, "utf8")).values : {};
+  return NUM;
+}
+function fill(text) {
+  const v = numbers();
+  let t = text.replace(/\{\?([\s\S]*?)\?\}/g, (_, seg) =>
+    [...seg.matchAll(KEY)].every(m => m[1] in v) ? seg : "");
+  t = t.replace(KEY, (_, k) => { if (k in v) return v[k]; fill.missing.add(k); return "[pending]"; });
+  return t.replace(/ {2,}/g, " ").replace(/ +([.,;:)])/g, "$1").trim();
+}
+fill.missing = new Set();
+fill.has = (...keys) => keys.every(k => k in numbers());
+fill.file = NUM_FILE;
+// paragraph with numbers; returns [] when nothing is left (all sentences optional and missing)
+const PF = (t, o = {}) => { const f = fill(t); return f ? P(f, o) : []; };
+
+// figure from a PNG of any size, scaled to width w (px); placeholder caption if the file is missing
+function pngSize(file) { const b = fs.readFileSync(file); return [b.readUInt32BE(16), b.readUInt32BE(20)]; }
+function FIGAUTO(file, w, cap) {
+  if (fs.existsSync(file)) { const [pw, ph] = pngSize(file); return FIG(file, w, Math.round(w * ph / pw), cap); }
+  fign++;
+  return [new Paragraph({ spacing: { before: 200, after: 240 }, children: [
+    new TextRun({ text: `Fig. ${FP}${fign}. `, bold: true, font: FONT, size: 20 }),
+    new TextRun({ text: `[pending: ${path.basename(file)}] `, font: FONT, size: 20 }), ...runs(cap, { size: 20 })] })];
+}
+
 let fign = 0;
 function FIG(path, w, h, cap) {
   fign++;
@@ -153,6 +191,9 @@ function save(body, file){
     sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 } } },
       footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 18 })] })] }) },
       children: body }] });
-  return Packer.toBuffer(doc).then(b => { fs.writeFileSync(file, b); console.log("wrote", file, order.length, "refs", eqn, "eqs"); });
+  return Packer.toBuffer(doc).then(b => { fs.writeFileSync(file, b); console.log("wrote", file, order.length, "refs", eqn, "eqs");
+    const nf = fs.existsSync(NUM_FILE) ? "numbers from " + path.relative(process.cwd(), NUM_FILE) : "no numbers.json";
+    if (fill.missing.size) console.log(`${nf}; [pending] keys (${fill.missing.size}): ${[...fill.missing].sort().join(", ")}`);
+    else console.log(`${nf}; no [pending] keys`); });
 }
-module.exports = { d, REF, cite, runs, P, H1, H2, H3, R, sub, frac, sum, EQ, TABLE, FIG, resetCounters, refsList, setPrefix, save, Paragraph, TextRun, PageBreak, FONT };
+module.exports = { fill, PF, FIGAUTO, d, REF, cite, runs, P, H1, H2, H3, R, sub, frac, sum, EQ, TABLE, FIG, resetCounters, refsList, setPrefix, save, Paragraph, TextRun, PageBreak, FONT };

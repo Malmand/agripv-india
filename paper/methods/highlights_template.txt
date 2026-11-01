@@ -1,0 +1,5 @@
+Coupled light and crop models find the panel cover that keeps 80% of crop yield.
+Cropland on slopes up to 5% could host {main.cap_twp} TWp of yield-constrained agrivoltaics.
+At 80% relative yield, wheat allows a GCR of {main.gcr_wheat} and chickpea a GCR of {main.gcr_chickpea}.
+Low nitrogen input hides shade losses; robust management cuts the potential by {robust.reduction_pct}%.
+Mid-century climate changes the potential by {ssp585.change_pct}% under SSP5-8.5 (with CO2 effect).

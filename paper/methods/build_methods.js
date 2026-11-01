@@ -64,11 +64,11 @@ add(P(`where η = 0.22 is the module efficiency, _I_~STC~ = 1000 W m^−2^, _A_~
 add(H2("2.6. Uncertainty and assumptions"));
 add(P(`All steps were run separately for each GCM; national and state totals are reported as the five-GCM median with the minimum and maximum as the range. Sensitivity cases cover the threshold (0.66, 0.90), the slope limit (none, 10%), management (recommended practice) and climate (both scenarios). Three assumptions shape the results. Panels change only the radiation reaching the crop; lower leaf temperature and evaporative demand under shade are not represented, which probably makes RY conservative for rainfed crops in hot regions. Mid-century yields include CO~2~ fertilisation, which is strongest for the C~3~ legumes. Finally, the potential is technical, bounded by crop yield and terrain only; grid capacity, land tenure and economics are not considered.`));
 
-add(H1("3. Results"));
-add(P(`[Results to be drafted from results/potential/headline_numbers.md once stage 1 post-processing is done.]`));
+require("./results.js").addResults(add);
 
 require("./discussion.js").addDiscussion(add);
 
 add(H1("References"));
 add(refsList());
 save(body, "Manuscript_AgriPV_India.docx");
+require("./highlights.js").writeHighlights();

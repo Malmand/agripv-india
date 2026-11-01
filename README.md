@@ -61,7 +61,27 @@ of each script.
 3. Potential: `prod/postprocess_india.py --summary <dir> --stage historical_current --grid data/grid_india_025.csv
    --slope data/slope_india.csv --energy <energy csv> --outdir results/potential`.
 4. Figures and tables: `src/fig_india.py`, `src/results_summary.py`, `src/fig_supp_validation.py`.
-5. Manuscript: `cd paper/methods && npm install docx && node build_methods.js && node build_supp.js`.
+5. Numbers and manuscript: `python src/make_numbers.py`, then `node paper/methods/build_methods.js` and
+   `node paper/methods/build_supp.js` (needs `npm install docx`).
+
+## Updating after a new stage
+
+```bash
+bash run_results.sh sX.zip && node paper/methods/build_methods.js
+```
+
+`sX.zip` holds the stage summaries from the GCP bucket (`ry_crop_<stage>.csv.gz`, `energy_<period>.csv`).
+`run_results.sh` post-processes every stage in the zip, makes the figures (PDF for the journal, PNG for the
+docx), `results/potential/headline_numbers.md` and `results/potential/numbers.json`, and redraws the graphical
+abstract. `build_methods.js` then rebuilds `Manuscript_AgriPV_India.docx` and `highlights.txt`.
+
+No result number is typed into the manuscript. `src/make_numbers.py` writes every number used in the Results,
+Discussion, highlights and graphical abstract to `numbers.json`, for each stage present (current climate,
+robust nitrogen case, SSP2-4.5, SSP5-8.5). The builders write `{key}` placeholders (for example
+`{main.cap_twp}`), and `fill()` in `paper/methods/lib.js` replaces them. Sentences in `{? ... ?}` need a stage
+that may not exist yet (robust case, 2050) and are left out until it does; any other missing key prints as
+`[pending]`, and the build lists those keys. The key scheme is in the header of `src/make_numbers.py`;
+highlights are written from `paper/methods/highlights_template.txt` (85-character check included).
 
 ## Data sources
 

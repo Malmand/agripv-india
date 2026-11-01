@@ -6,8 +6,10 @@
 # and optionally ry_crop_historical_recommended.csv.gz (robust case) and later stages
 # (ry_crop_ssp245_current.csv.gz + energy_ssp245.csv, ...). Folders inside the zip are ignored.
 # Steps: unzip -> runs/s1/summary, postprocess every *_current stage (with energy if present),
-# robust case (min of calibrated and recommended N), figures, headline numbers, graphical abstract.
-# Outputs: results/potential/ (tables, headline_numbers.md), results/figures/fig_india_*.pdf,
+# robust case (min of calibrated and recommended N), figures, headline numbers, numbers.json
+# (src/make_numbers.py, read by paper/methods/lib.js fill()), graphical abstract.
+# Outputs: results/potential/ (tables, headline_numbers.md, numbers.json for the manuscript text),
+# results/figures/fig_india_*.{pdf,png},
 # paper/methods/graphical_abstract.{pdf,png}. Nothing is committed.
 set -euo pipefail
 ZIP=${1:?usage: bash run_results.sh /path/to/s1.zip}
@@ -60,6 +62,10 @@ $PY src/fig_india.py --pp $PP --stage historical_current --grid $GRID --boundari
 echo "== headline numbers"
 $PY src/results_summary.py --pp $PP --stages "${SUMSTAGES[@]}" --summary "$SUM" --grid $GRID > /dev/null
 echo "wrote $PP/headline_numbers.md"
+
+echo "== manuscript numbers"
+$PY src/make_numbers.py --pp $PP
+echo "  (build the manuscript and highlights with: node paper/methods/build_methods.js)"
 
 echo "== graphical abstract"
 FUTGA=ssp245_current; [ -f "$PP/india_combined_ssp245_current.csv" ] || FUTGA=none

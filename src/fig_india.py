@@ -32,6 +32,12 @@ OI = {"south_fixed": "#E69F00", "ew_fixed": "#56B4E9", "vertical": "#009E73"}   
 MIN_HA = 1000      # cells with less eligible crop area are left blank on maps
 
 
+def save(fig, stem):
+    """Journal PDF (map rasters 400 dpi) plus a 300 dpi PNG that the manuscript builder embeds."""
+    fig.savefig(f"{stem}.pdf", dpi=400)
+    fig.savefig(f"{stem}.png", dpi=300)
+
+
 def panel_label(ax, s):
     ax.text(-0.02, 1.02, s, transform=ax.transAxes, fontsize=10, fontweight="bold", ha="right", va="bottom")
 
@@ -101,7 +107,7 @@ def fig_gcrmax(pp, stage, grid, states, thr, out):
     cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.5, aspect=35, pad=0.01)
     cb.set_label(f"Maximum ground coverage ratio with relative yield ≥ {thr:.2f} (–)", fontsize=8)
     cb.ax.tick_params(labelsize=7)
-    fig.savefig(out / f"fig_india_gcrmax_{stage}_thr{int(thr * 100)}.pdf", dpi=400)
+    save(fig, out / f"fig_india_gcrmax_{stage}_thr{int(thr * 100)}")
     plt.close(fig)
 
 
@@ -125,7 +131,7 @@ def fig_capacity(pp, stage, out):
     ax.set_xticklabels([f"RY ≥ {x:.2f}" for x in thrs])
     ax.set_ylabel("Capacity (TWp)")
     ax.legend(fontsize=6, loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=3)
-    fig.savefig(out / f"fig_india_capacity_{stage}.pdf")
+    save(fig, out / f"fig_india_capacity_{stage}")
     plt.close(fig)
 
 
@@ -146,7 +152,7 @@ def fig_states(pp, stage, thr, out, top=12):
     ax.set_yticklabels(order)
     ax.set_xlabel(f"Capacity at RY ≥ {thr:.2f} (GWp)")
     ax.legend(fontsize=6, loc="lower right")
-    fig.savefig(out / f"fig_india_states_{stage}_thr{int(thr * 100)}.pdf")
+    save(fig, out / f"fig_india_states_{stage}_thr{int(thr * 100)}")
     plt.close(fig)
 
 
@@ -178,7 +184,7 @@ def fig_delta(pp, hist, fut, grid, states, thr, out):
     cb.set_ticks([-0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3], labels=["−0.3", "−0.2", "−0.1", "0", "0.1", "0.2", "0.3"])
     cb.ax.tick_params(labelsize=7)
     cb.set_label(f"Change in maximum GCR at RY ≥ {thr:.2f}, 2041–2060 minus 1995–2014 (–)", fontsize=8)
-    fig.savefig(out / f"fig_india_delta_{fut}_thr{int(thr * 100)}.pdf", dpi=400)
+    save(fig, out / f"fig_india_delta_{fut}_thr{int(thr * 100)}")
     plt.close(fig)
 
 
