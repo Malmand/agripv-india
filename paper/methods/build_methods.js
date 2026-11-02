@@ -6,6 +6,7 @@ const body = [];
 const add = (...x) => x.flat().forEach(e => body.push(e));
 const { Paragraph, TextRun, FONT } = L;
 add(new Paragraph({ spacing: { after: 300 }, children: [new TextRun({ text: "Yield-constrained agrivoltaic potential of India under current and mid-century climate", bold: true, size: 32, font: FONT })] }));
+// remove before submission; Elsevier uploads the graphical abstract as a separate file without caption
 // Graphical abstract (front matter, unnumbered): image and caption from graphical_abstract.py
 {
   const fs = require("fs");

@@ -41,6 +41,7 @@ ROOT = HERE.parents[1]
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 7, "pdf.fonttype": 42,
                      "axes.linewidth": 0.6, "xtick.direction": "out", "ytick.direction": "out"})
 BLUE, SKY, GREEN, ORANGE, VERM = "#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00"
+INK, MID = "#1a1a1a", "#555555"   # text tiers: near black (titles, key numbers), mid grey (all other text)
 SOIL, GREY = "#C9B79C", "0.25"
 LAYOUT_NAME = {"ew_fixed": "east-west", "south_fixed": "south-facing", "vertical": "vertical"}
 CROPS = [("wheat", "wheat"), ("chickpea", "chickpea"), ("pearl_millet", "pearl millet"), ("groundnut", "groundnut")]
@@ -203,6 +204,34 @@ def icon_cropmodel(ax, cx, y0, h):
 ICONS = {"wheat": icon_wheat, "chickpea": icon_chickpea, "pearl_millet": icon_millet, "groundnut": icon_groundnut}
 
 
+def check_layout(fig, panels):
+    """Print text that leaves its panel or the figure, or overlaps other text (all in mm)."""
+    fig.canvas.draw()
+    r = fig.canvas.get_renderer()
+    mm = 25.4 / fig.dpi
+    boxes = []
+    for t in fig.findobj(lambda o: hasattr(o, "get_text") and hasattr(o, "get_window_extent")):
+        if not t.get_visible() or not str(t.get_text()).strip():
+            continue
+        e = t.get_window_extent(r)
+        boxes.append((t.get_text().replace("\n", " "), e.x0 * mm, e.y0 * mm, e.x1 * mm, e.y1 * mm))
+    bad = 0
+    for txt, x0, y0, x1, y1 in boxes:
+        if x0 < 0 or y0 < 0 or x1 > W or y1 > H:
+            print(f"  CLIPPED  {txt!r} x {x0:.1f}-{x1:.1f} y {y0:.1f}-{y1:.1f}"); bad += 1
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        inside = [(px, pw) for px, pw, py0, py1 in panels if px - 0.5 < cx < px + pw + 0.5 and py0 < cy < py1]
+        for px, pw in inside:
+            if x0 < px + 0.3 or x1 > px + pw - 0.3:
+                print(f"  EDGE     {txt!r} x {x0:.1f}-{x1:.1f} (panel {px:.1f}-{px + pw:.1f})"); bad += 1
+    for i in range(len(boxes)):
+        for j in range(i + 1, len(boxes)):
+            a_, b_ = boxes[i], boxes[j]
+            if min(a_[3], b_[3]) - max(a_[1], b_[1]) > 0.1 and min(a_[4], b_[4]) - max(a_[2], b_[2]) > 0.1:
+                print(f"  OVERLAP  {a_[0]!r} / {b_[0]!r}"); bad += 1
+    print(f"layout check: {bad} issue(s)")
+
+
 def write_caption(a, hlabel, scen):
     """Caption of the graphical abstract, consistent with what is drawn (graphical_abstract_caption.txt)."""
     case = ("calibrated nitrogen, an upper bound because low nitrogen rates hide part of the shade loss"
@@ -212,7 +241,7 @@ def write_caption(a, hlabel, scen):
     lay = LAYOUT_NAME[a.config]
     txt = (
         "Graphical abstract. Left: solar PV and crops compete for the same farmland. Centre: a light model and "
-        "the DSSAT crop model give the relative yield (RY, shaded over open-field yield) as a function of the "
+        "the DSSAT crop model give the relative yield (RY, crop yield under the array divided by open-field yield) as a function of the "
         "ground coverage ratio (GCR) for each cell, crop and layout; the curve is schematic. GCR_max is the "
         f"largest GCR that keeps RY ≥ {a.thr:.1f}, found where the RY-GCR curve, linearly interpolated from "
         "RY = 1 at GCR 0, first falls below the threshold. "
@@ -224,7 +253,7 @@ def write_caption(a, hlabel, scen):
         "mean of that crop's median GCR_max over all cells with eligible area, weighted by eligible area. "
         "Cereals were simulated up to GCR 0.7 and legumes up to 0.5, so cells that still meet the threshold at "
         "that limit enter at the limit. The headline is the crops-combined capacity (double-cropped land counted "
-        "once, capacity = eligible area × GCR_max × 0.22 × 10 MWp ha^-1), summed nationally for each GCM; "
+        "once, capacity = eligible area × GCR_max × 2.2 MWp ha^−1^ per unit GCR), summed nationally for each GCM; "
         "the value shown is the median of the five national totals. "
         f"The badge gives the change in this capacity by 2041–2060 under {scen} against 1995–2014 with "
         "calibrated nitrogen: the change of the five-GCM median totals, and the range of the change over the "
@@ -241,39 +270,47 @@ def main():
     def axes_mm(x, y, w, h):
         return fig.add_axes([x / W, y / H, w / W, h / H])
 
-    # panel frames, titles and arrows between panels
-    panels = [(1.0, 16.4, "Solar vs\nfood on\nfarmland"), (19.6, 45.3, "Simulate shade → yield"),
-              (67.1, 61.9, f"Where agrivoltaics keeps ≥ {a.thr:.0%} yield")]
-    for x, w, t in panels:
-        ax.add_patch(FancyBboxPatch((x, 1.0), w, 48, boxstyle="round,pad=0,rounding_size=1.8", fc="white",
+    # three text tiers: T1 key numbers (large, bold), T2 panel titles (bold, near black), T3 everything else
+    T2 = dict(fontsize=8, fontweight="bold", color=INK)
+    T3 = dict(fontsize=7, color=MID)
+
+    # panel frames with numbered discs on the top edge, titles and arrows between panels
+    PL, PM, PR = (1.0, 15.6), (18.8, 44.3), (65.3, 63.7)      # (x, width) of the three panels, mm
+    panels = [(PL, "Solar vs\nfood on\nfarmland"), (PM, "Simulate shade → yield"),
+              (PR, f"Where agrivoltaics keeps ≥ {a.thr:.0%} yield")]
+    for i, ((x, w), t) in enumerate(panels, start=1):
+        ax.add_patch(FancyBboxPatch((x, 1.0), w, 47.0, boxstyle="round,pad=0,rounding_size=1.8", fc="white",
                                     ec="0.6", lw=0.6))
-        ax.text(x + w / 2, 47.4, t, fontsize=8, fontweight="bold", ha="center", va="top", linespacing=1.15,
-                multialignment="center")
-    for x0, x1 in ((17.5, 19.5), (65.0, 67.0)):
+        ax.add_patch(Circle((x + 2.8, 48.0), 1.3, fc=INK, ec="white", lw=0.6, zorder=5))
+        ax.text(x + 2.8, 47.95, str(i), ha="center", va="center", fontsize=7, fontweight="bold", color="white",
+                zorder=6)
+        ax.text(x + w / 2, 45.9, t, ha="center", va="top", linespacing=1.15, multialignment="center", **T2)
+    for x0, x1 in ((PL[0] + PL[1] + 0.1, PM[0] - 0.1), (PM[0] + PM[1] + 0.1, PR[0] - 0.1)):
         ax.add_patch(FancyArrowPatch((x0, 25), (x1, 25), arrowstyle="-|>", mutation_scale=8, lw=1.2,
                                      color=GREY, shrinkA=0, shrinkB=0))
 
-    # ---- problem: solar rows and crops competing for the same land
+    # ---- 1 problem: solar rows and crops competing for the same land
     gy = 9.0
-    ax.add_patch(Rectangle((2.1, gy - 3.0), 14.2, 3.0, color=SOIL, lw=0))
-    sun(ax, 9.2, 27.0, 1.8)
+    ax.add_patch(Rectangle((1.9, gy - 3.0), 13.8, 3.0, color=SOIL, lw=0))
+    sun(ax, 8.8, 27.0, 1.8)
     for k in range(2):
-        x = 2.5 + 3.1 * k
-        ax.add_patch(Polygon([[x, gy + 2.6], [x + 2.7, gy + 4.4], [x + 2.7, gy + 5.2], [x, gy + 3.4]], color=BLUE, lw=0))
-        ax.plot([x + 1.5, x + 1.5], [gy, gy + 3.5], color="0.45", lw=0.6)
+        x = 2.3 + 3.0 * k
+        ax.add_patch(Polygon([[x, gy + 2.6], [x + 2.6, gy + 4.4], [x + 2.6, gy + 5.2], [x, gy + 3.4]], color=BLUE, lw=0))
+        ax.plot([x + 1.4, x + 1.4], [gy, gy + 3.5], color="0.45", lw=0.6)
     for k in range(4):
-        sprout(ax, 10.3 + 1.6 * k, gy, 4.6)
-    ax.plot([8.9, 8.9], [gy - 2.5, gy + 9.5], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
+        sprout(ax, 9.9 + 1.5 * k, gy, 4.6)
+    ax.plot([8.5, 8.5], [gy - 2.5, gy + 9.5], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
 
-    # ---- method: one RY-GCR curve with tau and GCR_max
-    # icon row: shade model -> crop model, each icon centred above its label
-    for cx, label, icon in ((34.5, "shade model", icon_shade), (53.0, "crop model", icon_cropmodel)):
-        icon(ax, cx, 38.6, 4.0)
-        ax.text(cx, 36.4, label, ha="center", va="center", fontsize=7, color="0.15")
-    ax.add_patch(FancyArrowPatch((38.6, 40.6), (48.9, 40.6), arrowstyle="-|>", mutation_scale=6, lw=0.9,
+    # ---- 2 method: one RY-GCR curve with tau and GCR_max
+    mc = PM[0] + PM[1] / 2                      # method panel centre
+    for cx, label, icon in ((mc - 7.75, "shade model", icon_shade), (mc + 10.75, "crop model", icon_cropmodel)):
+        icon(ax, cx, 38.0, 4.0)
+        ax.text(cx, 35.8, label, ha="center", va="center", **T3)
+    ax.add_patch(FancyArrowPatch((mc - 3.65, 40.0), (mc + 6.65, 40.0), arrowstyle="-|>", mutation_scale=6, lw=0.9,
                                  color=GREY, shrinkA=0, shrinkB=0))
-    ax.text(42.25, 6.0, "every 0.25° cell · 5 climate models", ha="center", va="center", fontsize=7, color="0.2")
-    b = axes_mm(33.0, 17.4, 28.0, 16.8)
+    ax.text(mc, 6.0, "every 0.25° cell · 5 climate models", ha="center", va="center", **T3)
+    bx = mc - 9.25
+    b = axes_mm(bx, 17.4, 28.0, 16.0)
     g = np.linspace(0, 0.7, 80); ry = 1 - 0.45 * g - 0.45 * g ** 2
     gm = g[np.argmin(abs(ry - a.thr))]
     # band between the curve and the RY = tau line, from GCR 0 to GCR_max: the yield kept above the threshold
@@ -282,23 +319,25 @@ def main():
     b.axhline(a.thr, color="0.2", lw=0.6, ls="--")
     b.plot([gm, gm], [0.4, a.thr], color="0.2", lw=0.6, ls="--")
     b.plot(gm, a.thr, "o", ms=3.5, color="0.1", zorder=5)
-    b.text(0.71, a.thr + 0.025, f"RY = {a.thr:.1f}", ha="right", va="bottom", fontsize=7)
-    b.text(gm + 0.025, 0.43, "GCR$_{max}$", fontsize=7, va="bottom", fontweight="bold")
-    b.text(0.71, 1.04, "schematic", ha="right", va="top", fontsize=7, style="italic", color="0.4")
+    b.text(0.71, a.thr + 0.025, f"RY = {a.thr:.1f}", ha="right", va="bottom", **T3)
+    b.text(gm + 0.025, 0.43, "GCR$_{max}$", va="bottom", **T3)
+    b.text(0.71, 1.04, "schematic", ha="right", va="top", style="italic", **T3)
     b.annotate(f"≥ {a.thr:.1f}\nkept", xy=(0.07, a.thr + 0.07), xytext=(0.02, 0.6), fontsize=7, color=BLUE,
-               ha="left", va="center", linespacing=1.05, arrowprops=dict(arrowstyle="-", color=BLUE, lw=0.6, shrinkA=0, shrinkB=0))
+               ha="left", va="center", linespacing=1.05,
+               arrowprops=dict(arrowstyle="-", color=BLUE, lw=0.6, shrinkA=0, shrinkB=0))
     b.set_xlim(0, 0.72); b.set_ylim(0.4, 1.05)
     b.set_xticks([0, 0.7], ["0", "0.7"]); b.set_yticks([0.4, 0.7, 1.0], ["0.4", "0.7", "1"])
-    b.tick_params(labelsize=7, length=2, width=0.5, pad=1)
+    b.tick_params(labelsize=7, labelcolor=MID, length=2, width=0.5, pad=1)
     for s in ("top", "right"):
         b.spines[s].set_visible(False)
-    b.set_xlabel("ground coverage ratio, GCR [–]", fontsize=7, labelpad=1)
-    b.xaxis.set_label_coords((42.25 - 33.0) / 28.0, -0.24)   # centred on the panel, not the axes
-    b.set_ylabel("rel. yield, RY [–]", fontsize=7, labelpad=1)
+    b.set_xlabel("ground coverage ratio, GCR [–]", labelpad=1, **T3)
+    b.xaxis.set_label_coords((mc - bx) / 28.0, -0.25)   # centred on the panel, not the axes
+    b.set_ylabel("rel. yield, RY [–]", labelpad=1, **T3)
     b.yaxis.set_label_coords(-0.21, 0.46)
 
-    # ---- result: India map of GCR_max at RY >= tau
-    b = axes_mm(73.0, 14.5, 26.2, 29.5)
+    # ---- 3 result: India map of GCR_max at RY >= tau
+    mx, mw = PR[0] + 5.9, 24.0                  # map left edge and width (height follows the aspect)
+    b = axes_mm(mx, 14.5, mw, mw * 29.5 / 26.2)
     b.set_facecolor("none")
     for s in b.spines.values():
         s.set_visible(False)
@@ -322,46 +361,45 @@ def main():
         india.boundary.plot(ax=b, color="0.35", lw=0.4)
     b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3); b.set_aspect(1 / np.cos(np.radians(22)))
     b.set_xticks([]); b.set_yticks([]); b.set_xlabel(""); b.set_ylabel("")
-    cb_ax = axes_mm(70.4, 16.6, 1.5, 9.4)    # over the Arabian Sea, so tick labels clear the coast
+    cb_ax = axes_mm(PR[0] + 2.95, 17.4, 1.5, 8.0)    # over the Arabian Sea, so tick labels clear the coast
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=[0, 0.35, 0.7])
-    cb.ax.set_yticklabels(["0", "0.35", "0.7"]); cb.ax.tick_params(labelsize=7, length=1.5, width=0.5, pad=1)
+    cb.ax.set_yticklabels(["0", "0.35", "0.7"])
+    cb.ax.tick_params(labelsize=7, labelcolor=MID, length=1.5, width=0.5, pad=1)
     cb.outline.set_linewidth(0.5)
-    ax.text(68.9, 21.3, "max GCR", ha="center", va="center", fontsize=7, color="0.15", rotation=90)
+    ax.text(PR[0] + 1.65, 21.4, "max GCR", ha="center", va="center", rotation=90, **T3)
 
-    # headline capacity and 2050 badge
+    # headline capacity, right-aligned in the empty area north-east of the map, and the 2050 badge
     big, rng = fmt_cap(head)
-    xr = 112.8                       # column centre; badge spans 97.3-128.3 mm, clear of the Andaman Islands
-    ax.text(xr, 41.4, big, ha="center", va="center", fontsize=14, fontweight="bold", color=BLUE)
-    ax.text(xr, 37.6, "Technical potential", ha="center", va="center", fontsize=7, color="0.15")
-    ax.text(xr, 35.1, f"({hlabel})", ha="center", va="center", fontsize=7, fontweight="bold", color="black")
-    ax.text(xr, 32.6, "1995–2014 climate", ha="center", va="center", fontsize=7, color="0.35")
+    xe = PR[0] + PR[1] - 1.2                    # right text edge
+    ax.text(xe, 40.0, big, ha="right", va="center", fontsize=14, fontweight="bold", color=BLUE)
+    ax.text(xe, 36.3, f"technical potential ({hlabel})", ha="right", va="center", **T3)
+    ax.text(xe, 33.8, "1995–2014 climate", ha="right", va="center", **T3)
     if head is None:
-        ax.add_patch(Rectangle((xr - 13.5, 39.0), 27.0, 5.0, fill=False, ec="0.1", lw=0.5, ls="--"))
-    # 2050 badge (light, outlined), values from numbers.json; placeholders when the stage is missing
+        ax.add_patch(Rectangle((xe - 27.0, 37.6), 27.0, 5.0, fill=False, ec="0.1", lw=0.5, ls="--"))
+    # badge: white with a thin orange border; values from numbers.json, placeholders when the stage is missing
     scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(a.future.split("_")[0], "SSP5-8.5")
     med, lo, hi = ("[±X]", "[lo]", "[hi]") if change is None else change
-    ax.add_patch(FancyBboxPatch((xr - 15.5, 13.6), 31.0, 16.8, boxstyle="round,pad=0,rounding_size=2.0",
-                                fc="#FDF1DC", ec=ORANGE, lw=0.8))
-    for y, t, kw in ((28.9, "Change in potential", dict(fontweight="bold", color="black")),
-                     (26.5, f"by 2050 ({scen})", dict(fontweight="bold", color="black")),
-                     (24.1, "vs 1995–2014", dict(color="0.2")),
-                     (18.3, "5-model range:", dict(color="0.2")),
-                     (15.9, f"{lo} to {hi}%", dict(color="0.2"))):
-        ax.text(xr, y, t, ha="center", va="center", fontsize=7, **kw)
-    ax.text(xr, 21.2, f"{med}%", ha="center", va="center", fontsize=9, fontweight="bold", color="black")
+    bl, br = mx + mw * 0.9, PR[0] + PR[1] - 0.4   # badge clears the Andaman Islands on the left
+    xb = (bl + br) / 2
+    ax.add_patch(FancyBboxPatch((bl, 15.6), br - bl, 12.4, boxstyle="round,pad=0,rounding_size=1.6",
+                                fc="white", ec=ORANGE, lw=0.6))
+    ax.text(xb, 24.6, f"{med}% by 2050", ha="center", va="center", fontsize=10, fontweight="bold", color=INK)
+    ax.text(xb, 20.9, f"{scen} vs 1995–2014", ha="center", va="center", **T3)
+    ax.text(xb, 18.3, f"5-model range {lo} to {hi}%", ha="center", va="center", **T3)
     val = f"{med}% ({lo} to {hi}%)"
 
     # crop icons with national mean GCR_max, small label at the start of the row
-    ax.text(68.6, 14.2, f"max GCR at RY ≥ {a.thr:.1f}", ha="left", va="center", fontsize=7, color="0.2")
-    for (c, name), cx in zip(CROPS, (73.5, 87.5, 103.0, 120.0)):   # slots sized to the crop names
+    ax.text(PR[0] + 1.5, 14.2, f"max GCR at RY ≥ {a.thr:.1f}", ha="left", va="center", **T3)
+    for (c, name), cx in zip(CROPS, (PR[0] + 6.4, PR[0] + 21.6, PR[0] + 38.0, PR[0] + 55.4)):
         ICONS[c](ax, cx - 3.4, 6.6, 6.0)
         ax.text(cx - 0.4, 9.6, "[X]" if c not in crop else f"{crop[c]:.2f}", ha="left", va="center",
-                fontsize=8, fontweight="bold", color="0.1")
-        ax.text(cx - 1.0, 3.4, name, ha="center", va="center", fontsize=7, color="0.2")
+                fontsize=8, fontweight="bold", color=INK)
+        ax.text(cx - 1.0, 3.4, name, ha="center", va="center", **T3)
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(a.out.with_suffix(".pdf"))
     fig.savefig(a.out.with_suffix(".png"), dpi=600)
+    check_layout(fig, [(*PL, 0, H), (*PM, 0, H), (*PR, 0, H), (bl, br - bl, 15.6, 28.0)])
     write_caption(a, hlabel, scen)
     print("wrote", a.out.with_suffix(".pdf"), "map:", "filled" if cells else "placeholder",
           "| headline:", big, f"({hlabel})", rng, "|", f"2050 change ({scen}): {val}", "| crops:", {c: round(v, 2) for c, v in crop.items()})
