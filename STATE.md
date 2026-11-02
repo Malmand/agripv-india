@@ -151,3 +151,6 @@
   MO; cea.nic.in blocked from the session). Upper bound energy = 48x requirement; 300/500 GWp need 0.26/0.44 Mha
   (0.7%/1.1% of eligible land). Ours is 22-38x TERI and 3.3x Fraunhofer upper end; TERI density on our land = 17-30 TW.
 - Mehta & Betz overlap sentence deleted. Highlights all <= 85 chars once numbers exist (last one 87 with [pending]).
+
+- 2026-11-02: demand framing switched to CEA LGBR 2026-27 (Section 2.1): 2025-26 energy requirement 1,707,493 MU
+  (supplied 1,706,985 MU). Reference URL still to be added by MO (lib.js REF.cea).

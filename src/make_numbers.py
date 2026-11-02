@@ -23,7 +23,7 @@ Key scheme (main case: east-west layout, RY >= 0.80, calibrated N, slope <= 5%):
   <p>.vertical.<tk>.nodin.cap_twp, <p>.din_cut_pct   vertical layout without the DIN cap (sensitivity)
   head.*      headline case: robust (historical_current_robust) when present, else calibrated N labelled
               "upper bound"; cap_twp(_m/_lo/_hi), energy_pwh, density, land_mha, label, x_teri_lo/hi, x_fhg
-  frame.*     cea_twh (India 2024-25 energy requirement, CEA PSP March 2025), <p>_multiple (annual energy / consumption),
+  frame.*     cea_twh (India 2025-26 energy requirement, CEA LGBR 2026-27), <p>_multiple (annual energy / consumption),
               gw300/gw500 .land_mha .share (cropland needed at the headline density, % of eligible land)
   ga.*        headline, range, label, change_2050, gcr_<crop>
 Usage: python src/make_numbers.py [--pp results/potential] [--validation results/validation_before_after.csv]
@@ -45,10 +45,9 @@ LEGUMES, CEREALS = ["chickpea", "groundnut"], ["wheat", "pearl_millet"]
 MAIN_LAYOUT, MAIN_THR = "ew_fixed", 0.8
 TERI, FHG_HI = (1.2, 2.1), 13.8       # TW, published Indian estimates quoted in Section 4.1
 TERI_DENS = (0.42, 0.75)              # MW per ha, TERI fixed power density
-# India's energy requirement 2024-25: 1,695,188 MU (energy supplied 1,693,599 MU). CEA, Power supply position
-# report (provisional), March 2025, https://cea.nic.in/wp-content/uploads/power_supply/2025/03/PSP_Mar25_provisional_e.pdf
-# (figure supplied by MO from the report; cea.nic.in is not reachable from the cloud session).
-CEA_TWH, CEA_VERIFIED = 1695.188, True
+# India's energy requirement 2025-26: 1,707,493 MU (energy supplied 1,706,985 MU). CEA, Load Generation Balance
+# Report 2026-27, Section 2.1 (figure supplied by MO; URL to be added by MO).
+CEA_TWH, CEA_VERIFIED = 1707.493, True
 TARGETS_GW = (300, 500)
 MINUS = "−"
 
@@ -423,7 +422,7 @@ def main():
     out = {"meta": {"stages": present, "main_case": {"layout": MAIN_LAYOUT, "thr": MAIN_THR, "slope": "le5",
                                                      "management": "calibrated N"},
                     "headline": N.values.get("head.label"), "din_cap_vertical": 0.6,
-                    "cea_requirement_2024_25_twh": CEA_TWH,
+                    "cea_requirement_2025_26_twh": CEA_TWH,
                     "units": "cap_twp TWp (raw MWp), cap_gwp GWp, land_mha Mha, energy_pwh PWh/yr, "
                              "density MWp/ha, sy kWh/kWp/yr, *_share and *_pct in %"},
            "values": dict(sorted(N.values.items())), "raw": dict(sorted(N.raw.items()))}
