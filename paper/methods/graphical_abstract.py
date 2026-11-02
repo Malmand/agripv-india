@@ -9,7 +9,7 @@ Three panels, left to right, with the result taking about half the width:
 Result panel is filled from postprocess_india.py outputs when they exist:
   <pp>/map_gcr_<stage>.csv.gz        cell GCR_max (5-GCM median), per crop and layout
   <pp>/india_combined_<stage>.csv    India capacity (crops combined), median and GCM range
-  <pp>/india_combined_<future>.csv   same for the mid-century run (2050 badge = change of the median;
+  <pp>/numbers.json                  2050 badge: <future>.change_pct, change_lo, change_hi (src/make_numbers.py;
                                      default SSP5-8.5)
 Map, crop values and headline use the robust case (<stage>_robust files) when it exists.
 Map cell value = GCR_max averaged over crops, weighted by eligible area (slope <= 5%).
@@ -26,6 +26,7 @@ Writes graphical_abstract.pdf and graphical_abstract.png (600 dpi, 3071 x 1181 p
 All text is >= 7 pt at the final 13 x 5 cm size.
 """
 import argparse
+import json
 from pathlib import Path
 
 import geopandas as gpd
@@ -91,9 +92,15 @@ def load_results(a):
         cells = (g.lon.values, g.lat.values, m.gcr.values)
     base, fut = headline(a, a.stage), headline(a, a.future)
     rob = headline(a, f"{a.stage}_robust")
-    head, label = (rob, "robust estimate") if rob is not None else (base, "upper bound")
-    # 2050 badge: change of the calibrated-N median (the future stages are run with calibrated N)
-    change = None if base is None or fut is None else 100 * (fut[0] / base[0] - 1)
+    head, label = (rob, "robust") if rob is not None else (base, "upper bound")
+    # 2050 badge from numbers.json (src/make_numbers.py): median change and GCM range of the change,
+    # calibrated N (the future stages are run with calibrated N)
+    change = None
+    fn, p = a.pp / "numbers.json", a.future.split("_")[0]
+    if fn.exists():
+        v = json.loads(fn.read_text())["values"]
+        if all(f"{p}.{k}" in v for k in ("change_pct", "change_lo", "change_hi")):
+            change = (v[f"{p}.change_pct"], v[f"{p}.change_lo"], v[f"{p}.change_hi"])
     return cells, crop, head, change, label
 
 
@@ -247,6 +254,7 @@ def main():
     b.plot(gm, a.thr, "o", ms=3.5, color="0.1", zorder=5)
     b.text(0.71, a.thr + 0.025, f"RY = {a.thr:.1f}", ha="right", va="bottom", fontsize=7)
     b.text(gm + 0.025, 0.43, "GCR$_{max}$", fontsize=7, va="bottom", fontweight="bold")
+    b.text(0.71, 1.04, "schematic", ha="right", va="top", fontsize=7, style="italic", color="0.4")
     b.text(0.03, 0.43, "keeps\nyield", fontsize=7, va="bottom", color=BLUE, linespacing=1.1)
     b.set_xlim(0, 0.72); b.set_ylim(0.4, 1.05)
     b.set_xticks([0, 0.7], ["0", "0.7"]); b.set_yticks([0.4, 0.7, 1.0], ["0.4", "0.7", "1"])
@@ -291,30 +299,36 @@ def main():
     # headline capacity and 2050 badge
     big, rng = fmt_cap(head)
     xr = 114.4
-    ax.text(xr, 37.0, big, ha="center", va="center", fontsize=15, fontweight="bold", color=BLUE)
-    ax.text(xr, 31.0, hlabel, ha="center", va="center", fontsize=9, fontweight="bold", color="black")
+    ax.text(xr, 40.0, big, ha="center", va="center", fontsize=15, fontweight="bold", color=BLUE)
+    ax.text(xr, 35.0, "technical potential,", ha="center", va="center", fontsize=7, color="0.2")
+    ax.text(xr, 31.8, hlabel, ha="center", va="center", fontsize=9, fontweight="bold", color="black")
     if head is None:
-        ax.add_patch(Rectangle((xr - 13.5, 33.5), 27.0, 7.0, fill=False, ec="0.1", lw=0.5, ls="--"))
-    # 2050 badge: scenario on the first line, change of the median on the second
+        ax.add_patch(Rectangle((xr - 13.5, 36.8), 27.0, 6.5, fill=False, ec="0.1", lw=0.5, ls="--"))
+    # 2050 badge (light, outlined): scenario on the first line, median change and GCM range on the second
     scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(a.future.split("_")[0], "SSP5-8.5")
-    val = "[±X]%" if change is None else f"{change:+.0f}%".replace("-", "−")
-    ax.add_patch(FancyBboxPatch((xr - 13.6, 17.6), 27.2, 9.0, boxstyle="round,pad=0,rounding_size=2.5",
-                                fc=ORANGE, ec="none"))
-    ax.text(xr, 24.2, f"2050 ({scen}):", ha="center", va="center", fontsize=7, fontweight="bold", color="black")
-    ax.text(xr, 20.3, val, ha="center", va="center", fontsize=10, fontweight="bold", color="black")
+    # wrapped to fit the column: "2050 change (SSP5-8.5): -X% (lo to hi%)"
+    med, rg = ("[±X]%", "([X] to [X]%)") if change is None else (f"{change[0]}%", f"({change[1]} to {change[2]}%)")
+    val = f"{med} {rg}"
+    ax.add_patch(FancyBboxPatch((xr - 12.5, 15.4), 25.0, 12.8, boxstyle="round,pad=0,rounding_size=2.0",
+                                fc="#FDF1DC", ec=ORANGE, lw=0.8))
+    ax.text(xr, 25.4, f"2050 change\n({scen}):", ha="center", va="center", fontsize=7, color="black",
+            linespacing=1.1)
+    ax.text(xr, 20.6, med, ha="center", va="center", fontsize=9, fontweight="bold", color="black")
+    ax.text(xr, 17.4, rg, ha="center", va="center", fontsize=7, color="black")
 
-    # crop icons with national mean GCR_max
+    # crop icons with national mean GCR_max, small label at the start of the row
+    ax.text(68.6, 14.2, f"max GCR at RY ≥ {a.thr:.1f}", ha="left", va="center", fontsize=7, color="0.2")
     for (c, name), cx in zip(CROPS, (73.5, 87.5, 103.0, 120.0)):   # slots sized to the crop names
-        ICONS[c](ax, cx - 3.4, 7.6, 6.0)
-        ax.text(cx - 0.4, 10.6, "[X]" if c not in crop else f"{crop[c]:.2f}", ha="left", va="center",
+        ICONS[c](ax, cx - 3.4, 6.6, 6.0)
+        ax.text(cx - 0.4, 9.6, "[X]" if c not in crop else f"{crop[c]:.2f}", ha="left", va="center",
                 fontsize=8, fontweight="bold", color="0.1")
-        ax.text(cx - 1.0, 4.3, name, ha="center", va="center", fontsize=7, color="0.2")
+        ax.text(cx - 1.0, 3.4, name, ha="center", va="center", fontsize=7, color="0.2")
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(a.out.with_suffix(".pdf"))
     fig.savefig(a.out.with_suffix(".png"), dpi=600)
     print("wrote", a.out.with_suffix(".pdf"), "map:", "filled" if cells else "placeholder",
-          "| headline:", big, f"({hlabel})", rng, "|", f"2050 ({scen}): {val}", "| crops:", {c: round(v, 2) for c, v in crop.items()})
+          "| headline:", big, f"({hlabel})", rng, "|", f"2050 change ({scen}): {val}", "| crops:", {c: round(v, 2) for c, v in crop.items()})
 
 
 if __name__ == "__main__":

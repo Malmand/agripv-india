@@ -372,7 +372,7 @@ def ga_numbers(N):
     Headline = robust case when present, else calibrated N labelled "upper bound"."""
     med, lo, hi = (N.raw.get(f"head.{k}") for k in ("cap_twp", "cap_twp_lo", "cap_twp_hi"))
     if "head.label" in N.values:
-        N.put("ga.label", N.raw["head.is_robust"], "robust estimate" if N.raw["head.is_robust"] else "upper bound")
+        N.put("ga.label", N.raw["head.is_robust"], "robust" if N.raw["head.is_robust"] else "upper bound")
     if med is not None:
         if med >= 1e6:
             nd = 1 if round(lo / 1e6, 1) != round(hi / 1e6, 1) else 2
