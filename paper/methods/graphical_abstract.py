@@ -42,6 +42,7 @@ plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 7, "pdf.fonttype
                      "axes.linewidth": 0.6, "xtick.direction": "out", "ytick.direction": "out"})
 BLUE, SKY, GREEN, ORANGE, VERM = "#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00"
 INK, MID = "#1a1a1a", "#555555"   # text tiers: near black (titles, key numbers), mid grey (all other text)
+PANEL_BG = "#F3F6F9"              # background of the result panel
 SOIL, GREY = "#C9B79C", "0.25"
 LAYOUT_NAME = {"ew_fixed": "east-west", "south_fixed": "south-facing", "vertical": "vertical"}
 CROPS = [("wheat", "wheat"), ("chickpea", "chickpea"), ("pearl_millet", "pearl millet"), ("groundnut", "groundnut")]
@@ -73,6 +74,22 @@ def headline(a, stage):
         return None
     r = t.iloc[0]
     return r.cap_mwp_median, r.cap_mwp_min, r.cap_mwp_max
+
+
+ISLANDS = ("Andaman & Nicobar", "Lakshadweep")
+
+
+def india_outline(a, sim_cells):
+    """India outline; island territories are dropped when no simulated cell falls on them."""
+    states = gpd.read_file(a.boundaries)
+    if sim_cells is not None:
+        lon, lat = sim_cells
+        pts = gpd.GeoSeries(gpd.points_from_xy(lon, lat), crs=states.crs)
+        for name in ISLANDS:
+            poly = states[states.ST_NM == name]
+            if len(poly) and not pts.within(poly.union_all()).any():
+                states = states[states.ST_NM != name]
+    return states.dissolve().simplify(0.03)
 
 
 def load_results(a):
@@ -232,6 +249,22 @@ def check_layout(fig, panels):
     print(f"layout check: {bad} issue(s)")
 
 
+def sketch_farmland(ax, P, sun_y=27.5, sun_r=2.9, div_top=13.0):
+    """Panel 1: sun over two PV rows (left) and crops (right) on one strip of soil, sized to fill the panel."""
+    x0, w = P
+    cx, gy = x0 + w / 2, 7.0
+    ax.add_patch(Rectangle((x0 + 1.0, gy - 3.6), w - 2.0, 3.6, color=SOIL, lw=0))
+    sun(ax, cx, sun_y, sun_r, ray=1.2)
+    for k in range(2):
+        x = x0 + 1.4 + 3.7 * k
+        ax.add_patch(Polygon([[x, gy + 6.0], [x + 3.4, gy + 8.4], [x + 3.4, gy + 9.5], [x, gy + 7.1]],
+                             color=BLUE, lw=0))
+        ax.plot([x + 1.8, x + 1.8], [gy, gy + 7.2], color="0.45", lw=0.8)
+    for k in range(3):
+        sprout(ax, cx + 2.4 + 1.9 * k, gy, 5.6, lw=1.1)    # leaves stay right of the divide and inside
+    ax.plot([cx, cx], [gy - 3.0, gy + div_top], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
+
+
 def write_caption(a, hlabel, scen):
     """Caption of the graphical abstract, consistent with what is drawn (graphical_abstract_caption.txt)."""
     case = ("calibrated nitrogen, an upper bound because low nitrogen rates hide part of the shade loss"
@@ -275,31 +308,32 @@ def main():
     T3 = dict(fontsize=7, color=MID)
 
     # panel frames with numbered discs on the top edge, titles and arrows between panels
-    PL, PM, PR = (1.0, 15.6), (18.8, 44.3), (65.3, 63.7)      # (x, width) of the three panels, mm
+    PL, PM, PR = (1.0, 17.9), (21.1, 43.9), (67.4, 61.6)      # (x, width) of the three panels, mm
     panels = [(PL, "Solar vs\nfood on\nfarmland"), (PM, "Simulate shade → yield"),
-              (PR, f"Where agrivoltaics keeps ≥ {a.thr:.0%} yield")]
+              (PR, f"Where ≥ {a.thr:.0%} yield is kept")]
+    r_mm = fig.canvas.get_renderer()
     for i, ((x, w), t) in enumerate(panels, start=1):
-        ax.add_patch(FancyBboxPatch((x, 1.0), w, 47.0, boxstyle="round,pad=0,rounding_size=1.8", fc="white",
-                                    ec="0.6", lw=0.6))
-        ax.add_patch(Circle((x + 2.8, 48.0), 1.3, fc=INK, ec="white", lw=0.6, zorder=5))
-        ax.text(x + 2.8, 47.95, str(i), ha="center", va="center", fontsize=7, fontweight="bold", color="white",
-                zorder=6)
-        ax.text(x + w / 2, 45.9, t, ha="center", va="top", linespacing=1.15, multialignment="center", **T2)
+        ax.add_patch(FancyBboxPatch((x, 1.0), w, 47.6, boxstyle="round,pad=0,rounding_size=1.8",
+                                    fc=PANEL_BG if i == 3 else "white", ec="0.6", lw=0.6))
+        # numbered disc inline, just left of the first title line, on its centre line; the title moves right
+        # when the disc would otherwise reach the frame
+        rd = 1.25
+        first = ax.text(x + w / 2, 47.0, t.split("\n")[0], ha="center", va="top", **T2)
+        e = first.get_window_extent(r_mm).transformed(ax.transData.inverted())
+        first.remove()
+        dx = max(0.0, x + 0.6 - (e.x0 - 0.5 - 2 * rd))
+        e.x0 += dx
+        ax.text(x + w / 2 + dx, 47.0, t, ha="center", va="top", linespacing=1.15, multialignment="center", **T2)
+        cy = (e.y0 + e.y1) / 2
+        ax.add_patch(Circle((e.x0 - 0.5 - rd, cy), rd, fc=INK, ec="none", zorder=5))
+        ax.text(e.x0 - 0.5 - rd, cy - 0.05, str(i), ha="center", va="center", fontsize=7, fontweight="bold",
+                color="white", zorder=6)
     for x0, x1 in ((PL[0] + PL[1] + 0.1, PM[0] - 0.1), (PM[0] + PM[1] + 0.1, PR[0] - 0.1)):
         ax.add_patch(FancyArrowPatch((x0, 25), (x1, 25), arrowstyle="-|>", mutation_scale=8, lw=1.2,
                                      color=GREY, shrinkA=0, shrinkB=0))
 
     # ---- 1 problem: solar rows and crops competing for the same land
-    gy = 9.0
-    ax.add_patch(Rectangle((1.9, gy - 3.0), 13.8, 3.0, color=SOIL, lw=0))
-    sun(ax, 8.8, 27.0, 1.8)
-    for k in range(2):
-        x = 2.3 + 3.0 * k
-        ax.add_patch(Polygon([[x, gy + 2.6], [x + 2.6, gy + 4.4], [x + 2.6, gy + 5.2], [x, gy + 3.4]], color=BLUE, lw=0))
-        ax.plot([x + 1.4, x + 1.4], [gy, gy + 3.5], color="0.45", lw=0.6)
-    for k in range(4):
-        sprout(ax, 9.9 + 1.5 * k, gy, 4.6)
-    ax.plot([8.5, 8.5], [gy - 2.5, gy + 9.5], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
+    sketch_farmland(ax, PL)
 
     # ---- 2 method: one RY-GCR curve with tau and GCR_max
     mc = PM[0] + PM[1] / 2                      # method panel centre
@@ -341,8 +375,8 @@ def main():
     b.set_facecolor("none")
     for s in b.spines.values():
         s.set_visible(False)
-    states = gpd.read_file(a.boundaries)
-    india = states.dissolve().simplify(0.03)
+    gr = pd.read_csv(a.grid)                    # all simulated grid cells decide whether islands are kept
+    india = india_outline(a, (gr.lon.values, gr.lat.values))
     bounds = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7001]
     cmap = ListedColormap(plt.colormaps["viridis"](np.linspace(0, 1, len(bounds) - 1)))
     norm = BoundaryNorm(bounds, cmap.N)
@@ -372,14 +406,16 @@ def main():
     big, rng = fmt_cap(head)
     xe = PR[0] + PR[1] - 1.2                    # right text edge
     ax.text(xe, 40.0, big, ha="right", va="center", fontsize=14, fontweight="bold", color=BLUE)
-    ax.text(xe, 36.3, f"technical potential ({hlabel})", ha="right", va="center", **T3)
+    lab = ax.text(xe, 36.3, f"({hlabel})", ha="right", va="center", fontsize=7, fontweight="bold", color=INK)
+    lx = lab.get_window_extent(r_mm).transformed(ax.transData.inverted()).x0
+    ax.text(lx - 0.6, 36.3, "technical potential", ha="right", va="center", **T3)
     ax.text(xe, 33.8, "1995–2014 climate", ha="right", va="center", **T3)
     if head is None:
         ax.add_patch(Rectangle((xe - 27.0, 37.6), 27.0, 5.0, fill=False, ec="0.1", lw=0.5, ls="--"))
     # badge: white with a thin orange border; values from numbers.json, placeholders when the stage is missing
     scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(a.future.split("_")[0], "SSP5-8.5")
     med, lo, hi = ("[±X]", "[lo]", "[hi]") if change is None else change
-    bl, br = mx + mw * 0.9, PR[0] + PR[1] - 0.4   # badge clears the Andaman Islands on the left
+    bl, br = mx + mw * 0.8, PR[0] + PR[1] - 0.4  # badge starts east of the Odisha / West Bengal coast
     xb = (bl + br) / 2
     ax.add_patch(FancyBboxPatch((bl, 15.6), br - bl, 12.4, boxstyle="round,pad=0,rounding_size=1.6",
                                 fc="white", ec=ORANGE, lw=0.6))
@@ -389,8 +425,8 @@ def main():
     val = f"{med}% ({lo} to {hi}%)"
 
     # crop icons with national mean GCR_max, small label at the start of the row
-    ax.text(PR[0] + 1.5, 14.2, f"max GCR at RY ≥ {a.thr:.1f}", ha="left", va="center", **T3)
-    for (c, name), cx in zip(CROPS, (PR[0] + 6.4, PR[0] + 21.6, PR[0] + 38.0, PR[0] + 55.4)):
+    ax.text(PR[0] + 1.5, 14.2, f"max GCR (RY ≥ {a.thr:.1f})", ha="left", va="center", **T3)
+    for (c, name), cx in zip(CROPS, (PR[0] + 6.2, PR[0] + 21.0, PR[0] + 37.0, PR[0] + 53.6)):
         ICONS[c](ax, cx - 3.4, 6.6, 6.0)
         ax.text(cx - 0.4, 9.6, "[X]" if c not in crop else f"{crop[c]:.2f}", ha="left", va="center",
                 fontsize=8, fontweight="bold", color=INK)
