@@ -105,7 +105,7 @@ fi
 
 # 4. production stages, most important first (a stop part-way still leaves usable results)
 #    current = state-calibrated N (main case); recommended = adequate N (sensitivity)
-for stage in historical:current ssp585:current ssp245:current historical:recommended; do
+for stage in historical:current ssp585:current historical:recommended ssp245:current; do
   p=${stage%:*}; g=${stage#*:}
   run $p $g
   $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage ${p}_${g} | tail -40
