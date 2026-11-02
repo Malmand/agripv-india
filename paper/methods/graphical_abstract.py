@@ -206,30 +206,28 @@ def main():
         return fig.add_axes([x / W, y / H, w / W, h / H])
 
     # panel frames, titles and arrows between panels
-    panels = [(1.0, 19.2, "Solar vs\nfood on\nfarmland"), (22.6, 40.9, "Simulate shade → yield"),
-              (66.5, 62.5, f"Where agrivoltaics keeps ≥ {a.thr:.0%} yield")]
+    panels = [(1.0, 16.4, "Solar vs\nfood on\nfarmland"), (19.6, 45.3, "Simulate shade → yield"),
+              (67.1, 61.9, f"Where agrivoltaics keeps ≥ {a.thr:.0%} yield")]
     for x, w, t in panels:
         ax.add_patch(FancyBboxPatch((x, 1.0), w, 48, boxstyle="round,pad=0,rounding_size=1.8", fc="white",
                                     ec="0.6", lw=0.6))
         ax.text(x + w / 2, 47.4, t, fontsize=8, fontweight="bold", ha="center", va="top", linespacing=1.15,
                 multialignment="center")
-    for x0, x1 in ((20.4, 22.4), (63.8, 66.2)):
+    for x0, x1 in ((17.5, 19.5), (65.0, 67.0)):
         ax.add_patch(FancyArrowPatch((x0, 25), (x1, 25), arrowstyle="-|>", mutation_scale=8, lw=1.2,
                                      color=GREY, shrinkA=0, shrinkB=0))
 
     # ---- problem: solar rows and crops competing for the same land
-    gy = 13.0
-    ax.add_patch(Rectangle((2.3, gy - 3.0), 15.9, 3.0, color=SOIL, lw=0))
-    sun(ax, 10.25, 29.0, 1.8)
+    gy = 9.0
+    ax.add_patch(Rectangle((2.1, gy - 3.0), 14.2, 3.0, color=SOIL, lw=0))
+    sun(ax, 9.2, 27.0, 1.8)
     for k in range(2):
-        x = 2.9 + 3.6 * k
-        ax.add_patch(Polygon([[x, gy + 2.6], [x + 3.2, gy + 4.4], [x + 3.2, gy + 5.2], [x, gy + 3.4]], color=BLUE, lw=0))
-        ax.plot([x + 1.8, x + 1.8], [gy, gy + 3.5], color="0.45", lw=0.6)
+        x = 2.5 + 3.1 * k
+        ax.add_patch(Polygon([[x, gy + 2.6], [x + 2.7, gy + 4.4], [x + 2.7, gy + 5.2], [x, gy + 3.4]], color=BLUE, lw=0))
+        ax.plot([x + 1.5, x + 1.5], [gy, gy + 3.5], color="0.45", lw=0.6)
     for k in range(4):
-        sprout(ax, 11.6 + 1.85 * k, gy, 4.6)
-    ax.plot([10.0, 10.0], [gy - 2.5, gy + 9.5], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
-    ax.text(10.25, 5.2, "competing\nfor land", ha="center", va="center", fontsize=7, color="0.15",
-            linespacing=1.2)
+        sprout(ax, 10.3 + 1.6 * k, gy, 4.6)
+    ax.plot([8.9, 8.9], [gy - 2.5, gy + 9.5], color="0.3", lw=0.6, ls=(0, (2, 1.5)))
 
     # ---- method: one RY-GCR curve with tau and GCR_max
     # icon row: shade model -> crop model, each icon centred above its label
@@ -238,8 +236,7 @@ def main():
         ax.text(cx, 36.4, label, ha="center", va="center", fontsize=7, color="0.15")
     ax.add_patch(FancyArrowPatch((38.6, 40.6), (48.9, 40.6), arrowstyle="-|>", mutation_scale=6, lw=0.9,
                                  color=GREY, shrinkA=0, shrinkB=0))
-    ax.text(42.9, 5.2, "simulated for every 0.25° cell\n4 crops · 3 layouts\n5 climate models", ha="center",
-            va="center", fontsize=7, color="0.2", linespacing=1.05)
+    ax.text(42.25, 6.0, "every 0.25° cell · 5 climate models", ha="center", va="center", fontsize=7, color="0.2")
     b = axes_mm(33.0, 17.4, 28.0, 16.8)
     g = np.linspace(0, 0.7, 80); ry = 1 - 0.45 * g - 0.45 * g ** 2
     gm = g[np.argmin(abs(ry - a.thr))]
@@ -261,7 +258,7 @@ def main():
     b.yaxis.set_label_coords(-0.21, 0.46)
 
     # ---- result: India map of GCR_max at RY >= tau
-    b = axes_mm(76.0, 16.0, 24.5, 27.5)
+    b = axes_mm(73.0, 14.5, 26.2, 29.5)
     b.set_facecolor("none")
     for s in b.spines.values():
         s.set_visible(False)
@@ -285,43 +282,39 @@ def main():
         india.boundary.plot(ax=b, color="0.35", lw=0.4)
     b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3); b.set_aspect(1 / np.cos(np.radians(22)))
     b.set_xticks([]); b.set_yticks([]); b.set_xlabel(""); b.set_ylabel("")
-    cb_ax = axes_mm(69.0, 18.0, 1.5, 20.0)
-    cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=[0, 0.35, 0.7])
-    cb.ax.set_yticklabels(["0", "0.35", "0.7"]); cb.ax.tick_params(labelsize=7, length=1.5, width=0.5, pad=1)
+    cb_ax = axes_mm(70.2, 17.0, 1.5, 20.0)
+    cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=[0, 0.7])
+    cb.ax.set_yticklabels(["0", "0.7"]); cb.ax.tick_params(labelsize=7, length=1.5, width=0.5, pad=1)
     cb.outline.set_linewidth(0.5)
-    ax.text(68.4, 40.2, "GCR$_{max}$", ha="left", va="center", fontsize=7, color="0.15")
+    ax.text(68.9, 27.0, "max GCR", ha="center", va="center", fontsize=7, color="0.15", rotation=90)
 
     # headline capacity and 2050 badge
     big, rng = fmt_cap(head)
-    xr = 114.5
-    ax.text(xr, 38.0, big, ha="center", va="center", fontsize=14, fontweight="bold", color=BLUE)
-    ax.text(xr, 33.4, hlabel, ha="center", va="center", fontsize=8, fontweight="bold", color="black")
-    ax.text(xr, 28.9, f"{LAYOUT_NAME[a.config]}, slope ≤ 5%\n{rng}", ha="center", va="center",
-            fontsize=7, color="0.2", linespacing=1.15)
+    xr = 114.4
+    ax.text(xr, 37.0, big, ha="center", va="center", fontsize=15, fontweight="bold", color=BLUE)
+    ax.text(xr, 31.0, hlabel, ha="center", va="center", fontsize=9, fontweight="bold", color="black")
     if head is None:
-        ax.add_patch(Rectangle((xr - 12.5, 35.0), 25.0, 6.0, fill=False, ec="0.1", lw=0.5, ls="--"))
-    badge = "2050: [±X]%" if change is None else f"2050: {change:+.0f}%".replace("-", "−")
-    ax.add_patch(FancyBboxPatch((xr - 12.0, 20.6), 24.0, 5.0, boxstyle="round,pad=0,rounding_size=2.5",
-                                fc=ORANGE, ec="none"))
-    ax.text(xr, 23.1, badge, ha="center", va="center", fontsize=9, fontweight="bold", color="black")
+        ax.add_patch(Rectangle((xr - 13.5, 33.5), 27.0, 7.0, fill=False, ec="0.1", lw=0.5, ls="--"))
+    # 2050 badge: scenario on the first line, change of the median on the second
     scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(a.future.split("_")[0], "SSP5-8.5")
-    ax.text(xr, 18.0, f"{scen}, median", ha="center", va="center", fontsize=7, color="0.2")
+    val = "[±X]%" if change is None else f"{change:+.0f}%".replace("-", "−")
+    ax.add_patch(FancyBboxPatch((xr - 13.6, 17.6), 27.2, 9.0, boxstyle="round,pad=0,rounding_size=2.5",
+                                fc=ORANGE, ec="none"))
+    ax.text(xr, 24.2, f"2050 ({scen}):", ha="center", va="center", fontsize=7, fontweight="bold", color="black")
+    ax.text(xr, 20.3, val, ha="center", va="center", fontsize=10, fontweight="bold", color="black")
 
     # crop icons with national mean GCR_max
-    ax.plot([68.5, 127.0], [15.2, 15.2], color="0.8", lw=0.5)
     for (c, name), cx in zip(CROPS, (73.5, 87.5, 103.0, 120.0)):   # slots sized to the crop names
         ICONS[c](ax, cx - 3.4, 7.6, 6.0)
         ax.text(cx - 0.4, 10.6, "[X]" if c not in crop else f"{crop[c]:.2f}", ha="left", va="center",
                 fontsize=8, fontweight="bold", color="0.1")
         ax.text(cx - 1.0, 4.3, name, ha="center", va="center", fontsize=7, color="0.2")
-    ax.text(97.75, 15.2, f"mean GCR$_{{max}}$ per crop, {hlabel}", ha="center", va="center", fontsize=7, color="0.2",
-            bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none"))
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(a.out.with_suffix(".pdf"))
     fig.savefig(a.out.with_suffix(".png"), dpi=600)
     print("wrote", a.out.with_suffix(".pdf"), "map:", "filled" if cells else "placeholder",
-          "| headline:", big, f"({hlabel})", rng, "|", badge, "| crops:", {c: round(v, 2) for c, v in crop.items()})
+          "| headline:", big, f"({hlabel})", rng, "|", f"2050 ({scen}): {val}", "| crops:", {c: round(v, 2) for c, v in crop.items()})
 
 
 if __name__ == "__main__":

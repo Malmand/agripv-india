@@ -159,3 +159,6 @@
   and runs inside run_results.sh; waterfall is Fig. 6 in Discussion 4.1 (recon.* keys). Stage 1, east-west RY 0.8:
   0.75 MW/ha on 50.0 Mha = 37.5 TW (0.42: 21.0), slope -10%, double cropping -12% -> 29.8 TW on 39.7 Mha,
   yield rule +53% (vs 0.42: +173%) -> 45.5 TWp. Matches postprocess exactly.
+- 2026-11-02: waterfall labels = change vs previous step (-10%, -12%, +53%), axis "Capacity (TWp)". Graphical abstract
+  decluttered: one-line method scope, no layout/GCM-range lines, badge "2050 (SSP5-8.5): X%", no crop-row heading,
+  colour bar 0/0.7 "max GCR", larger map (26 x 30 mm) and headline (15 pt); panels 16.4 / 45.3 / 61.9 mm wide.

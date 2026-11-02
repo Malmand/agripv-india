@@ -177,7 +177,7 @@ def waterfall(t, a):
             lo_, hi_ = hi.loc[st, "gw_min"] * k, hi.loc[st, "gw_max"] * k
             ax.errorbar(i, cur, yerr=[[cur - lo_], [hi_ - cur]], color="0.1", lw=0.6, capsize=1.5, capthick=0.6)
             top = max(top, hi_)
-        ax.text(i, top + 0.02 * lv[1], f"{100 * d / lv[1]:+.0f}%".replace("-", "−"), ha="center", va="bottom", fontsize=6)
+        ax.text(i, top + 0.02 * lv[1], f"{100 * d / prev:+.0f}%".replace("-", "−"), ha="center", va="bottom", fontsize=6)
         xs.append(i); names.append(labels[st])
     # end total
     n = len(steps)
@@ -198,7 +198,7 @@ def waterfall(t, a):
     ax.set_xticklabels(names, fontsize=6.5)
     ax.set_xlim(-0.6, n + 0.6)
     ax.set_ylim(0, max(hi.gw_max.max() * k, lv.max()) * 1.12)
-    ax.set_ylabel(f"Capacity [{unit}]", fontsize=8)
+    ax.set_ylabel(f"Capacity ({unit})", fontsize=8)
     ax.tick_params(axis="y", labelsize=7)
     from matplotlib.patches import Patch
     hd = [Patch(color=C_TOTAL, label="Total"), Patch(color=C_DOWN, label="Decrease"),
