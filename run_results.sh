@@ -86,12 +86,18 @@ echo "== headline numbers"
 $PY src/results_summary.py --pp $PP --stages "${SUMSTAGES[@]}" --summary "$SUM" --grid $GRID > /dev/null
 echo "wrote $PP/headline_numbers.md"
 
+if [ $REBUILD = 0 ]; then
+  echo "== reconciliation waterfall (fixed density -> yield-constrained)"
+  $PY src/reconcile.py --summary "$SUM" --stage historical_current --robust-with historical_recommended \
+    --din-cap "$DIN" | tail -3
+fi
+
 echo "== manuscript numbers"
 $PY src/make_numbers.py --pp $PP
 echo "  (build the manuscript and highlights with: node paper/methods/build_methods.js)"
 
 echo "== graphical abstract"
-FUTGA=ssp245_current; [ -f "$PP/india_combined_ssp245_current.csv" ] || FUTGA=none
+FUTGA=ssp585_current; [ -f "$PP/india_combined_ssp585_current.csv" ] || FUTGA=none
 (cd paper/methods && $PY graphical_abstract.py --future $FUTGA)
 
 cat <<EOF

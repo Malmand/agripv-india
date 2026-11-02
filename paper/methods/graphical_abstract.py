@@ -9,7 +9,9 @@ Three panels, left to right, with the result taking about half the width:
 Result panel is filled from postprocess_india.py outputs when they exist:
   <pp>/map_gcr_<stage>.csv.gz        cell GCR_max (5-GCM median), per crop and layout
   <pp>/india_combined_<stage>.csv    India capacity (crops combined), median and GCM range
-  <pp>/india_combined_<future>.csv   same for the mid-century run (2050 badge = change of the median)
+  <pp>/india_combined_<future>.csv   same for the mid-century run (2050 badge = change of the median;
+                                     default SSP5-8.5)
+Map, crop values and headline use the robust case (<stage>_robust files) when it exists.
 Map cell value = GCR_max averaged over crops, weighted by eligible area (slope <= 5%).
 Crop value = GCR_max of that crop averaged over cells, weighted by eligible area.
 Headline = crops-combined capacity, slope <= 5%, same layout and tau. It is the robust case
@@ -19,7 +21,7 @@ Without these files the map and numbers are drawn as marked placeholders ([X]).
 
 Usage (from paper/methods):
   python graphical_abstract.py [--pp ../../results/potential] [--stage historical_current]
-                               [--future ssp245_current] [--config ew_fixed] [--thr 0.8]
+                               [--future ssp585_current] [--config ew_fixed] [--thr 0.8]
 Writes graphical_abstract.pdf and graphical_abstract.png (600 dpi, 3071 x 1181 px).
 All text is >= 7 pt at the final 13 x 5 cm size.
 """
@@ -50,7 +52,7 @@ def parse():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pp", type=Path, default=ROOT / "results" / "potential")
     ap.add_argument("--stage", default="historical_current")
-    ap.add_argument("--future", default="ssp245_current", help="mid-century stage for the 2050 badge")
+    ap.add_argument("--future", default="ssp585_current", help="mid-century stage for the 2050 badge")
     ap.add_argument("--config", default="ew_fixed", choices=list(LAYOUT_NAME))
     ap.add_argument("--thr", type=float, default=0.8)
     ap.add_argument("--grid", type=Path, default=ROOT / "data" / "grid_india_025.csv")
@@ -73,7 +75,10 @@ def headline(a, stage):
 
 def load_results(a):
     """Cell map, per-crop mean GCR_max, headline capacity and 2050 change; None where files are missing."""
-    fm = a.pp / f"map_gcr_{a.stage}.csv.gz"
+    # map and crop values from the robust case when it exists (same case as the headline)
+    fm = a.pp / f"map_gcr_{a.stage}_robust.csv.gz"
+    if not fm.exists():
+        fm = a.pp / f"map_gcr_{a.stage}.csv.gz"
     cells, crop = None, {}
     if fm.exists():
         m = pd.read_csv(fm)
@@ -299,7 +304,8 @@ def main():
     ax.add_patch(FancyBboxPatch((xr - 12.0, 20.6), 24.0, 5.0, boxstyle="round,pad=0,rounding_size=2.5",
                                 fc=ORANGE, ec="none"))
     ax.text(xr, 23.1, badge, ha="center", va="center", fontsize=9, fontweight="bold", color="black")
-    ax.text(xr, 18.0, "SSP2-4.5, median", ha="center", va="center", fontsize=7, color="0.2")
+    scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(a.future.split("_")[0], "SSP5-8.5")
+    ax.text(xr, 18.0, f"{scen}, median", ha="center", va="center", fontsize=7, color="0.2")
 
     # crop icons with national mean GCR_max
     ax.plot([68.5, 127.0], [15.2, 15.2], color="0.8", lw=0.5)
@@ -308,7 +314,7 @@ def main():
         ax.text(cx - 0.4, 10.6, "[X]" if c not in crop else f"{crop[c]:.2f}", ha="left", va="center",
                 fontsize=8, fontweight="bold", color="0.1")
         ax.text(cx - 1.0, 4.3, name, ha="center", va="center", fontsize=7, color="0.2")
-    ax.text(97.75, 15.2, "mean GCR$_{max}$ per crop", ha="center", va="center", fontsize=7, color="0.2",
+    ax.text(97.75, 15.2, f"mean GCR$_{{max}}$ per crop, {hlabel}", ha="center", va="center", fontsize=7, color="0.2",
             bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none"))
 
     a.out.parent.mkdir(parents=True, exist_ok=True)

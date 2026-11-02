@@ -24,7 +24,7 @@ Outputs: <out_csv>  levels for every layout and threshold (GW)
 
 Usage: python src/reconcile.py --summary runs/s1/summary --stage historical_current
        [--robust-with historical_recommended] [--grid data/grid_india_025.csv]
-       [--slope data/slope_india.csv] [--layout ew_fixed] [--thr 0.8]
+       [--slope data/slope_india.csv] [--layout ew_fixed] [--thr 0.8] [--din-cap 0.6]
        [--fig results/figures/fig_reconcile.pdf] [--out-csv results/potential/reconcile.csv]
 Without --robust-with (or if that file is missing) step 5 is left out of the figure.
 """
@@ -40,7 +40,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "prod"))
-from postprocess_india import ETA, KHARIF, RABI, gcr_table  # noqa: E402
+from postprocess_india import DIN_LAYOUT, ETA, KHARIF, RABI, gcr_table  # noqa: E402
 
 DENS = (0.42, 0.75)          # MW/ha, TERI (2026) range
 SLOPE_COL = "frac_slope_le5"
@@ -84,9 +84,12 @@ def yield_capacity(g):
     return pd.Series(out)
 
 
-def gcr_long(summary, stage, area, slope):
+def gcr_long(summary, stage, area, slope, din_cap=0.6):
     ry = pd.read_csv(os.path.join(summary, f"ry_crop_{stage}.csv.gz"))
     g = gcr_table(ry)
+    if din_cap > 0:   # DIN SPEC 91434 land-loss cap on the vertical layout, as in postprocess_india.py
+        v = g.config == DIN_LAYOUT
+        g.loc[v, "gcr_max"] = g.loc[v, "gcr_max"].clip(upper=din_cap)
     g = g.merge(area, on=["cell", "crop"], how="left")
     g["elig_ha"] = g.area_ha * g.cell.map(slope).fillna(0.0)
     return g
@@ -99,10 +102,10 @@ def levels(a):
                      var_name="crop", value_name="area_ha").rename(columns={"cell_id": "cell"})
     area["crop"] = area.crop.str.replace("_ha", "")
 
-    g = gcr_long(a.summary, a.stage, area, slope)
+    g = gcr_long(a.summary, a.stage, area, slope, a.din_cap)
     rob = None
     if a.robust_with and os.path.exists(os.path.join(a.summary, f"ry_crop_{a.robust_with}.csv.gz")):
-        g2 = gcr_long(a.summary, a.robust_with, area, slope)
+        g2 = gcr_long(a.summary, a.robust_with, area, slope, a.din_cap)
         k = ["cell", "model", "crop", "config", "thr"]
         rob = g.merge(g2[k + ["gcr_max"]].rename(columns={"gcr_max": "g2"}), on=k, how="left")
         rob["gcr_max"] = np.fmin(rob.gcr_max, rob.g2)
@@ -174,7 +177,7 @@ def waterfall(t, a):
             lo_, hi_ = hi.loc[st, "gw_min"] * k, hi.loc[st, "gw_max"] * k
             ax.errorbar(i, cur, yerr=[[cur - lo_], [hi_ - cur]], color="0.1", lw=0.6, capsize=1.5, capthick=0.6)
             top = max(top, hi_)
-        ax.text(i, top + 0.02 * lv[1], f"{100 * d / lv[1]:+.0f}%", ha="center", va="bottom", fontsize=6)
+        ax.text(i, top + 0.02 * lv[1], f"{100 * d / lv[1]:+.0f}%".replace("-", "−"), ha="center", va="bottom", fontsize=6)
         xs.append(i); names.append(labels[st])
     # end total
     n = len(steps)
@@ -183,7 +186,7 @@ def waterfall(t, a):
     lo_, hi_ = hi.loc[steps[-1], "gw_min"] * k, hi.loc[steps[-1], "gw_max"] * k
     ax.errorbar(n, lv[steps[-1]], yerr=[[lv[steps[-1]] - lo_], [hi_ - lv[steps[-1]]]], color="0.1", lw=0.6,
                 capsize=1.5, capthick=0.6)
-    xs.append(n); names.append("This study")
+    xs.append(n); names.append("This study" if 5 in steps else "This study\n(upper bound)")
     # low fixed density (0.42 MW/ha) chain for steps 1-3 (step s sits at x = s - 1), joining step 4
     l3 = [s_ for s_ in (1, 2, 3) if s_ in lo.index]
     y3 = lo.loc[l3, "gw_median"].values * k
@@ -218,6 +221,7 @@ def main():
     ap.add_argument("--slope", default=str(ROOT / "data/slope_india.csv"))
     ap.add_argument("--layout", default="ew_fixed")
     ap.add_argument("--thr", type=float, default=0.8)
+    ap.add_argument("--din-cap", type=float, default=0.6, help="vertical GCR_max cap (0 = none)")
     ap.add_argument("--fig", default=str(ROOT / "results/figures/fig_reconcile.pdf"))
     ap.add_argument("--out-csv", default=str(ROOT / "results/potential/reconcile.csv"))
     a = ap.parse_args()

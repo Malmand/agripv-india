@@ -22,9 +22,11 @@ Key scheme (main case: east-west layout, RY >= 0.80, calibrated N, slope <= 5%):
   calib.*     state-yield calibration statistics (results/validation_before_after.csv)
   <p>.vertical.<tk>.nodin.cap_twp, <p>.din_cut_pct   vertical layout without the DIN cap (sensitivity)
   head.*      headline case: robust (historical_current_robust) when present, else calibrated N labelled
-              "upper bound"; cap_twp(_m/_lo/_hi), energy_pwh, density, land_mha, label, x_teri_lo/hi, x_fhg
+              "upper bound"; cap_twp(_m/_lo/_hi), energy_pwh, density, land_mha, gcr_<crop>, label,
+              x_teri_lo/hi, x_fhg
   frame.*     cea_twh (India 2025-26 energy requirement, CEA LGBR 2026-27), <p>_multiple (annual energy / consumption),
               gw300/gw500 .land_mha .share (cropland needed at the headline density, % of eligible land)
+  recon.*     reconciliation waterfall (reconcile.csv): d42/d75 .s<step>.twp, slope_pct, double_pct, yield_pct
   ga.*        headline, range, label, change_2050, gcr_<crop>
 Usage: python src/make_numbers.py [--pp results/potential] [--validation results/validation_before_after.csv]
 """
@@ -197,6 +199,7 @@ def hist_extras(N, pp, t, m, c):
     for i, r in enumerate(top.itertuples(), 1):
         N.put(f"hist.top{i}_state", r.state, r.state)
         N.put(f"hist.top{i}_gwp", r.cap_mwp_median / 1e3, f"{r.cap_mwp_median / 1e3:,.0f}")
+        N.put(f"hist.top{i}_twp", r.cap_mwp_median / 1e6, f"{r.cap_mwp_median / 1e6:.1f}")
 
 
 def ratio_text(x):
@@ -232,6 +235,9 @@ def headline_numbers(N):
                  "energy_pwh_hi", "density", "land_mha"):
         if src + name in N.raw:
             N.values[f"head.{name}"], N.raw[f"head.{name}"] = N.values[src + name], N.raw[src + name]
+    for crop in CROPS:   # crop GCR_max of the headline case
+        if src + f"gcr_{crop}" in N.raw:
+            N.values[f"head.gcr_{crop}"], N.raw[f"head.gcr_{crop}"] = N.values[src + f"gcr_{crop}"], N.raw[src + f"gcr_{crop}"]
     lab = "robust" if robust else "upper bound"
     N.put("head.label", lab, lab)
     N.put("head.is_robust", float(robust), "yes" if robust else "no")
@@ -362,7 +368,7 @@ def future_numbers(N, pp, p):
 
 
 def ga_numbers(N):
-    """Same text as graphical_abstract.py (ew_fixed, tau 0.8, slope <= 5%, badge = SSP2-4.5).
+    """Same text as graphical_abstract.py (ew_fixed, tau 0.8, slope <= 5%, badge = SSP5-8.5).
     Headline = robust case when present, else calibrated N labelled "upper bound"."""
     med, lo, hi = (N.raw.get(f"head.{k}") for k in ("cap_twp", "cap_twp_lo", "cap_twp_hi"))
     if "head.label" in N.values:
@@ -375,11 +381,38 @@ def ga_numbers(N):
         else:
             N.put("ga.headline", med, f"{med / 1e3:.0f} GWp")
             N.put("ga.range", lo, f"GCM range {lo / 1e3:.0f}–{hi / 1e3:.0f}")
-    if "ssp245.change_pct" in N.raw:
-        N.put("ga.change_2050", N.raw["ssp245.change_pct"], N.values["ssp245.change_pct"] + "%")
+    if "ssp585.change_pct" in N.raw:
+        N.put("ga.change_2050", N.raw["ssp585.change_pct"], N.values["ssp585.change_pct"] + "%")
     for crop in CROPS:
-        if f"hist.ew.t80.gcr_{crop}" in N.raw:
-            N.put(f"ga.gcr_{crop}", N.raw[f"hist.ew.t80.gcr_{crop}"], N.values[f"hist.ew.t80.gcr_{crop}"])
+        if f"head.gcr_{crop}" in N.raw:
+            N.put(f"ga.gcr_{crop}", N.raw[f"head.gcr_{crop}"], N.values[f"head.gcr_{crop}"])
+
+
+def reconcile_numbers(N, pp):
+    """Waterfall from fixed density to this study (src/reconcile.py, main layout and threshold)."""
+    f = pp / "reconcile.csv"
+    if not f.exists():
+        return
+    t = pd.read_csv(f)
+    t = t[(t.config == MAIN_LAYOUT) & (t.thr.round(2) == MAIN_THR)]
+    for D, dk in ((0.42, "d42"), (0.75, "d75")):
+        d = t[np.isclose(t.density_mw_ha, D)].set_index("step")
+        for st, r in d.iterrows():
+            N.put(f"recon.{dk}.s{st}.twp", r.gw_median / 1e3, f"{r.gw_median / 1e3:.1f}")
+            N.put(f"recon.{dk}.s{st}.land_mha", r.land_mha, f"{r.land_mha:.1f}")
+        if {1, 2, 3}.issubset(d.index):
+            for st, name in ((2, "slope"), (3, "double")):
+                x = 100 * (d.gw_median[st] / d.gw_median[st - 1] - 1)
+                N.put(f"recon.{name}_pct", x, pct(x, True))
+        if {1, 3}.issubset(d.index):
+            x = 100 * (1 - d.land_mha[3] / d.land_mha[1])
+            N.put("recon.land_cut_pct", x, pct(x))
+        if {3, 4}.issubset(d.index):
+            x = 100 * (d.gw_median[4] / d.gw_median[3] - 1)
+            N.put(f"recon.{dk}.yield_pct", x, pct(x, True))
+        if {4, 5}.issubset(d.index):
+            x = 100 * (d.gw_median[5] / d.gw_median[4] - 1)
+            N.put("recon.robust_pct", x, pct(x, True))
 
 
 def calib_numbers(N, f):
@@ -418,6 +451,7 @@ def main():
     for p in ("ssp245", "ssp585"):
         future_numbers(N, a.pp, p)
     ga_numbers(N)
+    reconcile_numbers(N, a.pp)
     calib_numbers(N, a.validation)
     out = {"meta": {"stages": present, "main_case": {"layout": MAIN_LAYOUT, "thr": MAIN_THR, "slope": "le5",
                                                      "management": "calibrated N"},

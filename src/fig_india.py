@@ -144,13 +144,13 @@ def fig_states(pp, stage, thr, out, top=12):
     for j, (cfg, ll) in enumerate(LAYOUTS):
         d = t[t.config == cfg].set_index("state").reindex(order)
         y = np.arange(len(order)) + (1 - j) * h
-        v = d.cap_mwp_median / 1e3
+        v = d.cap_mwp_median / 1e6
         ax.barh(y, v, h * 0.92, color=OI[cfg], label=ll, edgecolor="none")
-        ax.errorbar(v, y, xerr=[v - d.cap_mwp_min / 1e3, d.cap_mwp_max / 1e3 - v], fmt="none",
+        ax.errorbar(v, y, xerr=[v - d.cap_mwp_min / 1e6, d.cap_mwp_max / 1e6 - v], fmt="none",
                     ecolor="black", elinewidth=0.5, capsize=1)
     ax.set_yticks(np.arange(len(order)))
     ax.set_yticklabels(order)
-    ax.set_xlabel(f"Capacity at RY ≥ {thr:.2f} (GWp)")
+    ax.set_xlabel(f"Capacity at RY ≥ {thr:.2f} (TWp)")
     ax.legend(fontsize=6, loc="lower right")
     save(fig, out / f"fig_india_states_{stage}_thr{int(thr * 100)}")
     plt.close(fig)

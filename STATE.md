@@ -154,3 +154,8 @@
 
 - 2026-11-02: demand framing switched to CEA LGBR 2026-27 (Section 2.1): 2025-26 energy requirement 1,707,493 MU
   (supplied 1,706,985 MU). Reference URL still to be added by MO (lib.js REF.cea).
+- 2026-11-02: states chart in TWp; GA 2050 badge defaults to SSP5-8.5 (run_results.sh too); highlight 3, GA map and
+  crop values use the robust case when present, else labelled "upper bound". src/reconcile.py now applies the DIN cap
+  and runs inside run_results.sh; waterfall is Fig. 6 in Discussion 4.1 (recon.* keys). Stage 1, east-west RY 0.8:
+  0.75 MW/ha on 50.0 Mha = 37.5 TW (0.42: 21.0), slope -10%, double cropping -12% -> 29.8 TW on 39.7 Mha,
+  yield rule +53% (vs 0.42: +173%) -> 45.5 TWp. Matches postprocess exactly.

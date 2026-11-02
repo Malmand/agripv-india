@@ -177,6 +177,7 @@ function FIG(path, w, h, cap) {
 }
 
 
+const nextFig = () => fign + 1;   // number the next FIG/FIGAUTO will get (for "Fig. N shows ...")
 function resetCounters(){ order = []; eqn = 0; tabn = 0; fign = 0; }
 function refsList(){ return order.map((k, i) => new Paragraph({ spacing: { after: 80 }, indent: { left: 440, hanging: 440 },
   tabStops: [{ type: TabStopType.LEFT, position: 440 }],
@@ -197,4 +198,4 @@ function save(body, file){
     if (fill.missing.size) console.log(`${nf}; [pending] keys (${fill.missing.size}): ${[...fill.missing].sort().join(", ")}`);
     else console.log(`${nf}; no [pending] keys`); });
 }
-module.exports = { fill, PF, FIGAUTO, d, REF, cite, runs, P, H1, H2, H3, R, sub, frac, sum, EQ, TABLE, FIG, resetCounters, refsList, setPrefix, save, Paragraph, TextRun, PageBreak, FONT };
+module.exports = { nextFig, fill, PF, FIGAUTO, d, REF, cite, runs, P, H1, H2, H3, R, sub, frac, sum, EQ, TABLE, FIG, resetCounters, refsList, setPrefix, save, Paragraph, TextRun, PageBreak, FONT };
