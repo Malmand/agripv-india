@@ -15,7 +15,7 @@ cd $REPO
 git pull -q --rebase
 
 echo "== dependencies (first run takes a few minutes)"
-python3 -c "import geopandas" 2>/dev/null || pip install -q --user geopandas
+python3 -c "import numpy, pandas, matplotlib, geopandas" 2>/dev/null || pip install -q --user numpy pandas matplotlib geopandas pyogrio
 (cd paper/methods && [ -d node_modules/docx ] || npm install --silent --no-save docx)
 
 echo "== stage summaries from the bucket"
