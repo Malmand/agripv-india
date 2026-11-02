@@ -53,7 +53,7 @@ const REF = {
   weselek21: "Weselek A, Bauerle A, Hartung J, Zikeli S, Lewandowski I, Högy P. Agrivoltaic system impacts on microclimate and yield of different crops within an organic crop rotation in a temperate climate. Agron Sustain Dev 2021;41:59. https://doi.org/10.1007/s13593-021-00714-y.",
   folberth: "Folberth C, Skalský R, Moltchanova E, Balkovič J, Azevedo LB, Obersteiner M, et al. Uncertainty in soil data can outweigh climate impact signals in global crop yield simulations. Nat Commun 2016;7:11872. https://doi.org/10.1038/ncomms11872.",
   lopez: "Lopez A, Roberts B, Heimiller D, Blair N, Porro G. U.S. renewable energy technical potentials: a GIS-based analysis. NREL/TP-6A20-51946. Golden, CO: National Renewable Energy Laboratory; 2012. https://doi.org/10.2172/1219777.",
-  cea: "Central Electricity Authority. Load Generation Balance Report 2026-27. New Delhi: Ministry of Power, Government of India; 2026. [URL: add from MO].",
+  cea: "Central Electricity Authority. Load Generation Balance Report 2026-27. New Delhi: Ministry of Power, Government of India; 2026. https://cea.nic.in/reports/dashboardView?headingId=107&subHeadingId=1001&subSubHeadingId=10003&lang=hi [accessed 2 November 2026].",
   kusumfaq: "Ministry of New and Renewable Energy. PM-KUSUM: frequently asked questions. https://pmkusum.mnre.gov.in/landing-faq.html [accessed October 2026].",
 };
 let order = [];
