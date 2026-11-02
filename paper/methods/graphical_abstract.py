@@ -203,6 +203,35 @@ def icon_cropmodel(ax, cx, y0, h):
 ICONS = {"wheat": icon_wheat, "chickpea": icon_chickpea, "pearl_millet": icon_millet, "groundnut": icon_groundnut}
 
 
+def write_caption(a, hlabel, scen):
+    """Caption of the graphical abstract, consistent with what is drawn (graphical_abstract_caption.txt)."""
+    case = ("calibrated nitrogen, an upper bound because low nitrogen rates hide part of the shade loss"
+            if hlabel == "upper bound" else
+            "robust case, in which each cell, crop and GCM takes the smaller GCR_max of the calibrated and "
+            "recommended nitrogen runs")
+    lay = LAYOUT_NAME[a.config]
+    txt = (
+        "Graphical abstract. Left: solar PV and crops compete for the same farmland. Centre: a light model and "
+        "the DSSAT crop model give the relative yield (RY, shaded over open-field yield) as a function of the "
+        "ground coverage ratio (GCR) for each cell, crop and layout; the curve is schematic. GCR_max is the "
+        f"largest GCR that keeps RY ≥ {a.thr:.1f}, found where the RY-GCR curve, linearly interpolated from "
+        "RY = 1 at GCR 0, first falls below the threshold. "
+        f"Right: GCR_max at RY ≥ {a.thr:.1f} for the {lay} layout under 1995–2014 climate, {case}. "
+        "For each 0.25° cell and crop, GCR_max is first computed for each of five GCMs and the median of the five "
+        "is taken. Eligible area is the MapSPAM harvested area of the crop times the share of the cell with "
+        "terrain slope ≤ 5%. The map shows, per cell, the mean of the four crops' median GCR_max weighted by "
+        "eligible area; cells with less than 1000 ha of eligible area are left blank. Each crop value is the "
+        "mean of that crop's median GCR_max over all cells with eligible area, weighted by eligible area. "
+        "Cereals were simulated up to GCR 0.7 and legumes up to 0.5, so cells that still meet the threshold at "
+        "that limit enter at the limit. The headline is the crops-combined capacity (double-cropped land counted "
+        "once, capacity = eligible area × GCR_max × 0.22 × 10 MWp ha^-1), summed nationally for each GCM; "
+        "the value shown is the median of the five national totals. "
+        f"The badge gives the change in this capacity by 2041–2060 under {scen} against 1995–2014 with "
+        "calibrated nitrogen: the change of the five-GCM median totals, and the range of the change over the "
+        "five GCMs.")
+    (HERE / "graphical_abstract_caption.txt").write_text(txt + "\n")
+
+
 def main():
     a = parse()
     cells, crop, head, change, hlabel = load_results(a)
@@ -247,7 +276,8 @@ def main():
     b = axes_mm(33.0, 17.4, 28.0, 16.8)
     g = np.linspace(0, 0.7, 80); ry = 1 - 0.45 * g - 0.45 * g ** 2
     gm = g[np.argmin(abs(ry - a.thr))]
-    b.fill_between(g[g <= gm], 0.4, ry[g <= gm], color=SKY, alpha=0.35, lw=0)
+    # band between the curve and the RY = tau line, from GCR 0 to GCR_max: the yield kept above the threshold
+    b.fill_between(g[g <= gm], a.thr, ry[g <= gm], color=SKY, alpha=0.45, lw=0)
     b.plot(g, ry, color=VERM, lw=1.4)
     b.axhline(a.thr, color="0.2", lw=0.6, ls="--")
     b.plot([gm, gm], [0.4, a.thr], color="0.2", lw=0.6, ls="--")
@@ -255,13 +285,15 @@ def main():
     b.text(0.71, a.thr + 0.025, f"RY = {a.thr:.1f}", ha="right", va="bottom", fontsize=7)
     b.text(gm + 0.025, 0.43, "GCR$_{max}$", fontsize=7, va="bottom", fontweight="bold")
     b.text(0.71, 1.04, "schematic", ha="right", va="top", fontsize=7, style="italic", color="0.4")
-    b.text(0.03, 0.43, "keeps\nyield", fontsize=7, va="bottom", color=BLUE, linespacing=1.1)
+    b.annotate(f"≥ {a.thr:.1f}\nkept", xy=(0.07, a.thr + 0.07), xytext=(0.02, 0.6), fontsize=7, color=BLUE,
+               ha="left", va="center", linespacing=1.05, arrowprops=dict(arrowstyle="-", color=BLUE, lw=0.6, shrinkA=0, shrinkB=0))
     b.set_xlim(0, 0.72); b.set_ylim(0.4, 1.05)
     b.set_xticks([0, 0.7], ["0", "0.7"]); b.set_yticks([0.4, 0.7, 1.0], ["0.4", "0.7", "1"])
     b.tick_params(labelsize=7, length=2, width=0.5, pad=1)
     for s in ("top", "right"):
         b.spines[s].set_visible(False)
-    b.set_xlabel("panel cover, GCR [–]", fontsize=7, labelpad=1)
+    b.set_xlabel("ground coverage ratio, GCR [–]", fontsize=7, labelpad=1)
+    b.xaxis.set_label_coords((42.25 - 33.0) / 28.0, -0.24)   # centred on the panel, not the axes
     b.set_ylabel("rel. yield, RY [–]", fontsize=7, labelpad=1)
     b.yaxis.set_label_coords(-0.21, 0.46)
 
@@ -290,31 +322,34 @@ def main():
         india.boundary.plot(ax=b, color="0.35", lw=0.4)
     b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3); b.set_aspect(1 / np.cos(np.radians(22)))
     b.set_xticks([]); b.set_yticks([]); b.set_xlabel(""); b.set_ylabel("")
-    cb_ax = axes_mm(70.2, 17.0, 1.5, 20.0)
-    cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=[0, 0.7])
-    cb.ax.set_yticklabels(["0", "0.7"]); cb.ax.tick_params(labelsize=7, length=1.5, width=0.5, pad=1)
+    cb_ax = axes_mm(70.4, 16.6, 1.5, 9.4)    # over the Arabian Sea, so tick labels clear the coast
+    cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=[0, 0.35, 0.7])
+    cb.ax.set_yticklabels(["0", "0.35", "0.7"]); cb.ax.tick_params(labelsize=7, length=1.5, width=0.5, pad=1)
     cb.outline.set_linewidth(0.5)
-    ax.text(68.9, 27.0, "max GCR", ha="center", va="center", fontsize=7, color="0.15", rotation=90)
+    ax.text(68.9, 21.3, "max GCR", ha="center", va="center", fontsize=7, color="0.15", rotation=90)
 
     # headline capacity and 2050 badge
     big, rng = fmt_cap(head)
-    xr = 114.4
-    ax.text(xr, 40.0, big, ha="center", va="center", fontsize=15, fontweight="bold", color=BLUE)
-    ax.text(xr, 35.0, "technical potential,", ha="center", va="center", fontsize=7, color="0.2")
-    ax.text(xr, 31.8, hlabel, ha="center", va="center", fontsize=9, fontweight="bold", color="black")
+    xr = 112.8                       # column centre; badge spans 97.3-128.3 mm, clear of the Andaman Islands
+    ax.text(xr, 41.4, big, ha="center", va="center", fontsize=14, fontweight="bold", color=BLUE)
+    ax.text(xr, 37.6, "Technical potential", ha="center", va="center", fontsize=7, color="0.15")
+    ax.text(xr, 35.1, f"({hlabel})", ha="center", va="center", fontsize=7, fontweight="bold", color="black")
+    ax.text(xr, 32.6, "1995–2014 climate", ha="center", va="center", fontsize=7, color="0.35")
     if head is None:
-        ax.add_patch(Rectangle((xr - 13.5, 36.8), 27.0, 6.5, fill=False, ec="0.1", lw=0.5, ls="--"))
-    # 2050 badge (light, outlined): scenario on the first line, median change and GCM range on the second
+        ax.add_patch(Rectangle((xr - 13.5, 39.0), 27.0, 5.0, fill=False, ec="0.1", lw=0.5, ls="--"))
+    # 2050 badge (light, outlined), values from numbers.json; placeholders when the stage is missing
     scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(a.future.split("_")[0], "SSP5-8.5")
-    # wrapped to fit the column: "2050 change (SSP5-8.5): -X% (lo to hi%)"
-    med, rg = ("[±X]%", "([X] to [X]%)") if change is None else (f"{change[0]}%", f"({change[1]} to {change[2]}%)")
-    val = f"{med} {rg}"
-    ax.add_patch(FancyBboxPatch((xr - 12.5, 15.4), 25.0, 12.8, boxstyle="round,pad=0,rounding_size=2.0",
+    med, lo, hi = ("[±X]", "[lo]", "[hi]") if change is None else change
+    ax.add_patch(FancyBboxPatch((xr - 15.5, 13.6), 31.0, 16.8, boxstyle="round,pad=0,rounding_size=2.0",
                                 fc="#FDF1DC", ec=ORANGE, lw=0.8))
-    ax.text(xr, 25.4, f"2050 change\n({scen}):", ha="center", va="center", fontsize=7, color="black",
-            linespacing=1.1)
-    ax.text(xr, 20.6, med, ha="center", va="center", fontsize=9, fontweight="bold", color="black")
-    ax.text(xr, 17.4, rg, ha="center", va="center", fontsize=7, color="black")
+    for y, t, kw in ((28.9, "Change in potential", dict(fontweight="bold", color="black")),
+                     (26.5, f"by 2050 ({scen})", dict(fontweight="bold", color="black")),
+                     (24.1, "vs 1995–2014", dict(color="0.2")),
+                     (18.3, "5-model range:", dict(color="0.2")),
+                     (15.9, f"{lo} to {hi}%", dict(color="0.2"))):
+        ax.text(xr, y, t, ha="center", va="center", fontsize=7, **kw)
+    ax.text(xr, 21.2, f"{med}%", ha="center", va="center", fontsize=9, fontweight="bold", color="black")
+    val = f"{med}% ({lo} to {hi}%)"
 
     # crop icons with national mean GCR_max, small label at the start of the row
     ax.text(68.6, 14.2, f"max GCR at RY ≥ {a.thr:.1f}", ha="left", va="center", fontsize=7, color="0.2")
@@ -327,6 +362,7 @@ def main():
     a.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(a.out.with_suffix(".pdf"))
     fig.savefig(a.out.with_suffix(".png"), dpi=600)
+    write_caption(a, hlabel, scen)
     print("wrote", a.out.with_suffix(".pdf"), "map:", "filled" if cells else "placeholder",
           "| headline:", big, f"({hlabel})", rng, "|", f"2050 change ({scen}): {val}", "| crops:", {c: round(v, 2) for c, v in crop.items()})
 

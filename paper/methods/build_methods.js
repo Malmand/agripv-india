@@ -6,6 +6,23 @@ const body = [];
 const add = (...x) => x.flat().forEach(e => body.push(e));
 const { Paragraph, TextRun, FONT } = L;
 add(new Paragraph({ spacing: { after: 300 }, children: [new TextRun({ text: "Yield-constrained agrivoltaic potential of India under current and mid-century climate", bold: true, size: 32, font: FONT })] }));
+// Graphical abstract (front matter, unnumbered): image and caption from graphical_abstract.py
+{
+  const fs = require("fs");
+  const ga = "graphical_abstract.png", capf = "graphical_abstract_caption.txt";
+  if (fs.existsSync(ga)) {
+    const b = fs.readFileSync(ga), w = 600, h = Math.round(w * b.readUInt32BE(20) / b.readUInt32BE(16));
+    add(L.H3("Graphical abstract"));
+    add(new Paragraph({ alignment: L.d.AlignmentType.CENTER, keepNext: true,
+      children: [new L.d.ImageRun({ type: "png", data: b, transformation: { width: w, height: h } })] }));
+    if (fs.existsSync(capf)) {
+      const cap = fs.readFileSync(capf, "utf8").trim().replace(/^Graphical abstract\. /, "")
+        .replace(/GCR_max/g, "GCR~max~").replace(/ha\^-1/g, "ha^−1^");
+      add(new Paragraph({ spacing: { before: 80, after: 300 }, children: [
+        new TextRun({ text: "Graphical abstract. ", bold: true, font: FONT, size: 20 }), ...L.runs(cap, { size: 20 })] }));
+    }
+  }
+}
 require("./intro.js").addIntro(add);
 
 add(H1("2. Methodology"));
