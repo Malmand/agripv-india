@@ -37,7 +37,7 @@ node paper/methods/build_supp.js
 echo "== save to GitHub"
 git config user.name "Mohamed Al-Mandhari"
 git config user.email "almandharimohammed90@gmail.com"
-git add -A results paper/methods
+git add -A results paper/methods runs/s1/summary
 git commit -qm "Update results from stages: $(ls "$TMP" | grep -o 'ry_crop_[a-z0-9_]*' | sed 's/ry_crop_//' | tr '\n' ' ')" || echo "nothing new"
 git push -q
 cp paper/methods/Manuscript_AgriPV_India.docx paper/methods/Supplementary_Methods_AgriPV_India.docx ~/
