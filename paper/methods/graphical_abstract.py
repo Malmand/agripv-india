@@ -12,7 +12,9 @@ Result panel is filled from postprocess_india.py outputs when they exist:
   <pp>/india_combined_<future>.csv   same for the mid-century run (2050 badge = change of the median)
 Map cell value = GCR_max averaged over crops, weighted by eligible area (slope <= 5%).
 Crop value = GCR_max of that crop averaged over cells, weighted by eligible area.
-Headline = crops-combined capacity, slope <= 5%, same layout and tau.
+Headline = crops-combined capacity, slope <= 5%, same layout and tau. It is the robust case
+(<pp>/india_combined_<stage>_robust.csv, min of calibrated and recommended N) when that file exists;
+otherwise the calibrated-N value is shown and labelled "upper bound".
 Without these files the map and numbers are drawn as marked placeholders ([X]).
 
 Usage (from paper/methods):
@@ -82,9 +84,12 @@ def load_results(a):
         m = m[m.ha >= MIN_HA]
         g = pd.read_csv(a.grid).set_index("cell_id").loc[m.index]
         cells = (g.lon.values, g.lat.values, m.gcr.values)
-    head, fut = headline(a, a.stage), headline(a, a.future)
-    change = None if head is None or fut is None else 100 * (fut[0] / head[0] - 1)
-    return cells, crop, head, change
+    base, fut = headline(a, a.stage), headline(a, a.future)
+    rob = headline(a, f"{a.stage}_robust")
+    head, label = (rob, "robust estimate") if rob is not None else (base, "upper bound")
+    # 2050 badge: change of the calibrated-N median (the future stages are run with calibrated N)
+    change = None if base is None or fut is None else 100 * (fut[0] / base[0] - 1)
+    return cells, crop, head, change, label
 
 
 def fmt_cap(head):
@@ -188,7 +193,7 @@ ICONS = {"wheat": icon_wheat, "chickpea": icon_chickpea, "pearl_millet": icon_mi
 
 def main():
     a = parse()
-    cells, crop, head, change = load_results(a)
+    cells, crop, head, change, hlabel = load_results(a)
     fig = plt.figure(figsize=(W / 10 * CM, H / 10 * CM))
     ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, W); ax.set_ylim(0, H); ax.axis("off")
 
@@ -285,7 +290,8 @@ def main():
     big, rng = fmt_cap(head)
     xr = 114.5
     ax.text(xr, 38.0, big, ha="center", va="center", fontsize=14, fontweight="bold", color=BLUE)
-    ax.text(xr, 30.0, f"{LAYOUT_NAME[a.config]} panels\nslope ≤ 5%\n{rng}", ha="center", va="center",
+    ax.text(xr, 33.4, hlabel, ha="center", va="center", fontsize=8, fontweight="bold", color="black")
+    ax.text(xr, 28.9, f"{LAYOUT_NAME[a.config]}, slope ≤ 5%\n{rng}", ha="center", va="center",
             fontsize=7, color="0.2", linespacing=1.15)
     if head is None:
         ax.add_patch(Rectangle((xr - 12.5, 35.0), 25.0, 6.0, fill=False, ec="0.1", lw=0.5, ls="--"))
@@ -309,7 +315,7 @@ def main():
     fig.savefig(a.out.with_suffix(".pdf"))
     fig.savefig(a.out.with_suffix(".png"), dpi=600)
     print("wrote", a.out.with_suffix(".pdf"), "map:", "filled" if cells else "placeholder",
-          "| headline:", big, rng, "|", badge, "| crops:", {c: round(v, 2) for c, v in crop.items()})
+          "| headline:", big, f"({hlabel})", rng, "|", badge, "| crops:", {c: round(v, 2) for c, v in crop.items()})
 
 
 if __name__ == "__main__":

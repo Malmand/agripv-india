@@ -20,7 +20,12 @@ Key scheme (main case: east-west layout, RY >= 0.80, calibrated N, slope <= 5%):
   ssp245.*, ssp585.*  change_pct (+ per-layout), change_lo / change_hi (GCM range of the change),
               agree4_share (share of land where >= 4 of 5 GCMs agree on the sign), gcr_<crop>_delta
   calib.*     state-yield calibration statistics (results/validation_before_after.csv)
-  ga.*        headline, range, change_2050, gcr_<crop>
+  <p>.vertical.<tk>.nodin.cap_twp, <p>.din_cut_pct   vertical layout without the DIN cap (sensitivity)
+  head.*      headline case: robust (historical_current_robust) when present, else calibrated N labelled
+              "upper bound"; cap_twp(_m/_lo/_hi), energy_pwh, density, land_mha, label, x_teri_lo/hi, x_fhg
+  frame.*     cea_twh (India 2024-25 energy requirement, CEA PSP March 2025), <p>_multiple (annual energy / consumption),
+              gw300/gw500 .land_mha .share (cropland needed at the headline density, % of eligible land)
+  ga.*        headline, range, label, change_2050, gcr_<crop>
 Usage: python src/make_numbers.py [--pp results/potential] [--validation results/validation_before_after.csv]
 """
 import argparse
@@ -39,6 +44,12 @@ CROPS = ["wheat", "chickpea", "pearl_millet", "groundnut"]
 LEGUMES, CEREALS = ["chickpea", "groundnut"], ["wheat", "pearl_millet"]
 MAIN_LAYOUT, MAIN_THR = "ew_fixed", 0.8
 TERI, FHG_HI = (1.2, 2.1), 13.8       # TW, published Indian estimates quoted in Section 4.1
+TERI_DENS = (0.42, 0.75)              # MW per ha, TERI fixed power density
+# India's energy requirement 2024-25: 1,695,188 MU (energy supplied 1,693,599 MU). CEA, Power supply position
+# report (provisional), March 2025, https://cea.nic.in/wp-content/uploads/power_supply/2025/03/PSP_Mar25_provisional_e.pdf
+# (figure supplied by MO from the report; cea.nic.in is not reachable from the cloud session).
+CEA_TWH, CEA_VERIFIED = 1695.188, True
+TARGETS_GW = (300, 500)
 MINUS = "−"
 
 
@@ -53,7 +64,7 @@ def twp(mwp, nd=None):
 
 def twp_range(med, lo, hi):
     """Median, min, max with the decimals of the median, more if the range would collapse (1.1-1.1)."""
-    nd = twp_nd(med)
+    nd = max(twp_nd(med), 1)   # at least one decimal: "45.5 (45.5-45.9)", not "46 (45-46)"
     while twp(lo, nd) == twp(hi, nd) and nd < twp_nd(med) + 2:
         nd += 1
     return twp(med, nd), twp(lo, nd), twp(hi, nd)
@@ -168,7 +179,13 @@ def hist_extras(N, pp, t, m, c):
             N.put("hist.cereal_gcr_med", x, f"{x:.2f}")
     v = c[c.config == "vertical"]
     if len(v) and v.cap_mwp.sum() > 0:
-        x = 100 * v.cap_mwp[v.gcr_max > 0.6 + 1e-9].sum() / v.cap_mwp.sum()
+        if "gcr_raw" in v:   # share of the uncapped vertical capacity above GCR 0.6 (removed by the DIN cap)
+            raw = v.elig_ha * v.gcr_raw
+            x = 100 * raw[v.gcr_raw > 0.6 + 1e-9].sum() / raw.sum()
+            y = 100 * np.average(v.gcr_raw > 0.6 + 1e-9, weights=v.elig_ha)
+            N.put("hist.vertical_gt06_area_share", y, pct(y))
+        else:
+            x = 100 * v.cap_mwp[v.gcr_max > 0.6 + 1e-9].sum() / v.cap_mwp.sum()
         N.put("hist.vertical_gt06_share", x, pct(x))
     for lk, cfg in LAYOUTS.items():     # specific yield at GCR_max, area-weighted median cell
         e = c[(c.config == cfg) & c.yield_kwh_kwp.notna()]
@@ -181,6 +198,10 @@ def hist_extras(N, pp, t, m, c):
     for i, r in enumerate(top.itertuples(), 1):
         N.put(f"hist.top{i}_state", r.state, r.state)
         N.put(f"hist.top{i}_gwp", r.cap_mwp_median / 1e3, f"{r.cap_mwp_median / 1e3:,.0f}")
+
+
+def ratio_text(x):
+    return f"{x:.0f}" if x >= 10 else f"{x:.1f}"
 
 
 def main_aliases(N):
@@ -202,6 +223,74 @@ def main_aliases(N):
     else:
         phr = "close to"
     N.put("main.cmp_fhg", phr, phr)
+
+
+def headline_numbers(N):
+    """Headline case: robust when it exists (conservative), otherwise calibrated N as an upper bound."""
+    robust = "robust.ew.t80.cap_twp" in N.raw
+    src = "robust.ew.t80." if robust else "hist.ew.t80."
+    for name in ("cap_twp", "cap_twp_m", "cap_twp_lo", "cap_twp_hi", "cap_gwp", "energy_pwh", "energy_pwh_lo",
+                 "energy_pwh_hi", "density", "land_mha"):
+        if src + name in N.raw:
+            N.values[f"head.{name}"], N.raw[f"head.{name}"] = N.values[src + name], N.raw[src + name]
+    lab = "robust" if robust else "upper bound"
+    N.put("head.label", lab, lab)
+    N.put("head.is_robust", float(robust), "yes" if robust else "no")
+    cap = N.raw.get("head.cap_twp")
+    if cap is None:
+        return
+    tw = cap / 1e6
+    N.put("head.x_teri_lo", tw / TERI[1], ratio_text(tw / TERI[1]))   # multiple of TERI's upper value
+    N.put("head.x_teri_hi", tw / TERI[0], ratio_text(tw / TERI[0]))   # multiple of TERI's lower value
+    N.put("head.x_fhg", tw / FHG_HI, ratio_text(tw / FHG_HI))
+    dens = N.raw.get("head.density")
+    if dens:
+        N.put("head.x_teri_dens_lo", dens / TERI_DENS[1], f"{dens / TERI_DENS[1]:.1f}")
+        N.put("head.x_teri_dens_hi", dens / TERI_DENS[0], f"{dens / TERI_DENS[0]:.1f}")
+        land = N.raw.get("head.land_mha")
+        if land:   # our eligible land at TERI's fixed density: separates the land effect from the density effect
+            lo, hi = land * TERI_DENS[0], land * TERI_DENS[1]   # Mha x MW/ha = TW
+            N.put("head.teri_dens_twp_lo", lo, f"{lo:.0f}")
+            N.put("head.teri_dens_twp_hi", hi, f"{hi:.0f}")
+
+
+def framing_numbers(N):
+    """Potential against India's electricity use and the land needed for national PV targets."""
+    N.put("frame.cea_twh", CEA_TWH, f"{CEA_TWH:,.0f}")
+    for p in ("main", "robust.ew.t80", "head"):
+        e = N.raw.get(f"{p}.energy_pwh")
+        if e is not None:
+            x = 1000 * e / CEA_TWH
+            N.put(f"frame.{p.split('.')[0]}_multiple", x, ratio_text(x))
+    dens, land = N.raw.get("head.density"), N.raw.get("head.land_mha")
+    if not dens or not land:
+        return
+    for gw in TARGETS_GW:
+        mha = gw * 1e3 / dens / 1e6          # GWp -> MWp / (MWp/ha) -> ha -> Mha
+        sh = 100 * mha / land
+        N.put(f"frame.gw{gw}.land_mha", mha, f"{mha:.2f}")
+        N.put(f"frame.gw{gw}.share", sh, f"{sh:.1f}")
+
+
+def din_numbers(N, pp):
+    """Vertical layout without the DIN SPEC 91434 cap (sensitivity)."""
+    for p in ("hist", "robust"):
+        f, u = pp / f"india_combined_{STAGES[p]}.csv", pp / f"india_combined_{STAGES[p]}_nodin.csv"
+        if not (f.exists() and u.exists()):
+            continue
+        tc, tu = pd.read_csv(f), pd.read_csv(u)
+        for tk, thr in THRS.items():
+            rc, ru = sel(tc, "vertical", thr), sel(tu, "vertical", thr)
+            if ru is None:
+                continue
+            N.put(f"{p}.vertical.{tk}.nodin.cap_twp", ru.cap_mwp_median, twp(ru.cap_mwp_median))
+            if tk == "t80" and rc is not None and ru.cap_mwp_median > 0:
+                x = 100 * (1 - rc.cap_mwp_median / ru.cap_mwp_median)
+                N.put(f"{p}.din_cut_pct", x, pct(x))
+        b = tu[(tu.thr.round(2) == MAIN_THR) & (tu.slope_rule == "le5")].sort_values("cap_mwp_median")
+        if len(b):
+            lay = LAYOUT_TEXT.get(b.iloc[-1].config, b.iloc[-1].config)
+            N.put(f"{p}.nodin.best_layout", lay, lay)
 
 
 def robust_numbers(N, pp):
@@ -274,8 +363,11 @@ def future_numbers(N, pp, p):
 
 
 def ga_numbers(N):
-    """Same text as graphical_abstract.py (ew_fixed, tau 0.8, slope <= 5%, badge = SSP2-4.5)."""
-    med, lo, hi = (N.raw.get(f"hist.ew.t80.{k}") for k in ("cap_twp", "cap_twp_lo", "cap_twp_hi"))
+    """Same text as graphical_abstract.py (ew_fixed, tau 0.8, slope <= 5%, badge = SSP2-4.5).
+    Headline = robust case when present, else calibrated N labelled "upper bound"."""
+    med, lo, hi = (N.raw.get(f"head.{k}") for k in ("cap_twp", "cap_twp_lo", "cap_twp_hi"))
+    if "head.label" in N.values:
+        N.put("ga.label", N.raw["head.is_robust"], "robust estimate" if N.raw["head.is_robust"] else "upper bound")
     if med is not None:
         if med >= 1e6:
             nd = 1 if round(lo / 1e6, 1) != round(hi / 1e6, 1) else 2
@@ -321,12 +413,17 @@ def main():
             hist_extras(N, a.pp, t, m, c)
     main_aliases(N)
     robust_numbers(N, a.pp)
+    headline_numbers(N)
+    framing_numbers(N)
+    din_numbers(N, a.pp)
     for p in ("ssp245", "ssp585"):
         future_numbers(N, a.pp, p)
     ga_numbers(N)
     calib_numbers(N, a.validation)
     out = {"meta": {"stages": present, "main_case": {"layout": MAIN_LAYOUT, "thr": MAIN_THR, "slope": "le5",
                                                      "management": "calibrated N"},
+                    "headline": N.values.get("head.label"), "din_cap_vertical": 0.6,
+                    "cea_requirement_2024_25_twh": CEA_TWH,
                     "units": "cap_twp TWp (raw MWp), cap_gwp GWp, land_mha Mha, energy_pwh PWh/yr, "
                              "density MWp/ha, sy kWh/kWp/yr, *_share and *_pct in %"},
            "values": dict(sorted(N.values.items())), "raw": dict(sorted(N.raw.items()))}

@@ -80,6 +80,17 @@ def main():
         out += [f"## Robust vs calibrated N, {st} (capacity, %)", ""]
         out += [f"- {r.config}, τ {r.thr:.2f}: {100 * (r.cap_mwp_median_r / r.cap_mwp_median_c - 1):+.1f}%" for r in x.itertuples()]
         out.append("")
+    # DIN SPEC 91434 cap on the vertical layout (main case) vs uncapped (sensitivity)
+    for st in a.stages:
+        f, u = a.pp / f"india_combined_{st}.csv", a.pp / f"india_combined_{st}_nodin.csv"
+        if not (f.exists() and u.exists()):
+            continue
+        x = pd.read_csv(f).merge(pd.read_csv(u), on=["config", "thr", "slope_rule"], suffixes=("_c", "_u"))
+        x = x[(x.slope_rule == "le5") & (x.config == "vertical")]
+        out += [f"## Vertical layout, DIN cap GCR_max ≤ 0.6 (main) vs uncapped, {st} (TWp)", ""]
+        out += [f"- τ {r.thr:.2f}: capped {r.cap_mwp_median_c / 1e6:.2f}, uncapped {r.cap_mwp_median_u / 1e6:.2f} "
+                f"({100 * (r.cap_mwp_median_c / r.cap_mwp_median_u - 1):+.0f}%)" for r in x.itertuples()]
+        out.append("")
     out += sanity(a)
     (a.pp / "headline_numbers.md").write_text("\n".join(out))
     print("\n".join(out))
@@ -102,11 +113,12 @@ def sanity(a):
         out.append("")
         c = pd.read_csv(a.pp / f"cell_crop_{st}.csv.gz")
         v = c[(c.config == "vertical") & (c.slope_rule == "le5") & (c.elig_ha > 0)]
+        gcol = "gcr_raw" if "gcr_raw" in v else "gcr_max"   # uncapped GCR_max (before the DIN cap)
         if len(v):
-            sh = v.groupby("thr").apply(lambda d: np.average(d.gcr_max > 0.6 + 1e-9, weights=d.elig_ha),
+            sh = v.groupby("thr").apply(lambda d: np.average(d[gcol] > 0.6 + 1e-9, weights=d.elig_ha),
                                         include_groups=False)
-            out += [f"- {st}: vertical layout, share of eligible area with GCR_max > 0.6 (DIN 15% land loss): "
-                    + ", ".join(f"τ {k:.2f} {x:.0%}" for k, x in sh.items()), ""]
+            out += [f"- {st}: vertical layout, share of eligible area with uncapped GCR_max > 0.6 (DIN 15% land loss, "
+                    "capped at 0.6 in the main case): " + ", ".join(f"τ {k:.2f} {x:.0%}" for k, x in sh.items()), ""]
     if a.summary is None:
         return out
     grid = pd.read_csv(a.grid)

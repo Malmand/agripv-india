@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Results pipeline (task D) in one command, run from anywhere:
-#   bash run_results.sh /path/to/s1.zip
+#   bash run_results.sh /path/to/s1.zip      (zip of stage summaries)
+#   bash run_results.sh runs/s1               (folder; uses <folder>/summary if it exists)
+# If the folder holds no ry_crop_<stage>.csv.gz, every stage that already has
+# results/potential/cell_crop_<stage>.csv.gz is rebuilt from that table (postprocess --from-cell-crop):
+# this re-applies the DIN cap and the summaries without the crop runs (no open-field yield check).
 # s1.zip holds the stage summaries from gs://.../india/out/summary, at least
 #   ry_crop_historical_current.csv.gz and energy_historical.csv
 # and optionally ry_crop_historical_recommended.csv.gz (robust case) and later stages
@@ -12,11 +16,15 @@
 # results/figures/fig_india_*.{pdf,png},
 # paper/methods/graphical_abstract.{pdf,png}. Nothing is committed.
 set -euo pipefail
-ZIP=${1:?usage: bash run_results.sh /path/to/s1.zip}
-ZIP=$(realpath "$ZIP")
+SRC=${1:?usage: bash run_results.sh /path/to/s1.zip | runs/s1}
+SRC=$(realpath -m "$SRC")
 PY=${PY:-python3}
 cd "$(dirname "$(realpath "$0")")"
 SUM=runs/s1/summary
+if [ -d "$SRC" ]; then SUM=$SRC; [ -d "$SRC/summary" ] && SUM=$SRC/summary; ZIP=""
+elif [ -f "$SRC" ]; then ZIP=$SRC
+else SUM=$SRC; ZIP=""; echo "NOTE: $SRC does not exist"; fi
+DIN=${DIN_CAP:-0.6}   # vertical GCR_max cap (DIN SPEC 91434); uncapped totals go to *_nodin
 PP=results/potential
 FIG=results/figures
 GRID=data/grid_india_025.csv
@@ -24,39 +32,54 @@ GRID=data/grid_india_025.csv
 $PY -c "import numpy, pandas, matplotlib, geopandas" 2>/dev/null || {
   echo "missing Python packages: pip install numpy pandas matplotlib geopandas"; exit 1; }
 
-mkdir -p "$SUM" "$PP" "$FIG"
-unzip -o -j -q "$ZIP" '*.csv' '*.csv.gz' -d "$SUM"
-echo "== files in $SUM"; ls -l "$SUM"
-[ -f "$SUM/ry_crop_historical_current.csv.gz" ] || { echo "ry_crop_historical_current.csv.gz not in zip"; exit 1; }
+mkdir -p "$PP" "$FIG"
+if [ -n "$ZIP" ]; then mkdir -p "$SUM"; unzip -o -j -q "$ZIP" '*.csv' '*.csv.gz' -d "$SUM"; fi
+echo "== files in $SUM"; ls -l "$SUM" 2>/dev/null || true
+REBUILD=0
+if [ ! -f "$SUM/ry_crop_historical_current.csv.gz" ]; then
+  [ -f "$PP/cell_crop_historical_current.csv.gz" ] || { echo "no ry_crop_historical_current.csv.gz and no $PP/cell_crop table"; exit 1; }
+  echo "NOTE: no ry_crop files in $SUM: rebuilding from the committed cell_crop tables in $PP"
+  REBUILD=1
+fi
 
 # stages: historical_current first, then any other *_current (future) stages
 STAGES=(historical_current)
-for f in "$SUM"/ry_crop_*_current.csv.gz; do
-  s=$(basename "$f" .csv.gz); s=${s#ry_crop_}
+PRE=ry_crop_; DIR=$SUM; [ $REBUILD = 1 ] && { PRE=cell_crop_; DIR=$PP; }
+for f in "$DIR"/${PRE}*_current.csv.gz; do
+  [ -f "$f" ] || continue
+  s=$(basename "$f" .csv.gz); s=${s#$PRE}
   [ "$s" = historical_current ] || STAGES+=("$s")
 done
 HAVE_REC=0; [ -f "$SUM/ry_crop_historical_recommended.csv.gz" ] && HAVE_REC=1
+[ $REBUILD = 1 ] && [ -f "$PP/cell_crop_historical_current_robust.csv.gz" ] && HAVE_REC=2
+TMPCC=$(mktemp -d)
 
 pp() {  # stage [extra args]
   local st=$1; shift
   local en="$SUM/energy_${st%%_*}.csv"
-  [ -f "$en" ] || { echo "WARNING: $en missing, energy left empty for $st"; en=""; }
-  $PY prod/postprocess_india.py --summary "$SUM" --stage "$st" --grid $GRID --slope data/slope_india.csv \
-    ${en:+--energy "$en"} --outdir $PP "$@"
+  [ -f "$en" ] || { [ $REBUILD = 1 ] || echo "WARNING: $en missing, energy left empty for $st"; en=""; }
+  local src=(--summary "$SUM")
+  if [ $REBUILD = 1 ]; then   # copy first: the table is overwritten by its own rebuild
+    local stn=$st; [ "${1:-}" = --robust-with ] && { stn=${st}_robust; shift 2; }
+    cp "$PP/cell_crop_$stn.csv.gz" "$TMPCC/"; src=(--from-cell-crop "$TMPCC/cell_crop_$stn.csv.gz"); st=$stn
+  fi
+  $PY prod/postprocess_india.py "${src[@]}" --stage "$st" --grid $GRID --slope data/slope_india.csv \
+    ${en:+--energy "$en"} --din-cap "$DIN" --outdir $PP "$@"
 }
 for st in "${STAGES[@]}"; do echo "== postprocess $st"; pp "$st"; done
 SUMSTAGES=("${STAGES[@]}")
-if [ $HAVE_REC = 1 ]; then
+if [ $HAVE_REC != 0 ]; then
   echo "== postprocess historical_current, robust with historical_recommended"
   pp historical_current --robust-with historical_recommended
-  SUMSTAGES=(historical_current historical_current_robust "${STAGES[@]:1}" historical_recommended)
+  SUMSTAGES=(historical_current historical_current_robust "${STAGES[@]:1}")
+  [ $HAVE_REC = 1 ] && SUMSTAGES+=(historical_recommended)
 fi
 
 echo "== figures"
 FUT=("${STAGES[@]:1}")
 $PY src/fig_india.py --pp $PP --stage historical_current --grid $GRID --boundaries data/boundaries/Admin2.shp \
   --out $FIG ${FUT[@]:+--future "${FUT[@]}"}
-[ $HAVE_REC = 1 ] && $PY src/fig_india.py --pp $PP --stage historical_current_robust --grid $GRID \
+[ $HAVE_REC != 0 ] && $PY src/fig_india.py --pp $PP --stage historical_current_robust --grid $GRID \
   --boundaries data/boundaries/Admin2.shp --out $FIG
 
 echo "== headline numbers"

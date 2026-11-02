@@ -135,3 +135,19 @@
   delta map: no-change class grey (differs from no data), clean colourbar ticks.
 - graphical_abstract.py: GCM range gets 2 decimals when 1 decimal would show "1.1-1.1".
 - Note: legumes are simulated to GCR 0.5, cereals to 0.7, so "at simulated GCR limit" means 0.5 for legumes.
+
+## 2026-11-02 stage 1 results: DIN cap, framing, upper-bound wording
+- prod/postprocess_india.py: --din-cap (default 0.6) caps vertical GCR_max (DIN SPEC 91434, 15% land loss); main
+  outputs capped, uncapped sensitivity in india_combined/india_by_crop/state_combined_<stage>_nodin.csv. cell_crop keeps
+  gcr_raw, yield_raw, din_capped. --from-cell-crop rebuilds from a cell_crop table (energy at the cap interpolated from
+  the table's own GCR/kWh pairs, error < 0.3%). run_results.sh accepts a zip or a folder (runs/s1).
+- Stage 1 (runs/s1/summary, real inputs): east-west tau 0.8 = 45.5 TWp (45.5-45.9), 81.1 PWh, 1.15 MWp/ha (unchanged
+  by the cap). Vertical 42.0 TWp capped vs 47.2 uncapped (-11%); with the cap east-west leads. 62% of vertical area
+  would exceed GCR 0.6 uncapped.
+- Calibrated-N potential is called an upper bound everywhere (42% of east-west wheat area at the GCR 0.7 limit =
+  low-N masking); robust case (recommended-N stage) is the headline, still pending. Graphical abstract shows the
+  robust number when india_combined_historical_current_robust.csv exists, else "upper bound".
+- Framing (make_numbers.py frame.*, head.*): CEA PSP March 2025, 2024-25 energy requirement 1,695,188 MU (supplied by
+  MO; cea.nic.in blocked from the session). Upper bound energy = 48x requirement; 300/500 GWp need 0.26/0.44 Mha
+  (0.7%/1.1% of eligible land). Ours is 22-38x TERI and 3.3x Fraunhofer upper end; TERI density on our land = 17-30 TW.
+- Mehta & Betz overlap sentence deleted. Highlights all <= 85 chars once numbers exist (last one 87 with [pending]).
