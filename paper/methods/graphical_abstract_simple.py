@@ -1,7 +1,7 @@
 """Simpler graphical abstract for non-specialists (same size, colours, icons and map as graphical_abstract.py).
 
 No jargon: relative yield is "% of open-field harvest", GCR is "panel cover (% of land)".
-  1  question   "How much solar can share farmland and keep 80% of the harvest?" with the sun / PV / crop sketch
+  1  question   "How much solar fits on India's farmland and keeps 80% of the harvest?" with the sun / PV / crop sketch
   2  method     shade model -> crop model, schematic harvest curve against panel cover (no numbers on x)
   3  answer     map of max panel cover keeping 80% of the harvest, headline capacity, multiple of India's
                 electricity use, upper bound / robust label, 2050 change, cereal and legume panel cover
@@ -34,7 +34,7 @@ from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch, Rectangl
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import graphical_abstract as GA  # noqa: E402
 from graphical_abstract import (BLUE, GREY, INK, MID, ORANGE, PANEL_BG, SKY, VERM, H, HERE, ICONS,  # noqa: E402
-                                MIN_HA, W, CM, check_layout, fmt_cap, icon_cropmodel, icon_shade,
+                                MIN_HA, W, CM, check_layout, fmt_cap, geo_to_mm, icon_cropmodel, icon_shade,
                                 india_outline, load_results, sketch_farmland)
 
 CEREALS, LEGUMES = ("wheat", "pearl_millet"), ("chickpea", "groundnut")
@@ -68,20 +68,35 @@ def numbers(a):
 
 
 def wrap(ax, r, text, width, first_width=None, **kw):
-    """Greedy word wrap to a width in mm (first line may be narrower), measured with the renderer."""
-    words, lines, cur = text.split(), [], ""
-    for wd in words:
-        trial = (cur + " " + wd).strip()
-        t = ax.text(0, 0, trial, **kw)
-        wmm = t.get_window_extent(r).transformed(ax.transData.inverted()).width
-        t.remove()
-        lim = first_width if (first_width and not lines) else width
-        if wmm > lim and cur:
-            lines.append(cur); cur = wd
-        else:
-            cur = trial
-    lines.append(cur)
-    return "\n".join(lines)
+    """Fewest lines that fit the width (first line may be narrower), then the most even line lengths.
+    Every split of the words is tried (fine for a one-sentence title), widths measured with the renderer."""
+    words = text.split()
+    cache = {}
+
+    def wmm(sx):
+        if sx not in cache:
+            t = ax.text(0, 0, sx, **kw)
+            cache[sx] = t.get_window_extent(r).transformed(ax.transData.inverted()).width
+            t.remove()
+        return cache[sx]
+
+    best = None
+    for mask in range(1 << (len(words) - 1)):
+        lines, cur = [], [words[0]]
+        for i in range(1, len(words)):
+            if mask >> (i - 1) & 1:
+                lines.append(" ".join(cur)); cur = [words[i]]
+            else:
+                cur.append(words[i])
+        lines.append(" ".join(cur))
+        if best is not None and len(lines) > best[0][0]:
+            continue
+        ws = [wmm(sx) for sx in lines]
+        if ws[0] <= (first_width or width) and all(x <= width for x in ws[1:]):
+            key = (len(lines), max(ws))
+            if best is None or key < best[0]:
+                best = (key, lines)
+    return "\n".join(best[1] if best else words)
 
 
 def disc(ax, r, x, y_top, first_line, n, xmin, **T):
@@ -114,9 +129,9 @@ def write_caption(a, hlabel, scen, mult_key):
         "millet cells, the legume value over all chickpea and groundnut cells. The headline is the "
         "crops-combined capacity (double-cropped land counted once), median of the five national totals. "
         "The electricity multiple is its annual generation divided by India's 2025–26 electricity requirement "
-        f"(1,707 TWh; CEA Load Generation Balance Report 2026-27) ({mult_key} in numbers.json). The 2050 line "
+        "(1,707 TWh; CEA Load Generation Balance Report 2026-27). The 2050 line "
         f"gives the change in capacity by 2041–2060 under {scen} against 1995–2014 (five-GCM median, "
-        "calibrated nitrogen).")
+        "calibrated nitrogen). " + GA.BOUNDARY_SRC)
     (HERE / "graphical_abstract_simple_caption.txt").write_text(txt + "\n")
 
 
@@ -136,7 +151,7 @@ def main():
     T3 = dict(fontsize=7, color=MID)
     pct = int(round(100 * a.thr))
 
-    PL, PM, PR = (1.0, 24.4), (27.4, 45.4), (74.8, 54.2)
+    PL, PM, PR = (1.0, 26.6), (29.6, 45.4), (77.0, 52.0)
     for i, (x, w) in enumerate((PL, PM, PR), start=1):
         ax.add_patch(FancyBboxPatch((x, 1.0), w, 47.6, boxstyle="round,pad=0,rounding_size=1.8",
                                     fc=PANEL_BG if i == 3 else "white", ec="0.6", lw=0.6))
@@ -146,11 +161,12 @@ def main():
 
     # ---- 1 question
     x, w = PL
-    q = wrap(ax, r, f"How much solar can share farmland and keep {pct}% of the harvest?", w - 2.4,
-             first_width=w - 5.4, ha="center", va="top", **T2)
-    dx = disc(ax, r, x + w / 2, 47.0, q.split("\n")[0], 1, x, **T2)
+    TQ = dict(T2, fontsize=7.5)               # the question is long: 7.5 pt bold keeps it to five lines
+    q = wrap(ax, r, f"How much solar fits on India's farmland and keeps {pct}% of the harvest?", w - 1.6,
+             first_width=w - 5.0, ha="center", va="top", **TQ)
+    dx = disc(ax, r, x + w / 2, 47.0, q.split("\n")[0], 1, x, **TQ)
     for k, line in enumerate(q.split("\n")):
-        qt = ax.text(x + w / 2 + dx, 47.0 - 3.25 * k, line, ha="center", va="top", **T2)
+        qt = ax.text(x + w / 2 + dx, 47.0 - 3.1 * k, line, ha="center", va="top", **TQ)
     qb = qt.get_window_extent(r).transformed(ax.transData.inverted()).y0
     sketch_farmland(ax, PL, sun_y=(qb + 17.2) / 2, sun_r=1.9, div_top=10.0)
 
@@ -177,7 +193,7 @@ def main():
     b.text(gm - 0.02, 43, "max panel\ncover", ha="right", va="bottom", linespacing=1.05, **T3)
     b.text(0.71, 104, "schematic", ha="right", va="top", style="italic", **T3)
     b.set_xlim(0, 0.72); b.set_ylim(40, 105)
-    b.set_xticks([]); b.set_yticks([pct, 100], [f"{pct}", "100"])
+    b.set_xticks([]); b.set_yticks([pct, 100], [f"{pct}%", "100%"])
     b.tick_params(labelsize=7, labelcolor=MID, length=2, width=0.5, pad=1)
     for s in ("top", "right"):
         b.spines[s].set_visible(False)
@@ -186,17 +202,18 @@ def main():
 
     # ---- 3 answer
     x, w = PR
-    dx = disc(ax, r, x + w / 2, 47.0, "Answer", 3, x, **T2)
-    ax.text(x + w / 2 + dx, 47.0, "Answer", ha="center", va="top", **T2)
-    ax.text(x + 1.4, 42.3, f"max panel cover keeping {pct}% harvest", ha="left", va="center", **T3)
-    mx, mw = x + 1.2, 22.0
+    dx = disc(ax, r, x + w / 2, 47.0, "Answer for India", 3, x, **T2)
+    ax.text(x + w / 2 + dx, 47.0, "Answer for India", ha="center", va="top", **T2)
+    # map title directly above the map, left-aligned with it
+    ax.text(x + 1.4, 40.5, f"max panel cover\nkeeping {pct}% harvest", ha="left", va="center", linespacing=1.1, **T3)
+    mx, mw = x + 1.2, 20.6
     mh = mw * 29.5 / 26.2
-    b = axes_mm(mx, 13.6, mw, mh)
+    b = axes_mm(mx, 13.8, mw, mh)
     b.set_facecolor("none")
     for s in b.spines.values():
         s.set_visible(False)
     gr = pd.read_csv(a.grid)
-    india = india_outline(a, (gr.lon.values, gr.lat.values))
+    india, islands = india_outline(a)
     bounds = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7001]
     cmap = ListedColormap(plt.colormaps["viridis"](np.linspace(0, 1, len(bounds) - 1)))
     norm = BoundaryNorm(bounds, cmap.N)
@@ -213,9 +230,11 @@ def main():
         india.boundary.plot(ax=b, color="0.35", lw=0.4)
     b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3); b.set_aspect(1 / np.cos(np.radians(22)))
     b.set_xticks([]); b.set_yticks([]); b.set_xlabel(""); b.set_ylabel("")
-    # colour bar in the Bay of Bengal, ticks in % of land
+    # colour bar in the Bay of Bengal, between the east coast and the Andaman Islands; ticks in % of land
     ticks = [0, 0.35, 0.7]
-    cb_ax = axes_mm(mx + 0.62 * mw, 15.0, 1.3, 7.6)
+    c0x, c0y = geo_to_mm(ax, b, 84.0, 9.0)
+    c1x, c1y = geo_to_mm(ax, b, 84.0, 16.2)
+    cb_ax = axes_mm(c0x, c0y, 1.2, c1y - c0y)
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=ticks)
     cb.ax.set_yticklabels([f"{100 * t:.0f}" + ("%" if t == ticks[-1] else "") for t in ticks])
     cb.ax.tick_params(labelsize=7, labelcolor=MID, length=1.5, width=0.5, pad=1)
@@ -224,25 +243,26 @@ def main():
     # right column: headline, electricity multiple, case label, 2050 line
     xe = x + w - 1.2
     big, _ = fmt_cap(head)
-    ax.text(xe, 37.0, big, ha="right", va="center", fontsize=14, **T1)
+    ax.text(xe, 35.0, big, ha="right", va="center", fontsize=14, **T1)
     mult_key = "frame.head_multiple" if "frame.head_multiple" in num else "frame.main_multiple"
     mult = num.get(mult_key, "[N]")
-    ax.text(xe, 33.6, f"would generate ≈ {mult}×\nIndia's yearly\nelectricity use", ha="right", va="top",
+    ax.text(xe, 31.8, f"would generate ≈ {mult}×\nIndia's yearly\nelectricity use", ha="right", va="top",
             linespacing=1.1, **T3)
-    ax.text(xe, 23.6, f"({hlabel})", ha="right", va="center", fontsize=7, fontweight="bold", color=INK)
+    ax.text(xe, 22.5, f"({hlabel})", ha="right", va="center", fontsize=7, fontweight="bold", color=INK)
     scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(a.future.split("_")[0], "SSP5-8.5")
     p = a.future.split("_")[0]
     ch = num.get(f"{p}.change_pct", "[±X]")
-    ax.text(xe, 19.4, f"2050 ({scen}):\n{ch}% vs 1995–2014", ha="right", va="center", linespacing=1.1, **T3)
+    ax.text(xe, 18.6, f"2050 ({scen}):\n{ch}% vs 1995–2014", ha="right", va="center", linespacing=1.1, **T3)
 
-    # crop groups: two icons each with the group's panel cover
+    # crop groups: two icons each with the group's panel cover, under a small row label
+    ax.text(x + 1.4, 12.1, "max panel cover:", ha="left", va="center", **T3)
     for k, (name, crops) in enumerate((("cereals", CEREALS), ("legumes", LEGUMES))):
         gx = x + 2.0 + k * 27.0
         for j, c in enumerate(crops):
-            ICONS[c](ax, gx + 4.4 * j, 3.6, 6.0)
+            ICONS[c](ax, gx + 4.4 * j, 2.6, 6.0)
         val = f"~{grp[name]:.0f}%" if name in grp else "~[x]%"
-        ax.text(gx + 9.6, 6.6, name, ha="left", va="center", **T3)
-        ax.text(gx + 9.6, 9.4, val, ha="left", va="center", fontsize=8, fontweight="bold", color=INK)
+        ax.text(gx + 9.6, 4.6, name, ha="left", va="center", **T3)
+        ax.text(gx + 9.6, 7.6, val, ha="left", va="center", fontsize=8, fontweight="bold", color=INK)
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(a.out.with_suffix(".pdf"))

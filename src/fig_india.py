@@ -202,8 +202,9 @@ if __name__ == "__main__":
     grid = pd.read_csv(a.grid)
     states = gpd.read_file(a.boundaries)
     warnings.filterwarnings("ignore", message="Geometry is in a geographic CRS")
-    # outline only for orientation: close the narrow channels between delta islands (Sundarbans),
-    # drop islets and simplify (~2 km), else they draw as dark blobs and bloat the PDF
+    # outline only for orientation: close the narrow channels between delta islands (Sundarbans) and
+    # between islets, and simplify (~2 km), else they draw as dark blobs and bloat the PDF. All states and
+    # union territories stay, including the Andaman & Nicobar Islands and Lakshadweep.
     states["geometry"] = states.geometry.buffer(0.03).buffer(-0.03).simplify(0.02, preserve_topology=True)
     fig_gcrmax(a.pp, a.stage, grid, states, a.thr, a.out)
     fig_capacity(a.pp, a.stage, a.out)

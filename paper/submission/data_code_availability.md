@@ -15,7 +15,7 @@ The code used in this study (light model, crop-model set-up, energy model, post-
 | Observed district and state yields 1995-2014 | ICRISAT District Level Data | manual download | data/yields/ (see licence note) |
 | State nitrogen use | [MO: source of data/yields/state_n_use_1995_2014.csv, verify] | manual | data/yields/state_n_use_1995_2014.csv |
 | Terrain slope | Copernicus DEM GLO-90 (AWS open data) | prod/fetch_slope.py | data/slope_india.csv |
-| State boundaries | [MO: source and licence of data/boundaries/Admin2.shp, verify] | manual | data/boundaries/ |
+| State boundaries | DataMeet India community, States/Admin2, https://github.com/datameet/maps (CC BY 4.0) | manual | data/boundaries/ |
 | Pilot weather, Jodhpur | NASA POWER | src/dssat_inputs.py | data/weather/ |
 | Measured PPFD, CAZRI Jodhpur | Santra et al. 2021, Table 4 (published values) | validate_cazri_light.py | results/validation_cazri_light.csv |
 
@@ -30,7 +30,7 @@ Notes for MO (delete before submission):
 - Before the Zenodo release: (1) choose licences, e.g. MIT for code and CC BY 4.0 for processed results [MO to decide],
   and add LICENSE; (2) check whether the redistributed third-party files may be shared: the ICRISAT DLD CSV in
   data/yields/kaggle_raw came from a Kaggle copy (licence unknown; safer to drop it and point to the ICRISAT DOI),
-  MapSPAM and SoilGrids are CC BY 4.0 [verify], the boundaries shapefile licence is unknown; (3) make the GitHub
+  MapSPAM and SoilGrids are CC BY 4.0 [verify], the DataMeet boundaries are CC BY 4.0; (3) make the GitHub
   repository public or link it to Zenodo via the GitHub integration, then paste the DOI here, in the cover letter
   and in README.md.
 - Add the processed stage outputs (results/potential/, runs/*/summary) to the release once task D is done.

@@ -162,3 +162,9 @@
 - 2026-11-02: waterfall labels = change vs previous step (-10%, -12%, +53%), axis "Capacity (TWp)". Graphical abstract
   decluttered: one-line method scope, no layout/GCM-range lines, badge "2050 (SSP5-8.5): X%", no crop-row heading,
   colour bar 0/0.7 "max GCR", larger map (26 x 30 mm) and headline (15 pt); panels 16.4 / 45.3 / 61.9 mm wide.
+- 2026-11-02 graphical abstracts: manuscript front matter now uses graphical_abstract_simple.{png,txt} (plain-language
+  version; the detailed graphical_abstract.py is kept). Both keep the Andaman & Nicobar Islands and Lakshadweep (badge
+  and colour bar placed from the island bounds; maps smaller: 20.8 / 20.6 mm wide). layout check built into both scripts.
+- Boundaries: data/boundaries/Admin2.* are byte-identical to DataMeet maps States/Admin2 (CC BY 4.0). Outline includes
+  all of J&K and Ladakh as claimed by India (Gilgit, Muzaffarabad, Skardu, Aksai Chin, Shaksgam inside; J&K + Ladakh
+  223,131 km2). Not compared line by line with an official Survey of India file. Credit added to Fig. 3 and GA captions.

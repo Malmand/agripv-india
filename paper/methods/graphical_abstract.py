@@ -76,20 +76,22 @@ def headline(a, stage):
     return r.cap_mwp_median, r.cap_mwp_min, r.cap_mwp_max
 
 
-ISLANDS = ("Andaman & Nicobar", "Lakshadweep")
+BOUNDARY_SRC = ("State and union-territory boundaries: DataMeet India community, States/Admin2 "
+                "(https://github.com/datameet/maps, CC BY 4.0).")
+ISLANDS = ("Andaman & Nicobar", "Lakshadweep")   # Indian territory: always drawn, labels are placed around them
 
 
-def india_outline(a, sim_cells):
-    """India outline; island territories are dropped when no simulated cell falls on them."""
+def india_outline(a, sim_cells=None):
+    """India outline (all states and union territories, islands included) and the island polygons."""
     states = gpd.read_file(a.boundaries)
-    if sim_cells is not None:
-        lon, lat = sim_cells
-        pts = gpd.GeoSeries(gpd.points_from_xy(lon, lat), crs=states.crs)
-        for name in ISLANDS:
-            poly = states[states.ST_NM == name]
-            if len(poly) and not pts.within(poly.union_all()).any():
-                states = states[states.ST_NM != name]
-    return states.dissolve().simplify(0.03)
+    return states.dissolve().simplify(0.03), states[states.ST_NM.isin(ISLANDS)]
+
+
+def geo_to_mm(ax, b, lon, lat):
+    """Map coordinates on axes b -> mm on the base axes ax (after the aspect is applied)."""
+    b.apply_aspect()
+    x, y = ax.transData.inverted().transform(b.transData.transform((lon, lat)))
+    return x, y
 
 
 def load_results(a):
@@ -290,7 +292,7 @@ def write_caption(a, hlabel, scen):
         "the value shown is the median of the five national totals. "
         f"The badge gives the change in this capacity by 2041–2060 under {scen} against 1995–2014 with "
         "calibrated nitrogen: the change of the five-GCM median totals, and the range of the change over the "
-        "five GCMs.")
+        "five GCMs. " + BOUNDARY_SRC)
     (HERE / "graphical_abstract_caption.txt").write_text(txt + "\n")
 
 
@@ -370,13 +372,12 @@ def main():
     b.yaxis.set_label_coords(-0.21, 0.46)
 
     # ---- 3 result: India map of GCR_max at RY >= tau
-    mx, mw = PR[0] + 5.9, 24.0                  # map left edge and width (height follows the aspect)
+    mx, mw = PR[0] + 6.9, 20.8                  # map left edge and width (height follows the aspect)
     b = axes_mm(mx, 14.5, mw, mw * 29.5 / 26.2)
     b.set_facecolor("none")
     for s in b.spines.values():
         s.set_visible(False)
-    gr = pd.read_csv(a.grid)                    # all simulated grid cells decide whether islands are kept
-    india = india_outline(a, (gr.lon.values, gr.lat.values))
+    india, islands = india_outline(a)
     bounds = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7001]
     cmap = ListedColormap(plt.colormaps["viridis"](np.linspace(0, 1, len(bounds) - 1)))
     norm = BoundaryNorm(bounds, cmap.N)
@@ -395,12 +396,12 @@ def main():
         india.boundary.plot(ax=b, color="0.35", lw=0.4)
     b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3); b.set_aspect(1 / np.cos(np.radians(22)))
     b.set_xticks([]); b.set_yticks([]); b.set_xlabel(""); b.set_ylabel("")
-    cb_ax = axes_mm(PR[0] + 2.95, 17.4, 1.5, 8.0)    # over the Arabian Sea, so tick labels clear the coast
+    cb_ax = axes_mm(PR[0] + 2.95, 16.6, 1.5, 6.4)    # over the Arabian Sea, so tick labels clear the coast
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=[0, 0.35, 0.7])
     cb.ax.set_yticklabels(["0", "0.35", "0.7"])
     cb.ax.tick_params(labelsize=7, labelcolor=MID, length=1.5, width=0.5, pad=1)
     cb.outline.set_linewidth(0.5)
-    ax.text(PR[0] + 1.65, 21.4, "max GCR", ha="center", va="center", rotation=90, **T3)
+    ax.text(PR[0] + 1.65, 21.7, "max GCR", ha="center", va="center", rotation=90, **T3)
 
     # headline capacity, right-aligned in the empty area north-east of the map, and the 2050 badge
     big, rng = fmt_cap(head)
@@ -415,7 +416,10 @@ def main():
     # badge: white with a thin orange border; values from numbers.json, placeholders when the stage is missing
     scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(a.future.split("_")[0], "SSP5-8.5")
     med, lo, hi = ("[±X]", "[lo]", "[hi]") if change is None else change
-    bl, br = mx + mw * 0.8, PR[0] + PR[1] - 0.4  # badge starts east of the Odisha / West Bengal coast
+    b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3)
+    andaman = islands[islands.ST_NM == "Andaman & Nicobar"].total_bounds
+    bl = geo_to_mm(ax, b, andaman[2], andaman[3])[0] + 0.8   # badge starts east of the Andaman Islands
+    br = PR[0] + PR[1] - 0.4
     xb = (bl + br) / 2
     ax.add_patch(FancyBboxPatch((bl, 15.6), br - bl, 12.4, boxstyle="round,pad=0,rounding_size=1.6",
                                 fc="white", ec=ORANGE, lw=0.6))
@@ -425,7 +429,7 @@ def main():
     val = f"{med}% ({lo} to {hi}%)"
 
     # crop icons with national mean GCR_max, small label at the start of the row
-    ax.text(PR[0] + 1.5, 14.2, f"max GCR (RY ≥ {a.thr:.1f})", ha="left", va="center", **T3)
+    ax.text(PR[0] + 1.5, 13.9, f"max GCR (RY ≥ {a.thr:.1f})", ha="left", va="center", **T3)
     for (c, name), cx in zip(CROPS, (PR[0] + 6.2, PR[0] + 21.0, PR[0] + 37.0, PR[0] + 53.6)):
         ICONS[c](ax, cx - 3.4, 6.6, 6.0)
         ax.text(cx - 0.4, 9.6, "[X]" if c not in crop else f"{crop[c]:.2f}", ha="left", va="center",

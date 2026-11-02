@@ -95,7 +95,7 @@ All inputs are public; please cite the original sources.
 - ICRISAT District Level Data: https://doi.org/10.21421/D2/XFB1BZ
 - Copernicus DEM GLO-90: https://doi.org/10.5270/ESA-c5d3d65
 - CAZRI light measurements: Santra et al. (2021), Biosyst Eng 209:74-93, https://doi.org/10.1016/j.biosystemseng.2021.06.017
-- State boundaries (`data/boundaries/Admin2.shp`): [source and licence to add]
+- State boundaries (`data/boundaries/Admin2.shp`): DataMeet India community, `States/Admin2` from https://github.com/datameet/maps (byte-identical copy, checked 2026-11-02), CC BY 4.0
 
 ## Licence
 
