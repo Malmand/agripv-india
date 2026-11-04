@@ -20,9 +20,9 @@ python3 -c "import numpy, pandas, matplotlib, geopandas" 2>/dev/null || pip inst
 
 echo "== stage summaries from the bucket"
 TMP=$(mktemp -d)
-gsutil -q -m cp "$BUCKET/ry_crop_*_current.csv.gz" "$BUCKET/energy_*.csv" "$TMP/" || true
+timeout 300 gcloud storage cp "$BUCKET/ry_crop_*_current.csv.gz" "$BUCKET/energy_*.csv" "$TMP/" || true
 # recommended-N stage: only when it covers India (the 40-cell test run has the same file name)
-if gsutil -q cp "$BUCKET/ry_crop_historical_recommended.csv.gz" "$TMP/" 2>/dev/null; then
+if timeout 120 gcloud storage cp "$BUCKET/ry_crop_historical_recommended.csv.gz" "$TMP/" 2>/dev/null; then
   n=$(python3 -c "import pandas as p;print(p.read_csv('$TMP/ry_crop_historical_recommended.csv.gz',usecols=['cell']).cell.nunique())")
   if [ "$n" -lt 2500 ]; then echo "recommended-N stage covers only $n cells (test run): ignored"; rm "$TMP/ry_crop_historical_recommended.csv.gz"; fi
 fi
