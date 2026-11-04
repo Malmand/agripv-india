@@ -10,64 +10,64 @@ ew_fixed,0.66,0.75,4,yield constraint (historical_current),39.667,51143,50761,51
 ew_fixed,0.8,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 ew_fixed,0.8,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 ew_fixed,0.8,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
-ew_fixed,0.8,0.42,4,yield constraint (historical_current),39.667,45500,45481,45897,51.035,0.9791
+ew_fixed,0.8,0.42,4,yield constraint (historical_current),39.667,45488,45461,45881,51.035,0.9791
 ew_fixed,0.8,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 ew_fixed,0.8,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 ew_fixed,0.8,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
-ew_fixed,0.8,0.75,4,yield constraint (historical_current),39.667,45500,45481,45897,51.035,0.9791
+ew_fixed,0.8,0.75,4,yield constraint (historical_current),39.667,45488,45461,45881,51.035,0.9791
 ew_fixed,0.9,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 ew_fixed,0.9,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 ew_fixed,0.9,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
-ew_fixed,0.9,0.42,4,yield constraint (historical_current),39.667,40024,39819,40484,51.035,0.9791
+ew_fixed,0.9,0.42,4,yield constraint (historical_current),39.667,39794,39592,40263,51.035,0.9791
 ew_fixed,0.9,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 ew_fixed,0.9,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 ew_fixed,0.9,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
-ew_fixed,0.9,0.75,4,yield constraint (historical_current),39.667,40024,39819,40484,51.035,0.9791
+ew_fixed,0.9,0.75,4,yield constraint (historical_current),39.667,39794,39592,40263,51.035,0.9791
 south_fixed,0.66,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 south_fixed,0.66,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 south_fixed,0.66,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
-south_fixed,0.66,0.42,4,yield constraint (historical_current),39.667,40298,40106,40470,51.035,0.9791
+south_fixed,0.66,0.42,4,yield constraint (historical_current),39.667,40296,40104,40469,51.035,0.9791
 south_fixed,0.66,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 south_fixed,0.66,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 south_fixed,0.66,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
-south_fixed,0.66,0.75,4,yield constraint (historical_current),39.667,40298,40106,40470,51.035,0.9791
+south_fixed,0.66,0.75,4,yield constraint (historical_current),39.667,40296,40104,40469,51.035,0.9791
 south_fixed,0.8,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 south_fixed,0.8,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 south_fixed,0.8,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
-south_fixed,0.8,0.42,4,yield constraint (historical_current),39.667,34322,33968,34418,51.035,0.9791
+south_fixed,0.8,0.42,4,yield constraint (historical_current),39.667,34237,33878,34340,51.035,0.9791
 south_fixed,0.8,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 south_fixed,0.8,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 south_fixed,0.8,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
-south_fixed,0.8,0.75,4,yield constraint (historical_current),39.667,34322,33968,34418,51.035,0.9791
+south_fixed,0.8,0.75,4,yield constraint (historical_current),39.667,34237,33878,34340,51.035,0.9791
 south_fixed,0.9,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 south_fixed,0.9,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 south_fixed,0.9,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
-south_fixed,0.9,0.42,4,yield constraint (historical_current),39.667,28990,28474,29150,51.035,0.9791
+south_fixed,0.9,0.42,4,yield constraint (historical_current),39.667,28715,28195,28864,51.035,0.9791
 south_fixed,0.9,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 south_fixed,0.9,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 south_fixed,0.9,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
-south_fixed,0.9,0.75,4,yield constraint (historical_current),39.667,28990,28474,29150,51.035,0.9791
+south_fixed,0.9,0.75,4,yield constraint (historical_current),39.667,28715,28195,28864,51.035,0.9791
 vertical,0.66,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 vertical,0.66,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 vertical,0.66,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
-vertical,0.66,0.42,4,yield constraint (historical_current),39.667,47605,47505,47687,51.035,0.9791
+vertical,0.66,0.42,4,yield constraint (historical_current),39.667,47722,47606,47778,51.035,0.9791
 vertical,0.66,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 vertical,0.66,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 vertical,0.66,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
-vertical,0.66,0.75,4,yield constraint (historical_current),39.667,47605,47505,47687,51.035,0.9791
+vertical,0.66,0.75,4,yield constraint (historical_current),39.667,47722,47606,47778,51.035,0.9791
 vertical,0.8,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 vertical,0.8,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 vertical,0.8,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
-vertical,0.8,0.42,4,yield constraint (historical_current),39.667,42021,41808,42299,51.035,0.9791
+vertical,0.8,0.42,4,yield constraint (historical_current),39.667,42806,42629,43050,51.035,0.9791
 vertical,0.8,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 vertical,0.8,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 vertical,0.8,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
-vertical,0.8,0.75,4,yield constraint (historical_current),39.667,42021,41808,42299,51.035,0.9791
+vertical,0.8,0.75,4,yield constraint (historical_current),39.667,42806,42629,43050,51.035,0.9791
 vertical,0.9,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 vertical,0.9,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 vertical,0.9,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
-vertical,0.9,0.42,4,yield constraint (historical_current),39.667,37147,36815,37428,51.035,0.9791
+vertical,0.9,0.42,4,yield constraint (historical_current),39.667,38087,37802,38270,51.035,0.9791
 vertical,0.9,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 vertical,0.9,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 vertical,0.9,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
-vertical,0.9,0.75,4,yield constraint (historical_current),39.667,37147,36815,37428,51.035,0.9791
+vertical,0.9,0.75,4,yield constraint (historical_current),39.667,38087,37802,38270,51.035,0.9791
