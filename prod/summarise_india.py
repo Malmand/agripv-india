@@ -15,12 +15,40 @@ from multiprocessing import Pool
 import numpy as np
 import pandas as pd
 
+import pv_shading as ps
+
 GRID = None
 KEY = ["cell", "model", "period", "mgmt", "crop", "water"]
 
 
+_CF = {}
+
+
+def fix_rows(df):
+    """Repair two effects of sim_india.py writing task CSVs with float_format "%.1f" (fixed 4 Nov 2026):
+    (1) GCR 0.05 (chickpea, groundnut) was written as 0.1. Within a task file the 0.05 rows of a
+        (crop, water, config, strip, season) come before the 0.1 rows (GCRs run in ascending order),
+        so where a key occurs twice at 0.1, the first occurrence is relabelled 0.05.
+    (2) cult_frac was rounded to one decimal (vertical layout). It depends only on layout and GCR,
+        so it is recomputed from the geometry."""
+    apv = df.config != "open"
+    leg = apv & df.crop.isin(["chickpea", "groundnut"]) & np.isclose(df.gcr, 0.1)
+    if leg.any():
+        k = ["cell", "model", "period", "mgmt", "crop", "water", "config", "strip", "season"]
+        sub = df[leg]
+        n = sub.groupby(k).cumcount()
+        size = sub.groupby(k).season.transform("size")
+        df.loc[n.index[(n == 0) & (size == 2)], "gcr"] = 0.05
+    df["gcr"] = df.gcr.round(2)
+    for (cfgname, g), idx in df[apv].groupby(["config", "gcr"]).groups.items():
+        if (cfgname, g) not in _CF:
+            _CF[(cfgname, g)] = ps.strip_geometry(ps.make_config(cfgname), g)["cult_frac"]
+        df.loc[idx, "cult_frac"] = _CF[(cfgname, g)]
+    return df
+
+
 def ry_file(f):
-    df = pd.read_csv(f)
+    df = fix_rows(pd.read_csv(f))
     op = df[df.config == "open"].groupby(KEY).agg(open_mean=("hwam", "mean"), open_sd=("hwam", "std"),
                                                   open_irri=("irri", "mean")).reset_index()
     apv = df[df.config != "open"]

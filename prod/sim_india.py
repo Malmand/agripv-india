@@ -236,7 +236,7 @@ def task(npy_path, meta, cell, soil_json, period, mgmt, model, out_csv):
     ew = df[(df.config == "ew_fixed") & df.strip.isin([0, 1])]
     df = pd.concat([df, ew.assign(strip=4 - ew.strip)], ignore_index=True)
     tmp = out_csv + ".part"
-    df.to_csv(tmp, index=False, float_format="%.1f")
+    df.to_csv(tmp, index=False, float_format="%.6g")
     os.replace(tmp, out_csv)
     if sim.FAILS or retried:
         pd.DataFrame(sim.FAILS + [("retries", retried, "")]).to_csv(out_csv + ".issues", index=False, header=False)
