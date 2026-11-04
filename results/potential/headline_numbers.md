@@ -48,41 +48,41 @@
 |---|---|---|---|---|
 | ew_fixed | 0.66 | 39.67 | 50.65 (49.31–51.39) | 86.73 (84.59–87.90) |
 | south_fixed | 0.66 | 39.67 | 40.18 (39.27–42.36) | 74.11 (72.61–77.75) |
-| vertical | 0.66 | 39.67 | 47.79 (47.67–48.14) | 56.51 (56.40–56.84) |
-| ew_fixed | 0.80 | 39.67 | 44.91 (42.97–46.02) | 77.40 (74.18–79.17) |
-| south_fixed | 0.80 | 39.67 | 33.83 (32.50–36.52) | 63.16 (60.84–67.75) |
-| vertical | 0.80 | 39.67 | 41.91 (41.06–42.54) | 50.68 (49.76–51.34) |
-| ew_fixed | 0.90 | 39.67 | 39.00 (36.57–40.88) | 67.55 (63.39–70.56) |
-| south_fixed | 0.90 | 39.67 | 28.12 (26.72–31.34) | 53.00 (50.43–58.57) |
-| vertical | 0.90 | 39.67 | 36.71 (34.80–37.38) | 44.76 (42.75–45.50) |
+| vertical | 0.66 | 39.67 | 47.90 (47.83–48.22) | 56.61 (56.55–56.90) |
+| ew_fixed | 0.80 | 39.67 | 44.89 (42.95–46.00) | 77.37 (74.16–79.13) |
+| south_fixed | 0.80 | 39.67 | 33.74 (32.44–36.42) | 63.00 (60.72–67.57) |
+| vertical | 0.80 | 39.67 | 42.72 (42.06–43.13) | 51.57 (50.86–51.97) |
+| ew_fixed | 0.90 | 39.67 | 38.77 (36.34–40.65) | 67.16 (62.99–70.16) |
+| south_fixed | 0.90 | 39.67 | 27.84 (26.44–31.05) | 52.48 (49.92–58.05) |
+| vertical | 0.90 | 39.67 | 37.59 (35.61–38.25) | 45.80 (43.74–46.55) |
 
 ### ssp585_current: area-weighted mean of the five-GCM median GCR_max at τ = 0.80
 
 | Crop | Layout | GCR_max | Share of area at simulated GCR limit |
 |---|---|---|---|
 | chickpea | ew_fixed | 0.27 | 3% |
-| chickpea | south_fixed | 0.20 | 0% |
-| chickpea | vertical | 0.25 | 8% |
+| chickpea | south_fixed | 0.19 | 0% |
+| chickpea | vertical | 0.28 | 5% |
 | groundnut | ew_fixed | 0.31 | 6% |
 | groundnut | south_fixed | 0.31 | 2% |
-| groundnut | vertical | 0.29 | 10% |
+| groundnut | vertical | 0.33 | 7% |
 | pearl_millet | ew_fixed | 0.53 | 0% |
 | pearl_millet | south_fixed | 0.48 | 0% |
-| pearl_millet | vertical | 0.59 | 64% |
+| pearl_millet | vertical | 0.59 | 69% |
 | wheat | ew_fixed | 0.62 | 45% |
 | wheat | south_fixed | 0.44 | 0% |
-| wheat | vertical | 0.55 | 72% |
+| wheat | vertical | 0.56 | 74% |
 
 ### ssp585_current: top states, best layout, τ = 0.80 (GWp)
 
 - Uttar Pradesh: 14172
-- Rajasthan: 7316
-- Madhya Pradesh: 6440
+- Rajasthan: 7361
+- Madhya Pradesh: 6438
 - Haryana: 3514
 - Bihar: 3153
 - Punjab: 2729
-- Gujarat: 2254
-- Maharashtra: 2098
+- Gujarat: 2328
+- Maharashtra: 2166
 
 ## Change historical_current → ssp585_current (capacity, %)
 
@@ -90,11 +90,11 @@
 - ew_fixed, τ 0.80: -1%
 - ew_fixed, τ 0.90: -3%
 - south_fixed, τ 0.66: -0%
-- south_fixed, τ 0.80: -1%
-- south_fixed, τ 0.90: -3%
-- vertical, τ 0.66: +0%
-- vertical, τ 0.80: -0%
-- vertical, τ 0.90: -1%
+- south_fixed, τ 0.80: -2%
+- south_fixed, τ 0.90: -4%
+- vertical, τ 0.66: +1%
+- vertical, τ 0.80: +2%
+- vertical, τ 0.90: +1%
 
 ## Vertical layout, DIN cap GCR_max ≤ 0.6 (main) vs uncapped, historical_current (TWp)
 
@@ -104,9 +104,9 @@
 
 ## Vertical layout, DIN cap GCR_max ≤ 0.6 (main) vs uncapped, ssp585_current (TWp)
 
-- τ 0.66: capped 47.79, uncapped 53.10 (-10%)
-- τ 0.80: capped 41.91, uncapped 46.70 (-10%)
-- τ 0.90: capped 36.71, uncapped 39.85 (-8%)
+- τ 0.66: capped 47.90, uncapped 53.35 (-10%)
+- τ 0.80: capped 42.72, uncapped 47.80 (-11%)
+- τ 0.90: capped 37.59, uncapped 41.47 (-9%)
 
 ## Sanity checks
 
@@ -132,15 +132,15 @@
 |---|---|---|---|
 | ew_fixed | 0.66 | 1.28 | 1713 |
 | south_fixed | 0.66 | 1.01 | 1845 |
-| vertical | 0.66 | 1.20 | 1182 |
+| vertical | 0.66 | 1.21 | 1182 |
 | ew_fixed | 0.80 | 1.13 | 1724 |
 | south_fixed | 0.80 | 0.85 | 1867 |
-| vertical | 0.80 | 1.06 | 1209 |
+| vertical | 0.80 | 1.08 | 1207 |
 | ew_fixed | 0.90 | 0.98 | 1732 |
-| south_fixed | 0.90 | 0.71 | 1884 |
-| vertical | 0.90 | 0.93 | 1219 |
+| south_fixed | 0.90 | 0.70 | 1885 |
+| vertical | 0.90 | 0.95 | 1218 |
 
-- ssp585_current: vertical layout, share of eligible area with uncapped GCR_max > 0.6 (DIN 15% land loss, capped at 0.6 in the main case): τ 0.66 64%, τ 0.80 58%, τ 0.90 42%
+- ssp585_current: vertical layout, share of eligible area with uncapped GCR_max > 0.6 (DIN 15% land loss, capped at 0.6 in the main case): τ 0.66 68%, τ 0.80 61%, τ 0.90 52%
 
 ### historical_current: open-field yield (kg/ha, 5-GCM median, SPAM-area weighted)
 
