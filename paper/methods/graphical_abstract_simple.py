@@ -105,8 +105,8 @@ def disc(ax, r, x, y_top, first_line, n, xmin, **T):
     t = ax.text(x, y_top, first_line, ha="center", va="top", **T)
     e = t.get_window_extent(r).transformed(ax.transData.inverted())
     t.remove()
-    dx = max(0.0, xmin + 0.6 - (e.x0 - 0.5 - 2 * rd))
-    cx, cy = e.x0 + dx - 0.5 - rd, (e.y0 + e.y1) / 2
+    dx = max(0.0, xmin + 0.6 - (e.x0 - 0.8 - 2 * rd))
+    cx, cy = e.x0 + dx - 0.8 - rd, (e.y0 + e.y1) / 2
     ax.add_patch(Circle((cx, cy), rd, fc=INK, ec="none", zorder=5))
     ax.text(cx, cy - 0.05, str(n), ha="center", va="center", fontsize=7, fontweight="bold", color="white", zorder=6)
     return dx
@@ -246,13 +246,16 @@ def main():
     ax.text(xe, 35.0, big, ha="right", va="center", fontsize=14, **T1)
     mult_key = "frame.head_multiple" if "frame.head_multiple" in num else "frame.main_multiple"
     mult = num.get(mult_key, "[N]")
-    ax.text(xe, 31.8, f"would generate ≈ {mult}×\nIndia's yearly\nelectricity use", ha="right", va="top",
-            linespacing=1.1, **T3)
-    ax.text(xe, 22.5, f"({hlabel})", ha="right", va="center", fontsize=7, fontweight="bold", color=INK)
+    # stack the right-column lines from measured text heights, so font metrics on another machine cannot overlap
+    def below(t, gap=0.7):
+        return t.get_window_extent(r).transformed(ax.transData.inverted()).y0 - gap
+    t = ax.text(xe, 31.8, f"would generate ≈ {mult}×\nIndia's yearly\nelectricity use", ha="right", va="top",
+                linespacing=1.1, **T3)
+    t = ax.text(xe, below(t), f"({hlabel})", ha="right", va="top", fontsize=7, fontweight="bold", color=INK)
     scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(a.future.split("_")[0], "SSP5-8.5")
     p = a.future.split("_")[0]
     ch = num.get(f"{p}.change_pct", "[±X]")
-    ax.text(xe, 18.6, f"2050 ({scen}):\n{ch}% vs 1995–2014", ha="right", va="center", linespacing=1.1, **T3)
+    ax.text(xe, below(t), f"2050 ({scen}):\n{ch}% vs 1995–2014", ha="right", va="top", linespacing=1.1, **T3)
 
     # crop groups: two icons each with the group's panel cover, under a small row label
     ax.text(x + 1.4, 12.1, "max panel cover:", ha="left", va="center", **T3)
