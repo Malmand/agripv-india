@@ -19,12 +19,25 @@ python3 -c "import numpy, pandas, matplotlib, geopandas" 2>/dev/null || pip inst
 (cd paper/methods && [ -d node_modules/docx ] || npm install --silent --no-save docx)
 
 echo "== stage summaries from the bucket"
+# Mirror only the files the pipeline needs into a local cache; rsync downloads only files that changed.
+# The link from Cloud Shell to the bucket can be very slow, so there is no time limit, and the script
+# stops if any file is incomplete (a half-copied file would silently mix old and new results).
+CACHE=~/agripv-stage-cache; mkdir -p $CACHE
+# first run: seed with the energy files already in the repo (unchanged ones are then not downloaded again)
+[ -n "$(ls $CACHE)" ] || cp runs/s1/summary/energy_*.csv $CACHE/ 2>/dev/null || true
+PAT='^(?!(ry_crop_.*_current\.csv\.gz|ry_crop_historical_recommended\.csv\.gz|energy_.*\.csv)$).*'
+gcloud storage rsync "$BUCKET" $CACHE --exclude "$PAT"
+left=$(gcloud storage rsync "$BUCKET" $CACHE --exclude "$PAT" --dry-run 2>&1 | grep -c "Would copy" || true)
+if [ "$left" != "0" ] || ls $CACHE/*.gstmp >/dev/null 2>&1; then
+  echo "STOP: $left file(s) still differ from the bucket (slow or broken download). Run the script again."; exit 1
+fi
 TMP=$(mktemp -d)
-timeout 300 gcloud storage cp "$BUCKET/ry_crop_*_current.csv.gz" "$BUCKET/energy_*.csv" "$TMP/" || true
+cp $CACHE/ry_crop_*_current.csv.gz $CACHE/energy_*.csv "$TMP/"
 # recommended-N stage: only when it covers India (the 40-cell test run has the same file name)
-if timeout 120 gcloud storage cp "$BUCKET/ry_crop_historical_recommended.csv.gz" "$TMP/" 2>/dev/null; then
-  n=$(python3 -c "import pandas as p;print(p.read_csv('$TMP/ry_crop_historical_recommended.csv.gz',usecols=['cell']).cell.nunique())")
-  if [ "$n" -lt 2500 ]; then echo "recommended-N stage covers only $n cells (test run): ignored"; rm "$TMP/ry_crop_historical_recommended.csv.gz"; fi
+if [ -f $CACHE/ry_crop_historical_recommended.csv.gz ]; then
+  n=$(python3 -c "import pandas as p;print(p.read_csv('$CACHE/ry_crop_historical_recommended.csv.gz',usecols=['cell']).cell.nunique())")
+  if [ "$n" -lt 2500 ]; then echo "recommended-N stage covers only $n cells (test run): ignored"
+  else cp $CACHE/ry_crop_historical_recommended.csv.gz "$TMP/"; fi
 fi
 ls -l "$TMP"
 (cd "$TMP" && zip -q stages.zip *.csv *.csv.gz)
