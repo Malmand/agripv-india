@@ -46,10 +46,16 @@ def main():
         c = pd.read_csv(a.pp / f"cell_crop_{st}.csv.gz")
         c = c[(c.slope_rule == "le5") & (c.thr.round(2) == 0.8) & (c.elig_ha > 0)]
         w = c.groupby(["crop", "config"]).apply(lambda d: pd.Series({
-            "gcr_aw": np.average(d.gcr_max, weights=d.elig_ha),
             "share_at_cap": np.average(d.at_cap.astype(float), weights=d.elig_ha) if "at_cap" in d else np.nan}),
             include_groups=False).reset_index()
-        out += [f"### {st}: area-weighted GCR_max at τ = 0.80 (all GCMs pooled)", "",
+        # GCR_max: eligible-area-weighted mean of the five-GCM median map (map_gcr), the definition used in the
+        # manuscript, Fig. 3 and the graphical abstract (src/make_numbers.py)
+        m = pd.read_csv(a.pp / f"map_gcr_{st}.csv.gz")
+        m = m[(m.thr.round(2) == 0.8) & (m.elig_ha > 0)]
+        g = m.groupby(["crop", "config"]).apply(lambda d: np.average(d.gcr_med, weights=d.elig_ha),
+                                                include_groups=False).rename("gcr_aw").reset_index()
+        w = w.merge(g, on=["crop", "config"], how="left")
+        out += [f"### {st}: area-weighted mean of the five-GCM median GCR_max at τ = 0.80", "",
                 "| Crop | Layout | GCR_max | Share of area at simulated GCR limit |", "|---|---|---|---|"]
         out += [f"| {r.crop} | {r.config} | {r.gcr_aw:.2f} | {r.share_at_cap:.0%} |" for r in w.itertuples()]
         out.append("")

@@ -27,7 +27,15 @@ Key scheme (main case: east-west layout, RY >= 0.80, calibrated N, slope <= 5%):
   frame.*     cea_twh (India 2025-26 energy requirement, CEA LGBR 2026-27), <p>_multiple (annual energy / consumption),
               gw300/gw500 .land_mha .share (cropland needed at the headline density, % of eligible land)
   recon.*     reconciliation waterfall (reconcile.csv): d42/d75 .s<step>.twp, slope_pct, double_pct, yield_pct
-  ga.*        headline, range, label, change_2050, gcr_<crop>
+  ga.*        headline, range, label, change_2050, gcr_<crop>, cover_<cereals|legumes>_pct
+  <p>.ew.t80.gcr_<cereals|legumes>, cover_<..>_pct   group means (graphical-abstract definition)
+  hist.wheat_n<N>.atcap/.area_share, hist.wheat_<lown|hin>.atcap/.area_share   wheat at the GCR limit by
+              calibrated N level; hist.wheat_<atcap|notcap>.open_rel180 open yield at calibrated N / at 180 kg N
+  calib.<crop>.spearman_nuse   rank correlation of calibrated N with state fertiliser N use
+  <p>.energy_change_pct, sy_change_pct, irr_change_pct, pr_change_pct   mid-century energy change and its parts
+  <p>.open_<crop>_pct, ry03_<crop>_delta   mid-century open-field yield change and RY change at GCR 0.3
+  pilot.*, jodhpur.*   Rajasthan pilot (runs/rajasthan_final) and Jodhpur soil test (results/*_F)
+  hist.din_gain_pct (uncapped vs capped vertical), recon.land_keep_pct
 Usage: python src/make_numbers.py [--pp results/potential] [--validation results/validation_before_after.csv]
 """
 import argparse
@@ -292,6 +300,8 @@ def din_numbers(N, pp):
             if tk == "t80" and rc is not None and ru.cap_mwp_median > 0:
                 x = 100 * (1 - rc.cap_mwp_median / ru.cap_mwp_median)
                 N.put(f"{p}.din_cut_pct", x, pct(x))
+                y = 100 * (ru.cap_mwp_median / rc.cap_mwp_median - 1)   # uncapped relative to capped
+                N.put(f"{p}.din_gain_pct", y, pct(y))
         b = tu[(tu.thr.round(2) == MAIN_THR) & (tu.slope_rule == "le5")].sort_values("cap_mwp_median")
         if len(b):
             lay = LAYOUT_TEXT.get(b.iloc[-1].config, b.iloc[-1].config)
@@ -386,6 +396,12 @@ def ga_numbers(N):
     for crop in CROPS:
         if f"head.gcr_{crop}" in N.raw:
             N.put(f"ga.gcr_{crop}", N.raw[f"head.gcr_{crop}"], N.values[f"head.gcr_{crop}"])
+    src = "robust" if N.raw.get("head.is_robust") else "hist"
+    for name in ("cereals", "legumes"):
+        k = f"{src}.ew.t80.cover_{name}_pct"
+        if k in N.raw:
+            N.put(f"ga.cover_{name}_pct", N.raw[k], N.values[k])
+            N.put(f"head.gcr_{name}", N.raw[f"{src}.ew.t80.gcr_{name}"], N.values[f"{src}.ew.t80.gcr_{name}"])
 
 
 def reconcile_numbers(N, pp):
@@ -407,6 +423,7 @@ def reconcile_numbers(N, pp):
         if {1, 3}.issubset(d.index):
             x = 100 * (1 - d.land_mha[3] / d.land_mha[1])
             N.put("recon.land_cut_pct", x, pct(x))
+            N.put("recon.land_keep_pct", 100 - x, pct(100 - x))
         if {3, 4}.issubset(d.index):
             x = 100 * (d.gw_median[4] / d.gw_median[3] - 1)
             N.put(f"recon.{dk}.yield_pct", x, pct(x, True))
@@ -420,29 +437,213 @@ def calib_numbers(N, f):
         return
     d = pd.read_csv(f)
     d = d[d.obs_area >= 50]
-    for crop in CEREALS:
+    for crop in CROPS:
         for case in ("before", "after"):
             s = d[(d.crop == crop) & (d.case == case)]
             if len(s) < 3:
                 continue
             r = np.corrcoef(s.obs, s.sim)[0, 1]
             mape = 100 * np.average((s.sim / s.obs - 1).abs(), weights=s.obs_area)
-            N.put(f"calib.{crop}.{case}.r", r, f"{r:.2f}")
+            ratio = np.average(s.sim / s.obs, weights=s.obs_area)           # area-weighted mean of state ratios
+            pool = np.average(s.sim, weights=s.obs_area) / np.average(s.obs, weights=s.obs_area)
+            N.put(f"calib.{crop}.{case}.r", r, f"{r:.2f}".replace("-", MINUS))
             N.put(f"calib.{crop}.{case}.mape", mape, pct(mape))
             N.put(f"calib.{crop}.{case}.n", len(s), f"{len(s)}")
+            N.put(f"calib.{crop}.{case}.ratio", ratio, f"{ratio:.2f}")
+            N.put(f"calib.{crop}.{case}.ratio_pool", pool, f"{pool:.2f}")
+
+
+def group_numbers(N, p, m):
+    """Cereal and legume group means of GCR_max (graphical-abstract definition: eligible-area-weighted mean of
+    the five-GCM median map, all cells of the two crops pooled), main layout, tau 0.80."""
+    d = m[m.config == MAIN_LAYOUT]
+    for name, crops in (("cereals", CEREALS), ("legumes", LEGUMES)):
+        e = d[d.crop.isin(crops)]
+        if len(e):
+            g = np.average(e.gcr_med, weights=e.elig_ha)
+            N.put(f"{p}.ew.t80.gcr_{name}", g, f"{g:.2f}")
+            N.put(f"{p}.ew.t80.cover_{name}_pct", 100 * g, f"{100 * g:.0f}")
+
+
+def masking_numbers(N, c, calib_dir, calib_n):
+    """Wheat at the simulated GCR limit by calibrated N level, and the open-field yield at calibrated N relative
+    to 180 kg N/ha (irrigated system where simulated, else rainfed; mean of the two calibration GCMs)."""
+    if not calib_n.exists():
+        return
+    cal = pd.read_csv(calib_n)
+    cw = cal[cal.crop == "wheat"].set_index("state").n
+    w = c[(c.crop == "wheat") & (c.config == MAIN_LAYOUT)].copy()
+    if not len(w):
+        return
+    w["n"] = w.state.map(cw).fillna(cw.get("ALL", 60)).astype(int)
+    tot = w.elig_ha.sum()
+    for n, t in w.groupby("n"):
+        s = 100 * np.average(t.at_cap.astype(float), weights=t.elig_ha)
+        N.put(f"hist.wheat_n{n}.atcap", s, pct(s))
+        N.put(f"hist.wheat_n{n}.area_share", 100 * t.elig_ha.sum() / tot, pct(100 * t.elig_ha.sum() / tot))
+    for name, sel_ in (("lown", w.n <= 60), ("hin", w.n >= 90)):
+        t = w[sel_]
+        if len(t):
+            s = 100 * np.average(t.at_cap.astype(float), weights=t.elig_ha)
+            N.put(f"hist.wheat_{name}.atcap", s, pct(s))
+            N.put(f"hist.wheat_{name}.area_share", 100 * t.elig_ha.sum() / tot, pct(100 * t.elig_ha.sum() / tot))
+    o = {}
+    for n in (30, 60, 90, 120, 180):
+        f = calib_dir / f"ry_system_historical_n{n}_open.csv.gz"
+        if not f.exists():
+            return
+        d = pd.read_csv(f)
+        d = d[d.crop == "wheat"].groupby(["cell", "water"]).open_mean.mean().unstack()
+        o[n] = d["ir"].fillna(d["rf"]) if "rf" in d else d["ir"]
+    o = pd.DataFrame(o)
+    cc = w.groupby("cell").agg(n=("n", "first"), atcap=("at_cap", "mean"), a=("elig_ha", "sum")).join(o, how="inner")
+    cc["gap"] = [r[r.n] / r[180] for _, r in cc.iterrows()]
+    for name, t in (("atcap", cc[cc.atcap >= 0.5]), ("notcap", cc[cc.atcap < 0.5])):
+        if len(t):
+            g = 100 * np.average(t.gap, weights=t.a)
+            N.put(f"hist.wheat_{name}.open_rel180", g, pct(g))
+
+
+def spearman_numbers(N, f, nuse_file):
+    """Rank correlation of the calibrated state N level with state fertiliser N use (kg N per ha of gross cropped
+    area, 1995-2014), states with >= 50 kha (same as src/calibrate_n.py)."""
+    if not (f.exists() and nuse_file.exists()):
+        return
+    a = pd.read_csv(f)
+    a = a[(a.case == "after") & (a.obs_area >= 50)]
+    nu = pd.read_csv(nuse_file).rename(columns={"State Name": "state"})
+    nu["state"] = nu.state.replace({"Orissa": "Odisha"})
+    for crop in CEREALS:
+        x = a[a.crop == crop].merge(nu, on="state", how="inner")
+        if len(x) >= 3:
+            r = x[["n", "kgN_per_ha_gca"]].corr(method="spearman").iloc[0, 1]
+            N.put(f"calib.{crop}.spearman_nuse", r, f"{r:.2f}")
+
+
+def energy_change_numbers(N, pp, summary, p):
+    """Mid-century change in energy, specific yield, front plane-of-array irradiance and the remainder
+    (performance ratio, mainly module temperature), main layout and threshold."""
+    e0, e1 = N.raw.get(f"hist.ew.t80.energy_pwh"), N.raw.get(f"{p}.ew.t80.energy_pwh")
+    if e0 and e1:
+        x = 100 * (e1 / e0 - 1)
+        N.put(f"{p}.energy_change_pct", x, pct(x, True))
+    s0, s1 = N.raw.get("hist.ew.t80.sy"), N.raw.get(f"{p}.ew.t80.sy")
+    if s0 and s1:
+        x = 100 * (s1 / s0 - 1)
+        N.put(f"{p}.sy_change_pct", x, pct(x, True))
+    per = {"ssp245": "ssp245", "ssp585": "ssp585"}[p]
+    fh, ff = summary / "energy_historical.csv", summary / f"energy_{per}.csv"
+    cl = pp / f"cell_combined_{STAGES['hist']}.csv.gz"
+    if not (fh.exists() and ff.exists() and cl.exists()):
+        return
+    x = pd.read_csv(fh).merge(pd.read_csv(ff), on=["cell", "config", "gcr"], suffixes=("_h", "_f"))
+    x = x[x.config == MAIN_LAYOUT]
+    land = pd.read_csv(cl)
+    land = land[(land.config == MAIN_LAYOUT) & (land.thr.round(2) == MAIN_THR) & (land.slope_rule == "le5")]
+    land = land.groupby("cell").land_ha.first()
+    x = x.join(land, on="cell").dropna(subset=["land_ha"])
+    if not len(x):
+        return
+    w = x.land_ha
+    sy = np.average(x.yield_kwh_kwp_f, weights=w) / np.average(x.yield_kwh_kwp_h, weights=w) - 1
+    poa = np.average(x.poa_front_kwh_m2_f * (1 + x.rear_gain_f), weights=w) / \
+        np.average(x.poa_front_kwh_m2_h * (1 + x.rear_gain_h), weights=w) - 1
+    pr = (1 + sy) / (1 + poa) - 1
+    N.put(f"{p}.irr_change_pct", 100 * poa, f"{100 * poa:+.1f}".replace("-", MINUS))
+    N.put(f"{p}.pr_change_pct", 100 * pr, f"{100 * pr:+.1f}".replace("-", MINUS))
+
+
+def open_field_change_numbers(N, summary, c, p):
+    """Mid-century change of open-field legume yields and of RY at GCR 0.3 (main layout); per cell the mean over
+    GCMs, then the eligible-area-weighted median over cells. CO2 is included in the future runs."""
+    fh, ff = summary / "ry_crop_historical_current.csv.gz", summary / f"ry_crop_{STAGES[p]}.csv.gz"
+    if not (fh.exists() and ff.exists()):
+        return
+    k = ["cell", "crop", "config", "gcr"]
+    a = pd.read_csv(fh)
+    b = pd.read_csv(ff)
+    a = a[(a.config == MAIN_LAYOUT) & (a.gcr.round(2) == 0.3)].groupby(k)[["open", "ry"]].mean()
+    b = b[(b.config == MAIN_LAYOUT) & (b.gcr.round(2) == 0.3)].groupby(k)[["open", "ry"]].mean()
+    x = a.join(b, lsuffix="_h", rsuffix="_f", how="inner").reset_index()
+    el = c[c.config == MAIN_LAYOUT].groupby(["cell", "crop"]).elig_ha.mean().rename("w").reset_index()
+    x = x.merge(el, on=["cell", "crop"])
+    for crop in CROPS:
+        t = x[(x.crop == crop) & (x.w > 0) & (x.open_h > 0)]
+        if len(t):
+            g = wmedian(100 * (t.open_f / t.open_h - 1), t.w)
+            N.put(f"{p}.open_{crop}_pct", g, pct(g, True))
+            r = wmedian(t.ry_f - t.ry_h, t.w)
+            N.put(f"{p}.ry03_{crop}_delta", r, "0.00" if abs(r) < 0.005 else f"{r:+.2f}".replace("-", MINUS))
+
+
+def pilot_numbers(N, pilot, jodhpur):
+    """Rajasthan pilot (runs/rajasthan_final, SM Section S9) and the Jodhpur single-cell soil test (results/)."""
+    f, g = pilot / "ry_ensemble.csv", pilot / "gcr_max.csv"
+    if f.exists():
+        d = pd.read_csv(f)
+        N.put("pilot.n_cells", d.cell.nunique(), f"{d.cell.nunique()}")
+        h = d[d.period == "historical"]
+        for crop in ("wheat", "pearl_millet"):
+            for mg in ("farmer", "recommended"):
+                for gcr in (0.3, 0.5):
+                    t = h[(h.system == crop) & (h.config == "south_fixed") & (h.mgmt == mg) & (h.gcr.round(2) == gcr)]
+                    if len(t):
+                        v = t.ry_med.median()
+                        N.put(f"pilot.{crop}.south.{mg}.g{int(gcr * 10)}", v, f"{v:.2f}")
+        kk = ["cell", "mgmt", "system", "config", "gcr"]
+        x = h[kk + ["ry_med"]].merge(d[d.period == "ssp245"][kk + ["ry_med"]], on=kk)
+        if len(x):
+            v = (x.ry_med_y - x.ry_med_x).groupby([x.system, x.config]).median().abs().max()
+            N.put("pilot.ssp245_ry_change_max", v, f"{v:.2f}")
+    if g.exists():
+        m = pd.read_csv(g)
+        m = m[m.period == "historical"]
+        med = m.groupby(["mgmt", "system", "config"]).gcr_max.median()
+        for crop, systems in (("chickpea", ["chickpea_irrigated", "chickpea_rainfed", "chickpea_mix"]),
+                              ("groundnut", ["groundnut_irrigated", "groundnut_rainfed"]),
+                              ("wheat", ["wheat"]), ("pearl_millet", ["pearl_millet"])):
+            v = med.loc["farmer"][med.loc["farmer"].index.get_level_values(0).isin(systems)]
+            if len(v):
+                N.put(f"pilot.{crop}.gcr_lo", v.min(), f"{v.min():.1f}")
+                N.put(f"pilot.{crop}.gcr_hi", v.max(), f"{v.max():.1f}")
+        if "recommended" in med.index.get_level_values(0):
+            r = med.loc["recommended"].loc["wheat"]
+            for cfg, lk in LAYOUTS.items():
+                if lk in r.index:
+                    N.put(f"pilot.wheat.rec.{cfg}.gcr", r[lk], f"{r[lk]:.1f}")
+    for soil in ("soilgrids", "loamy_sand"):
+        o, s = jodhpur / f"{soil}_F" / "open_field_yield.csv", jodhpur / f"{soil}_F" / "pilot_summary.csv"
+        if o.exists():
+            y = pd.read_csv(o).set_index("crop")["mean"].get("pearl_millet")
+            if y is not None:
+                N.put(f"jodhpur.{soil}.millet_open", y, f"{y:.0f}")
+        if s.exists():
+            t = pd.read_csv(s)
+            t = t[(t.crop == "pearl_millet") & (t.config == "south_fixed") & (t.gcr.round(2) == 0.3)]
+            if len(t):
+                N.put(f"jodhpur.{soil}.millet_ry_s03", t.ry.iloc[0], f"{t.ry.iloc[0]:.2f}")
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pp", type=Path, default=Path("results/potential"))
     ap.add_argument("--validation", type=Path, default=Path("results/validation_before_after.csv"))
+    ap.add_argument("--summary", type=Path, default=Path("runs/s1/summary"), help="stage summaries (energy, ry_crop)")
+    ap.add_argument("--calib-dir", type=Path, default=Path("runs/calib/cal"), help="N calibration sweep")
+    ap.add_argument("--calib-n", type=Path, default=Path("prod/calib_n.csv"))
+    ap.add_argument("--nuse", type=Path, default=Path("data/yields/state_n_use_1995_2014.csv"))
+    ap.add_argument("--pilot", type=Path, default=Path("runs/rajasthan_final"))
+    ap.add_argument("--jodhpur", type=Path, default=Path("results"), help="Jodhpur single-cell soil test")
     a = ap.parse_args()
     N = Numbers()
     present = {p: st for p, st in STAGES.items() if (a.pp / f"india_combined_{st}.csv").exists()}
     for p, st in present.items():
         t, m, c = stage_numbers(N, p, a.pp, st)
+        group_numbers(N, p, m)
         if p == "hist":
             hist_extras(N, a.pp, t, m, c)
+            masking_numbers(N, c, a.calib_dir, a.calib_n)
+            c_hist = c
     main_aliases(N)
     robust_numbers(N, a.pp)
     headline_numbers(N)
@@ -450,9 +651,15 @@ def main():
     din_numbers(N, a.pp)
     for p in ("ssp245", "ssp585"):
         future_numbers(N, a.pp, p)
+        if p in present:
+            energy_change_numbers(N, a.pp, a.summary, p)
+            if "hist" in present:
+                open_field_change_numbers(N, a.summary, c_hist, p)
     ga_numbers(N)
     reconcile_numbers(N, a.pp)
     calib_numbers(N, a.validation)
+    spearman_numbers(N, a.validation, a.nuse)
+    pilot_numbers(N, a.pilot, a.jodhpur)
     out = {"meta": {"stages": present, "main_case": {"layout": MAIN_LAYOUT, "thr": MAIN_THR, "slope": "le5",
                                                      "management": "calibrated N"},
                     "headline": N.values.get("head.label"), "din_cap_vertical": 0.6,

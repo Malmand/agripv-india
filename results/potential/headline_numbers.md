@@ -14,16 +14,16 @@
 | south_fixed | 0.90 | 39.67 | 28.99 (28.47–29.15) | 56.59 (55.66–56.88) |
 | vertical | 0.90 | 39.67 | 37.15 (36.81–37.43) | 46.96 (46.61–47.34) |
 
-### historical_current: area-weighted GCR_max at τ = 0.80 (all GCMs pooled)
+### historical_current: area-weighted mean of the five-GCM median GCR_max at τ = 0.80
 
 | Crop | Layout | GCR_max | Share of area at simulated GCR limit |
 |---|---|---|---|
 | chickpea | ew_fixed | 0.27 | 6% |
-| chickpea | south_fixed | 0.20 | 0% |
+| chickpea | south_fixed | 0.19 | 0% |
 | chickpea | vertical | 0.25 | 9% |
 | groundnut | ew_fixed | 0.32 | 5% |
 | groundnut | south_fixed | 0.32 | 2% |
-| groundnut | vertical | 0.31 | 11% |
+| groundnut | vertical | 0.32 | 11% |
 | pearl_millet | ew_fixed | 0.58 | 1% |
 | pearl_millet | south_fixed | 0.51 | 0% |
 | pearl_millet | vertical | 0.59 | 86% |
@@ -56,21 +56,21 @@
 | south_fixed | 0.90 | 39.67 | 28.12 (26.72–31.34) | 53.00 (50.43–58.57) |
 | vertical | 0.90 | 39.67 | 36.71 (34.80–37.38) | 44.76 (42.75–45.50) |
 
-### ssp585_current: area-weighted GCR_max at τ = 0.80 (all GCMs pooled)
+### ssp585_current: area-weighted mean of the five-GCM median GCR_max at τ = 0.80
 
 | Crop | Layout | GCR_max | Share of area at simulated GCR limit |
 |---|---|---|---|
 | chickpea | ew_fixed | 0.27 | 3% |
 | chickpea | south_fixed | 0.20 | 0% |
 | chickpea | vertical | 0.25 | 8% |
-| groundnut | ew_fixed | 0.32 | 6% |
+| groundnut | ew_fixed | 0.31 | 6% |
 | groundnut | south_fixed | 0.31 | 2% |
 | groundnut | vertical | 0.29 | 10% |
-| pearl_millet | ew_fixed | 0.51 | 0% |
-| pearl_millet | south_fixed | 0.47 | 0% |
-| pearl_millet | vertical | 0.58 | 64% |
+| pearl_millet | ew_fixed | 0.53 | 0% |
+| pearl_millet | south_fixed | 0.48 | 0% |
+| pearl_millet | vertical | 0.59 | 64% |
 | wheat | ew_fixed | 0.62 | 45% |
-| wheat | south_fixed | 0.45 | 0% |
+| wheat | south_fixed | 0.44 | 0% |
 | wheat | vertical | 0.55 | 72% |
 
 ### ssp585_current: top states, best layout, τ = 0.80 (GWp)

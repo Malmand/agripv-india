@@ -168,3 +168,16 @@
 - Boundaries: data/boundaries/Admin2.* are byte-identical to DataMeet maps States/Admin2 (CC BY 4.0). Outline includes
   all of J&K and Ladakh as claimed by India (Gilgit, Muzaffarabad, Skardu, Aksai Chin, Shaksgam inside; J&K + Ladakh
   223,131 km2). Not compared line by line with an official Survey of India file. Credit added to Fig. 3 and GA captions.
+
+## 2026-11-04 review round 1: text fixes (no new simulations)
+- review/review_round1.md (task E) written; text issues fixed in paper/methods: Abstract (224 words, head.* switch), keywords,
+  highlights in the front matter (abstract.js), Section 5 Conclusions (conclusions.js), SM Section S9 (Rajasthan pilot,
+  Jodhpur soil test, Tables S9-S10). Table 3 now from calib.* keys (ratio = mean of state ratios, pooled ratio in brackets).
+- New make_numbers.py keys: group GCR means (cereals 0.61, legumes 0.29), wheat at the GCR limit by calibrated N
+  (30: 67%, 60: 59%, 90: 10%, 180: 4%), open yield at calibrated N / 180 kg N (34% at-limit cells vs 61%), Spearman
+  (wheat 0.33, millet 0.26), SSP5-8.5 energy -5% / specific yield -3% (irradiance -3.2%, PR -0.3%: irradiance, not
+  temperature), legume open-field change (+45% chickpea, +32% groundnut; earlier text had 37/24), pilot.* and jodhpur.*.
+- Dropped as untraceable: pilot "RY 0.68 at 70% light with N stress off", pilot legume yield +37% under SSP2-4.5.
+  Pilot SSP2-4.5 RY change is at most 0.04 (text had 0.03).
+- results_summary.py GCR_max table now uses the same definition as the manuscript (area-weighted mean of 5-GCM median map).
+- Open: stage-1 summaries contain no GCR 0.05 rows for the legumes although Methods/Table S1 say 0.05 was simulated.

@@ -1,13 +1,13 @@
 // Supplementary Material for the Methodology
 const L = require("./lib.js");
-const { cite, P, H1, H2, R, sub, frac, sum, EQ, TABLE, FIG, refsList, save, Paragraph, TextRun, FONT } = L;
+const { cite, P, PF, H1, H2, R, sub, frac, sum, EQ, TABLE, FIG, refsList, save, Paragraph, TextRun, FONT, fill } = L;
 L.resetCounters();
 L.setPrefix("S", "S", "S");
 const body = [];
 const add = (...x) => x.flat().forEach(e => body.push(e));
 
 add(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Supplementary Material", bold: true, size: 32, font: FONT })] }));
-add(P("Yield-constrained agrivoltaic potential of India under current and mid-century climate. Sections S1 to S7 give the detail behind Section 2 of the main text, and Section S8 shows the validation of the crop and light models."));
+add(P("Yield-constrained agrivoltaic potential of India under current and mid-century climate. Sections S1 to S7 give the detail behind Section 2 of the main text, Section S8 shows the validation of the crop and light models, and Section S9 describes the Rajasthan pilot and the Jodhpur soil test that the Discussion cites."));
 
 // S1
 add(H1("S1. Layout geometry and light model"));
@@ -109,6 +109,31 @@ add(P(`Figs. S1 to S3 compare the crop model with observed state yields and the 
 add(FIG("../../results/figures/figS1_yield_calibration.png", 460, 442, "State mean open-field yields, simulated against observed (ICRISAT District Level Database, 1995–2014), before and after nitrogen calibration. (A, B) Wheat. (C, D) Pearl millet. Before calibration all states used farmer nitrogen (wheat 60, pearl millet 10 kg N ha^−1^); after calibration each state used its calibrated level (Table S6). Simulated yields are the mean of GFDL-ESM4 and MPI-ESM1-2-HR. Marker area is proportional to observed harvested area; only states with at least 50 kha are shown. The dashed line is 1:1. r is the Pearson correlation and MAPE the mean absolute percentage error weighted by harvested area. Pearl millet in the southern states (Karnataka, Tamil Nadu, Andhra Pradesh) stays over-predicted even at 10 kg N ha^−1^."));
 add(FIG("../../results/figures/figS2_light_vs_pvlib.png", 600, 289, "Light model against the analytical view-factor functions of pvlib for single-segment rows at 26.4°N, 73.1°E (hourly sun positions of 2010, solar zenith below 85°). (A) Sky view factor of the ground averaged across the pitch. (B) Sunlit fraction of the ground averaged over all daylight hours. Lines are this model and open markers pvlib, for the south-facing layout (tilt 25°) and the vertical bifacial layout. The largest pointwise difference in sky view factor is 0.017 and the mean absolute error of the hourly sunlit fraction is 0.0009 to 0.0015."));
 add(FIG("../../results/figures/figS3_light_vs_cazri.png", 600, 328, `Modelled relative irradiance against measured relative PPFD at ICAR-CAZRI, Jodhpur ${cite("santra")}, by block (colour) and time window (marker). (A) Whole system, averaged over the row pitch: bias −0.044, RMSE 0.053. (B) Ground below the PV array: bias +0.147, RMSE 0.199. The model used clear-sky beam and diffuse irradiance with a broadband diffuse fraction. The dashed line is 1:1. The model reproduces the pitch-mean light but over-estimates the light directly below the modules, most strongly under the single-row Block 1. In late December the noon solar elevation at Jodhpur is about 40°, so below-array light is over-estimated for low winter sun: modelled beam reaches the ground under the low modules more often than measured, and the model includes neither frames, supports nor reflection from the ground and the array. The crop model uses light averaged over strips that span the cultivated pitch, which corresponds to panel A.`));
+
+// S9
+add(H1("S9. Rajasthan pilot and Jodhpur soil test"));
+add(PF(`Before the national run, the light and crop models were tested in a pilot over Rajasthan, the state with the largest pearl millet area and a large wheat and chickpea area. The pilot used {pilot.n_cells} cells of the same 0.25° grid, the same five NEX-GDDP-CMIP6 GCMs ${cite("thrasher")}, SoilGrids 2.0 profiles ${cite("poggio")}, cultivars and light model as the national run, for 1995–2014 (378 ppm CO~2~) and 2041–2060 under SSP2-4.5 (507 ppm). It differed from the national run in four ways: nitrogen was not calibrated, and two management cases were run instead (Table S9); sowing dates were fixed (wheat 15 November, chickpea 1 November, groundnut 25 June) except for rainfed pearl millet, which was sown automatically in July; GCR was simulated from 0.1 to 0.5 only, in steps of 0.1; and GCR~max~ was taken as the largest simulated GCR whose RY met the threshold, without interpolation. Chickpea and groundnut were run as rainfed and irrigated systems and, for chickpea, also as their area-weighted mix. The SSP2-4.5 runs used farmer management only. RY was computed per cell and GCM as in the main text (Eq. (2)) and is reported as the median over GCMs and then over cells.`));
+add(TABLE("Management cases of the Rajasthan pilot.",
+  ["Case", "Wheat", "Chickpea, groundnut", "Pearl millet"],
+  [["Farmer", "60 kg N ha^−1^ (30 at sowing, 30 at 30 d); irrigated at 50% of plant-available water", "No N; rainfed, and irrigated at 20% of plant-available water", "10 kg N ha^−1^; rainfed, automatic sowing in July"],
+   ["Recommended", "120 kg N ha^−1^ (60 + 60); irrigated at 50%", "20 kg N ha^−1^; irrigated at 50%", "40 kg N ha^−1^; rainfed, automatic sowing in July"]],
+  [1500, 2700, 2600, 2226], "Irrigation triggers refer to the top 30 cm of soil."));
+add(PF(`Table S10 gives the pilot values that the Discussion uses. The soil test was run for the single cell that contains the ICAR-CAZRI experimental site at Jodhpur (26.375°N, 73.125°E), with NASA POWER daily weather for 1995–2014 ${cite("nasapower")}, FAO-56 Penman-Monteith evapotranspiration ${cite("allen")} and the same light model. Rainfed pearl millet received 40 kg N ha^−1^ and was sown automatically in July. The SoilGrids 2.0 profile of the cell was compared with a generic loamy sand profile, to test how strongly soil texture changes open-field yield and RY.`));
+const pv = (k) => fill(`{${k}}`);
+add(TABLE("Rajasthan pilot and Jodhpur soil test: values cited in the main text.",
+  ["Quantity", "Case", "Value"],
+  [["Wheat RY, south-facing, GCR 0.3", "Farmer / recommended", `${pv("pilot.wheat.south.farmer.g3")} / ${pv("pilot.wheat.south.recommended.g3")}`],
+   ["Wheat RY, south-facing, GCR 0.5", "Farmer / recommended", `${pv("pilot.wheat.south.farmer.g5")} / ${pv("pilot.wheat.south.recommended.g5")}`],
+   ["Pearl millet RY, south-facing, GCR 0.5", "Farmer / recommended", `${pv("pilot.pearl_millet.south.farmer.g5")} / ${pv("pilot.pearl_millet.south.recommended.g5")}`],
+   ["GCR~max~ at RY ≥ 0.80, chickpea systems", "Farmer, all layouts", `${pv("pilot.chickpea.gcr_lo")}–${pv("pilot.chickpea.gcr_hi")}`],
+   ["GCR~max~ at RY ≥ 0.80, groundnut systems", "Farmer, all layouts", `${pv("pilot.groundnut.gcr_lo")}–${pv("pilot.groundnut.gcr_hi")}`],
+   ["GCR~max~ at RY ≥ 0.80, wheat and pearl millet", "Farmer, all layouts", `${pv("pilot.wheat.gcr_lo")} (largest simulated)`],
+   ["GCR~max~ at RY ≥ 0.80, wheat", "Recommended; south / east-west / vertical", `${pv("pilot.wheat.rec.south.gcr")} / ${pv("pilot.wheat.rec.ew.gcr")} / ${pv("pilot.wheat.rec.vertical.gcr")}`],
+   ["Largest median change in RY, SSP2-4.5 vs 1995–2014", "Farmer, any system, layout, GCR", pv("pilot.ssp245_ry_change_max")],
+   ["Jodhpur open-field pearl millet yield (kg ha^−1^)", "SoilGrids / loamy sand", `${pv("jodhpur.soilgrids.millet_open")} / ${pv("jodhpur.loamy_sand.millet_open")}`],
+   ["Jodhpur pearl millet RY, south-facing, GCR 0.3", "SoilGrids / loamy sand", `${pv("jodhpur.soilgrids.millet_ry_s03")} / ${pv("jodhpur.loamy_sand.millet_ry_s03")}`]],
+  [3800, 2900, 2326], "Pilot: median over five GCMs and then over cells. Jodhpur: mean over the simulated seasons."));
+// Table S10 sources: runs/rajasthan_final, results/soilgrids_F, results/loamy_sand_F (src/make_numbers.py pilot_numbers)
 
 add(H1("Supplementary references"));
 add(refsList());
