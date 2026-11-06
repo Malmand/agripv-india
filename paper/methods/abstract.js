@@ -8,7 +8,7 @@ const { PF, H3, fill, P } = L;
 function abstractText() {
   const robust = fill.has("head.is_robust") && fill("{head.is_robust}") === "yes";
   const head = robust
-    ? "In the robust case, in which each cell takes the lower density of calibrated and recommended nitrogen, cropland with slopes up to 5% could host {head.cap_twp_m} TWp of east-west elevated arrays at 80% relative yield on {head.land_mha} Mha, generating about {frame.head_multiple} times India's 2025–26 electricity requirement."
+    ? "In the robust case, in which each cell takes the lower density of calibrated and recommended nitrogen, cropland with slopes up to 5% could host {head.cap_twp_m} TWp of east-west elevated arrays at 80% relative yield on {head.land_mha} Mha, generating about {frame.head_multiple} times India's 2025–26 electricity requirement. Vertical rows gave slightly more capacity ({robust.vertical.t80.cap_twp_m} TWp) but less energy ({robust.vertical.t80.energy_pwh} against {robust.ew.t80.energy_pwh} PWh yr^−1^)."
     : "With calibrated nitrogen, cropland with slopes up to 5% could host {head.cap_twp_m} TWp of east-west elevated arrays at 80% relative yield on {head.land_mha} Mha, generating about {frame.head_multiple} times India's 2025–26 electricity requirement. This is an upper bound: low nitrogen rates hide part of the shade loss.";
   return [
     "National estimates of India's agrivoltaic potential assume fixed power densities and do not test whether crops under the panels keep their yield.",
@@ -16,10 +16,11 @@ function abstractText() {
     "For each cell we found the largest ground coverage ratio (GCR) that keeps relative yield at or above 0.66, 0.80 or 0.90, the thresholds of German, Japanese and French rules.",
     head,
     "The feasible GCR averaged {head.gcr_cereals} for cereals but {head.gcr_legumes} for legumes.",
-    "Wheat that met the threshold even at the densest array lay mostly in states calibrated at 60 kg N ha^−1^ or less.",
-    "{?Recommended nitrogen lowers the potential by {robust.reduction_pct}%.?}",
-    "Under SSP5-8.5, capacity changed by {ssp585.change_pct}% but annual energy by {ssp585.energy_change_pct}%, mainly through lower irradiance.",
-    "A yield rule therefore limits density rather than land, and its effect depends on crop and nitrogen management.",
+    robust
+      ? "Calibrated nitrogen alone gives {main.cap_twp_m} TWp, an upper bound: there wheat met the threshold even at the densest array on {main.atcap_wheat}% of its area, mostly in low-nitrogen states, against {robust.ew.t80.atcap_wheat}% in the robust case."
+      : "Wheat that met the threshold even at the densest array lay mostly in states calibrated at 60 kg N ha^−1^ or less.",
+    "Under SSP5-8.5 (calibrated nitrogen), capacity changed by {ssp585.change_pct}% but annual energy by {ssp585.energy_change_pct}%, mainly through lower irradiance.",
+    "A yield rule thus limits density, not land.",
     "India could adopt a relative-yield threshold with crop-specific density caps for farm-based solar schemes.",
   ].join(" ");
 }
