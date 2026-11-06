@@ -66,22 +66,16 @@ def season_land(d):
 
 
 def yield_capacity(g):
-    """Capacity (MWp) per model with GCR_max, same combination rule as postprocess_india.py."""
-    g = g[g.elig_ha > 0]
-    out = {}
-    for model, d in g.groupby("model"):
-        tot = 0.0
-        for _, c in d.groupby("cell"):
-            s = {}
-            for name, crops in (("r", RABI), ("k", KHARIF)):
-                e = c[c.crop.isin(crops)]
-                A = e.elig_ha.sum()
-                s[name] = (A, (e.gcr_max * e.elig_ha).sum() / A if A > 0 else 0.0)
-            (Ar, gr), (Ak, gk) = s["r"], s["k"]
-            ov = min(Ar, Ak)
-            tot += (ov * min(gr, gk) + (Ar - ov) * gr + (Ak - ov) * gk) * ETA * 10
-        out[model] = tot
-    return pd.Series(out)
+    """Capacity (MWp) per model with GCR_max, same combination rule as postprocess_india.py (vectorised)."""
+    g = g[g.elig_ha > 0].assign(season=lambda d: np.where(d.crop.isin(RABI), "r", "k"),
+                                 ga=lambda d: d.gcr_max * d.elig_ha)
+    s = g.groupby(["model", "cell", "season"])[["elig_ha", "ga"]].sum().unstack("season", fill_value=0.0)
+    A_r, A_k = s[("elig_ha", "r")] if ("elig_ha", "r") in s else 0.0, s[("elig_ha", "k")] if ("elig_ha", "k") in s else 0.0
+    G_r = (s[("ga", "r")] / A_r).where(A_r > 0, 0.0) if ("ga", "r") in s else 0.0
+    G_k = (s[("ga", "k")] / A_k).where(A_k > 0, 0.0) if ("ga", "k") in s else 0.0
+    ov = np.minimum(A_r, A_k)
+    mw = (ov * np.minimum(G_r, G_k) + (A_r - ov) * G_r + (A_k - ov) * G_k) * ETA * 10
+    return mw.groupby(level="model").sum()
 
 
 def gcr_long(summary, stage, area, slope, din_cap=0.6):
