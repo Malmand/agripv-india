@@ -63,7 +63,7 @@ def write_caption(a, hlabel, scen):
         "with double-cropped land counted once (median of five GCMs); the electricity multiple is its annual "
         "generation divided by India's 2025–26 electricity requirement (1,707 TWh, CEA). Cereal and legume "
         "values are eligible-area-weighted means; the call-outs give the same mean for the wheat belt (24–31°N, "
-        "74–88°E) and the Deccan (12–21°N, 73–80°E). The 2050 values are the changes by 2041–2060 under "
+        "74–88°E) and the Deccan (12–21°N, 73–80°E); the scale bar holds at 22°N. The 2050 values are the changes by 2041–2060 under "
         f"{scen} against 1995–2014 (five-GCM median, calibrated nitrogen). " + GA.BOUNDARY_SRC)
     (HERE / "graphical_abstract_v3_caption.txt").write_text(txt + "\n")
 
@@ -175,7 +175,7 @@ def main():
                 ax.text(xx, YN - 2.5, nm, fontsize=7, color=MID, ha="center", va="center")
             ax.plot([mid, mid], [YN - 3.1, YN + 2.8], color=PILL_EC, lw=0.5)
             ax.text(mid, YC - 1.0, "of field under panels", **CAP)
-            ax.text(mid, YC - 4.4, "Set caps by crop", **dict(CAP, fontweight="bold", color=ACC))
+            ax.text(mid, YC - 4.4, "Crop sets the limit", **dict(CAP, fontweight="bold", color=ACC))
         else:
             ax.text(mid, YN, f"{ch}%", fontsize=13, **NUM)
             ax.text(mid, YC - 1.0, f"capacity, {scen}", **CAP)
@@ -204,6 +204,20 @@ def main():
     india.boundary.plot(ax=b, color="#4A4A4A", lw=0.45)
     b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3); b.set_aspect(1 / np.cos(np.radians(22)))
     b.set_xticks([]); b.set_yticks([]); b.set_xlabel(""); b.set_ylabel("")
+
+    # north arrow (top-left, empty land west of Jammu & Kashmir) and 500 km scale bar (Arabian Sea, north of Lakshadweep)
+    nx, ny0 = geo_to_mm(ax, b, 69.6, 31.0)
+    _, ny1 = geo_to_mm(ax, b, 69.6, 34.0)
+    ax.add_patch(FancyArrowPatch((nx, ny0), (nx, ny1), arrowstyle="-|>", mutation_scale=7, lw=0.8, color=INK,
+                                 shrinkA=0, shrinkB=0))
+    ax.text(nx, ny1 + 0.5, "N", ha="center", va="bottom", fontsize=7, fontweight="bold", color=INK)
+    km_deg = 111.32 * np.cos(np.radians(22))          # km per degree of longitude at the map's reference latitude
+    sx0, sy = geo_to_mm(ax, b, 68.0, 14.0)
+    sx1, _ = geo_to_mm(ax, b, 68.0 + 500 / km_deg, 14.0)
+    ax.plot([sx0, sx1], [sy, sy], color=INK, lw=1.0, solid_capstyle="butt")
+    for xx in (sx0, sx1):
+        ax.plot([xx, xx], [sy - 0.4, sy + 0.4], color=INK, lw=0.8)
+    ax.text(sx0, sy + 0.6, "500 km", ha="left", va="bottom", fontsize=7, color=MID)
 
     # two call-outs carry the map's story (values computed from the same map file)
     def callout(key, label, txt_lonlat, pt_lonlat):
