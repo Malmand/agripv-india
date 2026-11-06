@@ -76,22 +76,27 @@ function addResults(add) {
   if (fill.has("sens.base.cap")) {
     const nsec = 4 + (ROB ? 1 : 0) + ((fill.has("ssp245.change_pct") || fill.has("ssp585.change_pct")) ? 1 : 0);
     add(H2(`3.${nsec}. Sensitivity`));
-    add(PF(`Apart from the array layout, the yield threshold is the strongest lever on the potential (Table 5): moving τ from 0.80 to 0.66 or 0.90 changes capacity by {sens.thr66.chg}% and {sens.thr90.chg}%. Calibrated nitrogen alone changes it by {sens.n_calib.chg}% and dropping the slope limit by {sens.slope_none.chg}%, while module efficiency of 20% or 24% instead of 22% changes capacity and energy by about ±9%.{? Applying the threshold season by season, in at least 16 of 20 seasons, changes capacity by {sens.season.chg}%.?} The spread of the five GCMs, {sens.base.range} TWp, is small against all of these, so the choice of rule and management matters far more than the climate model.`));
-    const R = (lab, k, note) => fill.has(`sens.${k}.cap`) ? [[lab, fill(`{sens.${k}.cap}`), k === "base" ? "–" : fill(`{sens.${k}.chg}`), fill.has(`sens.${k}.en`) ? fill(`{sens.${k}.en}`) : "–"]] : [];
+    add(PF(`Apart from the array layout, the yield threshold is the strongest lever on the potential (Table 5): moving τ from 0.80 to 0.66 or 0.90 changes capacity by {sens.thr66.chg}% and {sens.thr90.chg}%. Calibrated nitrogen alone changes it by {sens.n_calib.chg}% and dropping the slope limit by {sens.slope_none.chg}%, while module efficiency of 20% or 24% instead of 22%, the span from older modules to 2025 back-contact modules ${cite("itrpv")}, changes capacity and energy by about ±9%.{? Applying the threshold season by season, in at least 16 of 20 seasons, changes capacity by {sens.season.chg}%.?} The spread of the five GCMs, {sens.base.range} TWp, is small against all of these, so the choice of rule and management matters far more than the climate model.`));
+    const R = (lab, k, basis) => fill.has(`sens.${k}.cap`) ? [[lab, basis, fill(`{sens.${k}.cap}`), k === "base" ? "–" : fill(`{sens.${k}.chg}`), fill.has(`sens.${k}.en`) ? fill(`{sens.${k}.en}`) : "–"]] : [];
     const rows = [
-      ...R(`Base: ${ROB ? "robust nitrogen" : "calibrated nitrogen"}, east-west, τ = 0.80, slope ≤ 5%`, "base"),
-      ...R("Threshold τ = 0.66", "thr66"), ...R("Threshold τ = 0.90", "thr90"),
-      ...R("No slope limit", "slope_none"), ...R("Slope ≤ 10%", "slope_le10"),
-      ...(ROB ? R("Calibrated nitrogen alone (upper bound)", "n_calib") : []),
-      ...R("Module efficiency 20%", "eta20"), ...R("Module efficiency 24%", "eta24"),
-      ...R("South-facing layout", "south"), ...R("Vertical layout, GCR ≤ 0.6", "vertical"),
-      ...R("Vertical layout, no DIN cap", "vertical_nodin"),
-      ...R("Threshold met in ≥ 16 of 20 seasons", "season"),
-      ...R("Radiation not corrected (energy only)", "rad_off"),
+      ...R(`Base: ${ROB ? "robust nitrogen" : "calibrated nitrogen"}, east-west, τ = 0.80, slope ≤ 5%`, "base",
+        `Japanese threshold ${cite("maff")}; 5% PV slope limit for India ${cite("deshmukh")}`),
+      ...R("Threshold τ = 0.66", "thr66", `DIN SPEC 91434 minimum ${cite("din")}`),
+      ...R("Threshold τ = 0.90", "thr90", `French decree ${cite("decret")}`),
+      ...R("No slope limit", "slope_none", "No terrain screening"),
+      ...R("Slope ≤ 10%", "slope_le10", "Relaxed terrain limit"),
+      ...(ROB ? R("Calibrated nitrogen alone (upper bound)", "n_calib", "State-calibrated nitrogen, Section 2.4") : []),
+      ...R("Module efficiency 20%", "eta20", `Older modules; 2025 mass production 21.7% (PERC) ${cite("itrpv")}`),
+      ...R("Module efficiency 24%", "eta24", `Back-contact modules, 24.1% in 2025 ${cite("itrpv")}`),
+      ...R("South-facing layout", "south", "Alternative design, Section 2.2"),
+      ...R("Vertical layout, GCR ≤ 0.6", "vertical", "Alternative design, Section 2.2"),
+      ...R("Vertical layout, no DIN cap", "vertical_nodin", `15% land-loss limit removed ${cite("din")}`),
+      ...R("Threshold met in ≥ 16 of 20 seasons", "season", `Rules judge single seasons ${cite("din", "decret")}; one failure in five tolerated`),
+      ...R("Radiation not corrected (energy only)", "rad_off", "NEX-GDDP radiation as supplied, SM Section S12"),
     ];
-    if (fill.has("sens.base.range")) rows.push(["Range of five GCMs (base case)", fill("{sens.base.range}"), "–", "–"]);
-    add(TABLE("Sensitivity of the national APV potential, 1995–2014: one assumption changed at a time from the base case.",
-      ["Case", "Capacity, TWp", "Change, %", "Energy, PWh yr^−1^"], rows, [4800, 1500, 1300, 1726],
+    if (fill.has("sens.base.range")) rows.push(["Range of five GCMs (base case)", "CMIP6 ensemble, Section 2.3", fill("{sens.base.range}"), "–", "–"]);
+    add(TABLE("Sensitivity of the national APV potential, 1995–2014: one assumption changed at a time from the base case, with the basis of each tested value.",
+      ["Case", "Basis of the tested value", "Capacity, TWp", "Change, %", "Energy, PWh yr^−1^"], rows, [2900, 2900, 1100, 1000, 1426],
       "Five-GCM median. Module efficiency scales capacity and energy in proportion, because GCR~max~ depends on shade, not on the module rating."));
   }
 }
