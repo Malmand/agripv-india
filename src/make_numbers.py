@@ -636,6 +636,68 @@ def pilot_numbers(N, pilot, jodhpur):
                 N.put(f"jodhpur.{soil}.millet_ry_s03", t.ry.iloc[0], f"{t.ry.iloc[0]:.2f}")
 
 
+def _gcr_at(gcr, ry, thr):
+    """First crossing of thr on the RY-GCR curve from (0, 1), as postprocess_india.gcr_at_threshold."""
+    g, r = np.r_[0.0, gcr], np.r_[1.0, ry]
+    below = np.nonzero(r < thr)[0]
+    if len(below) == 0:
+        return g[-1]
+    k = below[0]
+    if np.isnan(r[k]) or r[k - 1] == r[k]:
+        return g[k - 1]
+    return g[k - 1] + (r[k - 1] - thr) * (g[k] - g[k - 1]) / (r[k - 1] - r[k])
+
+
+def review_numbers(N, pp, summ, grid_file="data/grid_india_025.csv"):
+    """Review analyses (extra VM mode): radiation bias (M5), crop test with corrected radiation, season rule (M9)."""
+    g = pd.read_csv(grid_file).set_index("cell_id")
+    area = g[[c for c in g.columns if c.endswith("_ha")]].sum(axis=1)
+    f = summ / "rad_factors.csv"
+    if f.exists():
+        k = pd.read_csv(f).groupby("cell")[["nex_kwh", "ref_kwh"]].mean()
+        k = k.join(g[["lat", "lon"]]).assign(w=area.reindex(k.index).fillna(0))
+        k = k[k.w > 0]
+        for name, msk in (("nat", k.index == k.index), ("north", k.lat.between(24, 31) & k.lon.between(74, 88)),
+                          ("south", k.lat < 16)):
+            d = k[msk]
+            if len(d):
+                x = 100 * (np.average(d.ref_kwh, weights=d.w) / np.average(d.nex_kwh, weights=d.w) - 1)
+                N.put(f"rad.k_{name}_pct", x, pct(x, True))
+    e0, e1 = summ / "energy_historical.csv", summ / "energy_historical_rc.csv"
+    if e0.exists() and e1.exists():
+        a = pd.read_csv(e0); b = pd.read_csv(e1)
+        x = a.merge(b, on=["cell", "config", "gcr"], suffixes=("", "_rc"))
+        x = x[(x.config == MAIN_LAYOUT) & (x.gcr.round(2) == 0.3)]
+        w = area.reindex(x.cell).fillna(0).values
+        if w.sum() > 0:
+            ch = 100 * (np.average(x.yield_kwh_kwp_rc, weights=w) / np.average(x.yield_kwh_kwp, weights=w) - 1)
+            N.put("rad.sy_change_pct", ch, pct(ch, True))
+    r1, r0 = summ / "ry_crop_historical_current_rc.csv.gz", summ / "ry_crop_historical_current.csv.gz"
+    if r1.exists() and r0.exists():
+        b = pd.read_csv(r1); b = b[b.config == MAIN_LAYOUT]
+        a = pd.read_csv(r0); a = a[(a.config == MAIN_LAYOUT) & a.cell.isin(b.cell.unique())]
+        gm = {}
+        for tag, d in (("base", a), ("rc", b)):
+            rows = [(c, m, cr, _gcr_at(x.sort_values("gcr").gcr.values, x.sort_values("gcr").ry.values, MAIN_THR))
+                    for (c, m, cr), x in d.groupby(["cell", "model", "crop"])]
+            gm[tag] = pd.DataFrame(rows, columns=["cell", "model", "crop", "g"]).groupby(["cell", "crop"]).g.median()
+        dd = (gm["rc"] - gm["base"]).dropna()
+        if len(dd):
+            N.put("rad.crop_n_cells", b.cell.nunique(), f"{b.cell.nunique()}")
+            N.put("rad.gcr_change", dd.mean(), f"{dd.mean():+.2f}".replace("-", "−"))
+            N.put("rad.gcr_change_abs_max", dd.abs().max(), f"{dd.abs().max():.2f}")
+    s0, s1 = pp / "india_combined_historical_current_robust.csv", pp / "india_combined_historical_current_season_robust.csv"
+    if not s1.exists():
+        s0, s1 = pp / "india_combined_historical_current.csv", pp / "india_combined_historical_current_season.csv"
+    if s0.exists() and s1.exists():
+        a, b = sel(pd.read_csv(s0), MAIN_LAYOUT, MAIN_THR), sel(pd.read_csv(s1), MAIN_LAYOUT, MAIN_THR)
+        if a is not None and b is not None:
+            ch = 100 * (b.cap_mwp_median / a.cap_mwp_median - 1)
+            N.put("season.change_pct", ch, pct(ch, True))
+            N.put("season.reduction_pct", -ch, pct(-ch))
+            N.put("season.cap_twp", b.cap_mwp_median, twp(b.cap_mwp_median))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pp", type=Path, default=Path("results/potential"))
@@ -682,6 +744,7 @@ def main():
     calib_numbers(N, a.validation)
     spearman_numbers(N, a.validation, a.nuse)
     pilot_numbers(N, a.pilot, a.jodhpur)
+    review_numbers(N, a.pp, a.summary)
     out = {"meta": {"stages": present, "main_case": {"layout": MAIN_LAYOUT, "thr": MAIN_THR, "slope": "le5",
                                                      "management": "calibrated N"},
                     "headline": N.values.get("head.label"), "din_cap_vertical": 0.6,

@@ -63,7 +63,7 @@ def main():
     only = set()
     if a.only:
         only = set(open(a.only).read().split()) if os.path.exists(a.only) else set(a.only.split(","))
-    stage = f"{a.period}_{a.mgmt}" + ("_open" if a.open_only else "")
+    stage = f"{a.period}_{a.mgmt}" + ("_open" if a.open_only else "") + os.environ.get("AGRIPV_STAGE_SUFFIX", "")
     tasks = []
     for model in a.models.split(","):
         npy = os.path.join(a.cells, f"cells_{model}_{a.period}.npy")

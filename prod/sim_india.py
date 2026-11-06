@@ -195,6 +195,12 @@ def task(npy_path, meta, cell, soil_json, period, mgmt, model, out_csv):
     soil = L["soil_from_soilgrids"](soil_json, soil_id=f"IN{int(cid[1:]):08d}")
     y0, nyears = dates[0].year, dates[-1].year - dates[0].year + 1
     co2 = CO2[period]
+    kf = os.environ.get("AGRIPV_SRAD_FACTORS")   # radiation bias test (radiation_ref.py); unset in production
+    if kf:
+        f = pd.read_csv(kf)
+        k = f[f.cell == cid].sort_values("month").k.values
+        if len(k) == 12:
+            wdf["srad_MJ"] = (wdf.srad_MJ.values * k[wdf.date.dt.month.values - 1]).round(2)
     hourly = ps.hourly_from_daily(lat, lon, wdf.date, wdf.srad_MJ)
     systems = systems_for(cell)
     rows, retried = [], 0

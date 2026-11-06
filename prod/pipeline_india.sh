@@ -103,6 +103,48 @@ if [ "$MODE" = "calib" ]; then
   push; shutdown -h now; exit 0
 fi
 
+if [ "$MODE" = "extra" ]; then
+  # 3d. review analyses after the four production stages (run once; each step skips finished work)
+  #  (a) radiation bias factors against NASA POWER, (b) radiation-corrected PV energy for each period,
+  #  (c) crop test with corrected radiation on 40 strongly biased cells, (d) season-by-season yield rule
+  S=$DATA/out/summary
+  [ -f $S/rad_factors.csv ] || ( cd $APP && $PY radiation_ref.py --cells $DATA/cells --grid $GRID --out $S ) | tail -3
+  push
+  for p in historical ssp585 ssp245; do
+    [ -f $S/energy_${p}_rc.csv ] && continue
+    [ -f $DATA/cells/cells_GFDL-ESM4_${p}.npy ] || continue
+    say "energy $p, radiation-corrected"
+    ( cd $APP && $PY energy_india.py --cells $DATA/cells --grid $GRID --period $p --out $S \
+        --srad-factors $S/rad_factors.csv --tag _rc ) | tail -2
+    push
+  done
+  if [ ! -f $S/ry_crop_historical_current_rc.csv.gz ]; then
+    # 40 cells with the largest radiation bias among cells with at least 5000 ha of the four crops
+    $PY - <<PYEOF > $DATA/rc_cells.txt
+import pandas as pd
+k = pd.read_csv("$S/rad_factors.csv").groupby("cell")[["nex_kwh", "ref_kwh"]].mean()
+k = (k.ref_kwh / k.nex_kwh).rename("k")
+g = pd.read_csv("$GRID").set_index("cell_id")
+area = g[[c for c in g.columns if c.endswith("_ha")]].sum(axis=1)
+c = k[k.index.isin(area[area >= 5000].index)].sort_values().head(40)
+print("\n".join(c.index))
+PYEOF
+    say "radiation test on $(wc -l < $DATA/rc_cells.txt) cells"
+    export AGRIPV_SRAD_FACTORS=$S/rad_factors.csv AGRIPV_STAGE_SUFFIX=_rc
+    run historical current --only $DATA/rc_cells.txt
+    unset AGRIPV_SRAD_FACTORS AGRIPV_STAGE_SUFFIX
+    $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage historical_current_rc | tail -3
+    push
+  fi
+  for st in historical_current historical_recommended; do
+    [ -f $S/ry_crop_${st}_season.csv.gz ] || ( cd $APP && $PY season_check.py --out $DATA/out --grid $GRID --stage $st ) | tail -2
+  done
+  status; push
+  touch $DATA/EXTRA_DONE && gsutil -q cp $DATA/EXTRA_DONE "gs://$BUCKET/EXTRA_DONE"
+  say "=== extra analyses finished; shutting down"
+  push; shutdown -h now; exit 0
+fi
+
 # 4. production stages, most important first (a stop part-way still leaves usable results)
 #    current = state-calibrated N (main case); recommended = adequate N (sensitivity)
 for stage in historical:current ssp585:current historical:recommended ssp245:current; do

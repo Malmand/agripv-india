@@ -60,6 +60,8 @@ def cell_energy(args):
     for model, (data, dates, keep) in _G["clim"].items():
         _G["dates"] = dates[keep]
         d = pd.DataFrame(np.asarray(data[i])[keep], columns=VARS)
+        if _G.get("k") is not None:          # radiation bias factors per calendar month (radiation_ref.py)
+            d["srad_MJ"] = d.srad_MJ.values * _G["k"].get(cid, np.ones(12))[dates[keep].month.values - 1]
         h = ps.hourly_from_daily(lat, lon, pd.Series(dates[keep]), d.srad_MJ)
         h = h[h.day.isin(set(dates[keep]))]
         t_air = hourly_temp(h, d.tmax_C.values, d.tmin_C.values)
@@ -85,7 +87,11 @@ def cell_energy(args):
     return rows
 
 
-def init(cells_dir, period, step):
+def init(cells_dir, period, step, factors=None):
+    _G["k"] = None
+    if factors:
+        f = pd.read_csv(factors).sort_values(["cell", "month"])
+        _G["k"] = {c: d.k.values for c, d in f.groupby("cell")}
     _G["clim"] = {}
     for m in MODELS:
         npy = os.path.join(cells_dir, f"cells_{m}_{period}.npy")
@@ -105,15 +111,17 @@ if __name__ == "__main__":
     ap.add_argument("--step", type=int, default=5)
     ap.add_argument("--workers", type=int, default=os.cpu_count())
     ap.add_argument("--limit", type=int, default=0, help="first N cells only (testing)")
+    ap.add_argument("--srad-factors", default="", help="rad_factors.csv: scale daily radiation by k(cell, month)")
+    ap.add_argument("--tag", default="", help="suffix of the output file, e.g. _rc")
     a = ap.parse_args()
     g = pd.read_csv(a.grid)
     if a.limit:
         g = g.head(a.limit)
     jobs = [(i, r.lat, r.lon, r.cell_id) for i, r in enumerate(g.itertuples())]
-    with Pool(a.workers, initializer=init, initargs=(a.cells, a.period, a.step)) as p:
+    with Pool(a.workers, initializer=init, initargs=(a.cells, a.period, a.step, a.srad_factors or None)) as p:
         rows = [r for rs in p.imap(cell_energy, jobs, chunksize=4) for r in rs]
     os.makedirs(a.out, exist_ok=True)
-    out = os.path.join(a.out, f"energy_{a.period}.csv")
+    out = os.path.join(a.out, f"energy_{a.period}{a.tag}.csv")
     pd.DataFrame(rows, columns=["cell", "config", "gcr", "yield_kwh_kwp", "poa_front_kwh_m2", "rear_gain"]) \
         .to_csv(out, index=False, float_format="%.4g")
     print("wrote", out, len(rows), "rows")

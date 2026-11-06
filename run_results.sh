@@ -57,6 +57,8 @@ TMPCC=$(mktemp -d)
 pp() {  # stage [extra args]
   local st=$1; shift
   local en="$SUM/energy_${st%%_*}.csv"
+  # radiation-corrected energy (radiation_ref.py, extra VM mode) is the main case when present; ENERGY_RC=0 skips it
+  [ "${ENERGY_RC:-1}" = 1 ] && [ -f "$SUM/energy_${st%%_*}_rc.csv" ] && en="$SUM/energy_${st%%_*}_rc.csv"
   [ -f "$en" ] || { [ $REBUILD = 1 ] || echo "WARNING: $en missing, energy left empty for $st"; en=""; }
   local src=(--summary "$SUM")
   if [ $REBUILD = 1 ]; then   # copy first: the table is overwritten by its own rebuild
@@ -73,6 +75,13 @@ if [ $HAVE_REC != 0 ]; then
   pp historical_current --robust-with historical_recommended
   SUMSTAGES=(historical_current historical_current_robust "${STAGES[@]:1}")
   [ $HAVE_REC = 1 ] && SUMSTAGES+=(historical_recommended)
+fi
+if [ -f "$SUM/ry_crop_historical_current_season.csv.gz" ] && [ $REBUILD = 0 ]; then
+  # season-by-season yield rule (season_check.py): "ry" is the share of seasons with RY >= 0.80
+  echo "== postprocess season rule"
+  pp historical_current_season > /dev/null
+  [ -f "$SUM/ry_crop_historical_recommended_season.csv.gz" ] && \
+    pp historical_current_season --robust-with historical_recommended_season > /dev/null
 fi
 
 echo "== figures"

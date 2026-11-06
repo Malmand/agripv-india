@@ -25,7 +25,7 @@ echo "== stage summaries from the bucket"
 CACHE=~/agripv-stage-cache; mkdir -p $CACHE
 # first run: seed with the energy files already in the repo (unchanged ones are then not downloaded again)
 [ -n "$(ls $CACHE)" ] || cp runs/s1/summary/energy_*.csv $CACHE/ 2>/dev/null || true
-PAT='^(?!(ry_crop_.*_current\.csv\.gz|ry_crop_historical_recommended\.csv\.gz|energy_.*\.csv)$).*'
+PAT='^(?!(ry_crop_.*_current\.csv\.gz|ry_crop_historical_recommended\.csv\.gz|ry_crop_.*_(rc|season)\.csv\.gz|energy_.*\.csv|rad_factors\.csv)$).*'
 gcloud storage rsync "$BUCKET" $CACHE --exclude "$PAT"
 left=$(gcloud storage rsync "$BUCKET" $CACHE --exclude "$PAT" --dry-run 2>&1 | grep -c "Would copy" || true)
 if [ "$left" != "0" ] || ls $CACHE/*.gstmp >/dev/null 2>&1; then
@@ -33,6 +33,7 @@ if [ "$left" != "0" ] || ls $CACHE/*.gstmp >/dev/null 2>&1; then
 fi
 TMP=$(mktemp -d)
 cp $CACHE/ry_crop_*_current.csv.gz $CACHE/energy_*.csv "$TMP/"
+cp $CACHE/ry_crop_*_rc.csv.gz $CACHE/ry_crop_*_season.csv.gz $CACHE/rad_factors.csv "$TMP/" 2>/dev/null || true
 # recommended-N stage: only when it covers India (the 40-cell test run has the same file name)
 if [ -f $CACHE/ry_crop_historical_recommended.csv.gz ]; then
   n=$(python3 -c "import pandas as p;print(p.read_csv('$CACHE/ry_crop_historical_recommended.csv.gz',usecols=['cell']).cell.nunique())")
