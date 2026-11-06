@@ -57,7 +57,7 @@ const REF = {
   folberth: "Folberth C, Skalský R, Moltchanova E, Balkovič J, Azevedo LB, Obersteiner M, et al. Uncertainty in soil data can outweigh climate impact signals in global crop yield simulations. Nat Commun 2016;7:11872. https://doi.org/10.1038/ncomms11872.",
   lopez: "Lopez A, Roberts B, Heimiller D, Blair N, Porro G. U.S. renewable energy technical potentials: a GIS-based analysis. NREL/TP-6A20-51946. Golden, CO: National Renewable Energy Laboratory; 2012. https://doi.org/10.2172/1219777.",
   cea: "Central Electricity Authority. Load Generation Balance Report 2026-27. New Delhi: Ministry of Power, Government of India; 2026. https://cea.nic.in/wp-content/uploads/l_g_b_r_reports/2025/LGBR_2026_27.pdf [accessed 2 November 2026].",
-  nasapower: "NASA Langley Research Center. Prediction Of Worldwide Energy Resources (POWER) Project, daily data. Hampton, VA: NASA. https://power.larc.nasa.gov [accessed 2026, verify date].",
+  nasapower: "NASA Langley Research Center. Prediction Of Worldwide Energy Resources (POWER) Project, daily and climatology data. Hampton, VA: NASA. https://power.larc.nasa.gov [accessed November 2026].",
   kusumfaq: "Ministry of New and Renewable Energy. PM-KUSUM: frequently asked questions. https://pmkusum.mnre.gov.in/landing-faq.html [accessed October 2026].",
 };
 let order = [];

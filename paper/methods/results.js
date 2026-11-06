@@ -30,7 +30,7 @@ function addResults(add) {
 
   // 3.3
   add(H2("3.3. National potential"));
-  add(PF(`Under the yield rule, Indian cropland could host {${C}.ew.t80.cap_twp_m} TWp of APV (Table 4, Fig. 4). This is the east-west layout at τ = 0.80 on {${C}.ew.t80.land_mha} Mha of cropland with slopes up to 5% (GCM range {${C}.ew.t80.cap_twp_lo}–{${C}.ew.t80.cap_twp_hi} TWp), or {${C}.ew.t80.density} MWp ha^−1^. It would generate {${C}.ew.t80.energy_pwh} PWh per year, about {frame.head_multiple} times India's 2025–26 electricity requirement of {frame.cea_twh} TWh ${cite("cea")}. Seen the other way, 500 GWp at this density would occupy only {frame.gw500.land_mha} Mha, {frame.gw500.share}% of the eligible cropland.`));
+  add(PF(`Under the yield rule, Indian cropland could host {${C}.ew.t80.cap_twp_m} TWp of APV (Table 4, Fig. 4). This is the east-west layout at τ = 0.80 on {${C}.ew.t80.land_mha} Mha of cropland with slopes up to 5% (GCM range {${C}.ew.t80.cap_twp_lo}–{${C}.ew.t80.cap_twp_hi} TWp), or {${C}.ew.t80.density} MWp ha^−1^. It would generate {${C}.ew.t80.energy_pwh} PWh per year, about {frame.head_multiple} times India's 2025–26 electricity requirement of {frame.cea_twh} TWh ${cite("cea")}. Seen the other way, 500 GWp at this mean density would occupy only {frame.gw500.land_mha} Mha, {frame.gw500.share}% of the eligible cropland{?, and {supply.gw500_mha} Mha if the densest cells are used first (Fig. S6)?}.`));
   add(PF(`The layouts rank differently by capacity and by energy (Fig. 4). Vertical rows reached the most capacity, {${C}.vertical.t80.cap_twp_m} TWp with the 0.6 cap, against {${C}.south.t80.cap_twp_m} TWp for the south-facing array. Their specific yield, however, was only {${C}.vertical.t80.sy} kWh kWp^−1^ yr^−1^, against {${C}.ew.t80.sy} for east-west and {${C}.south.t80.sy} for south-facing arrays, so they produced the least energy ({${C}.vertical.t80.energy_pwh} PWh yr^−1^). East-west arrays gave the most energy at every threshold and are used for the headline. The threshold mattered more than the slope rule: capacity was {${C}.ew.t66.cap_twp} TWp at τ = 0.66 and {${C}.ew.t90.cap_twp} TWp at τ = 0.90, while dropping the slope limit raised it only to {${C}.ew.t80.none.cap_twp} TWp.`));
   add(PF(`The potential is concentrated in three states, which hold {${C}.top3_share}% of it: {${C}.top1_state} ({${C}.top1_twp} TWp), {${C}.top2_state} ({${C}.top2_twp} TWp) and {${C}.top3_state} ({${C}.top3_twp} TWp) (Fig. 5).`));
   const cell = (c, lk, tk) => fill(`{${c}.${lk}.${tk}.cap_twp_m} ({${c}.${lk}.${tk}.cap_twp_lo}–{${c}.${lk}.${tk}.cap_twp_hi})`);
@@ -70,6 +70,29 @@ function addResults(add) {
     const fut = fill.has("ssp245.change_pct") ? "ssp245_current" : "ssp585_current";
     add(FIGAUTO(FIGS + `fig_india_delta_${fut}_thr80.png`, 600,
       `Change in GCR~max~ at RY ≥ 0.80, 2041–2060 under ${fut.startsWith("ssp245") ? "SSP2-4.5" : "SSP5-8.5"} minus 1995–2014, by crop and layout (five-GCM median).`));
+  }
+
+  // sensitivity (review comment M6): one assumption changed at a time, from src/make_numbers.py sens_numbers
+  if (fill.has("sens.base.cap")) {
+    const nsec = 4 + (ROB ? 1 : 0) + ((fill.has("ssp245.change_pct") || fill.has("ssp585.change_pct")) ? 1 : 0);
+    add(H2(`3.${nsec}. Sensitivity`));
+    add(PF(`Apart from the array layout, the yield threshold is the strongest lever on the potential (Table 5): moving τ from 0.80 to 0.66 or 0.90 changes capacity by {sens.thr66.chg}% and {sens.thr90.chg}%. Calibrated nitrogen alone changes it by {sens.n_calib.chg}% and dropping the slope limit by {sens.slope_none.chg}%, while module efficiency of 20% or 24% instead of 22% changes capacity and energy by about ±9%.{? Applying the threshold season by season, in at least 16 of 20 seasons, changes capacity by {sens.season.chg}%.?} The spread of the five GCMs, {sens.base.range} TWp, is small against all of these, so the choice of rule and management matters far more than the climate model.`));
+    const R = (lab, k, note) => fill.has(`sens.${k}.cap`) ? [[lab, fill(`{sens.${k}.cap}`), k === "base" ? "–" : fill(`{sens.${k}.chg}`), fill.has(`sens.${k}.en`) ? fill(`{sens.${k}.en}`) : "–"]] : [];
+    const rows = [
+      ...R(`Base: ${ROB ? "robust nitrogen" : "calibrated nitrogen"}, east-west, τ = 0.80, slope ≤ 5%`, "base"),
+      ...R("Threshold τ = 0.66", "thr66"), ...R("Threshold τ = 0.90", "thr90"),
+      ...R("No slope limit", "slope_none"), ...R("Slope ≤ 10%", "slope_le10"),
+      ...(ROB ? R("Calibrated nitrogen alone (upper bound)", "n_calib") : []),
+      ...R("Module efficiency 20%", "eta20"), ...R("Module efficiency 24%", "eta24"),
+      ...R("South-facing layout", "south"), ...R("Vertical layout, GCR ≤ 0.6", "vertical"),
+      ...R("Vertical layout, no DIN cap", "vertical_nodin"),
+      ...R("Threshold met in ≥ 16 of 20 seasons", "season"),
+      ...R("Radiation not corrected (energy only)", "rad_off"),
+    ];
+    if (fill.has("sens.base.range")) rows.push(["Range of five GCMs (base case)", fill("{sens.base.range}"), "–", "–"]);
+    add(TABLE("Sensitivity of the national APV potential, 1995–2014: one assumption changed at a time from the base case.",
+      ["Case", "Capacity, TWp", "Change, %", "Energy, PWh yr^−1^"], rows, [4800, 1500, 1300, 1726],
+      "Five-GCM median. Module efficiency scales capacity and energy in proportion, because GCR~max~ depends on shade, not on the module rating."));
   }
 }
 module.exports = { addResults };

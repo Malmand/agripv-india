@@ -698,6 +698,58 @@ def review_numbers(N, pp, summ, grid_file="data/grid_india_025.csv"):
             N.put("season.cap_twp", b.cap_mwp_median, twp(b.cap_mwp_median))
 
 
+def sens_numbers(N, pp):
+    """One-at-a-time sensitivity of the headline (Table 5): each row changes one assumption of the base case
+    (robust nitrogen when present, east-west, tau 0.80, slope <= 5%, DIN cap on vertical rows)."""
+    rob = (pp / "india_combined_historical_current_robust.csv").exists()
+    bst = "historical_current_robust" if rob else "historical_current"
+    t = pd.read_csv(pp / f"india_combined_{bst}.csv")
+    base = sel(t, MAIN_LAYOUT, MAIN_THR)
+    if base is None:
+        return
+    b_cap, b_en = base.cap_mwp_median, base.energy_gwh_median
+
+    def row(key, cap, en):
+        N.put(f"sens.{key}.cap", cap, f"{cap / 1e6:.1f}")
+        if en and en > 0:
+            N.put(f"sens.{key}.en", en, f"{en / 1e6:.1f}")
+        ch = 100 * (cap / b_cap - 1)
+        N.put(f"sens.{key}.chg", ch, "0" if abs(ch) < 0.5 else pct(ch, True))
+
+    row("base", b_cap, b_en)
+    N.put("sens.base.range", base.cap_mwp_min, f"{base.cap_mwp_min / 1e6:.1f}–{base.cap_mwp_max / 1e6:.1f}")
+    for key, thr in (("thr66", 0.66), ("thr90", 0.90)):
+        r = sel(t, MAIN_LAYOUT, thr)
+        if r is not None:
+            row(key, r.cap_mwp_median, r.energy_gwh_median)
+    for key, rule in (("slope_none", "none"), ("slope_le10", "le10")):
+        r = sel(t, MAIN_LAYOUT, MAIN_THR, rule)
+        if r is not None:
+            row(key, r.cap_mwp_median, r.energy_gwh_median)
+    if rob:
+        r = sel(pd.read_csv(pp / "india_combined_historical_current.csv"), MAIN_LAYOUT, MAIN_THR)
+        if r is not None:
+            row("n_calib", r.cap_mwp_median, r.energy_gwh_median)
+    for key, eta in (("eta20", 0.20), ("eta24", 0.24)):     # capacity and energy scale with module efficiency
+        row(key, b_cap * eta / 0.22, b_en * eta / 0.22)
+    for key, cfg in (("south", "south_fixed"), ("vertical", "vertical")):
+        r = sel(t, cfg, MAIN_THR)
+        if r is not None:
+            row(key, r.cap_mwp_median, r.energy_gwh_median)
+    f = pp / f"india_combined_{bst}_nodin.csv"
+    if f.exists():
+        r = sel(pd.read_csv(f), "vertical", MAIN_THR)
+        if r is not None:
+            row("vertical_nodin", r.cap_mwp_median, r.energy_gwh_median)
+    f = pp / f"india_combined_historical_current_season{'_robust' if rob else ''}.csv"
+    if f.exists():
+        r = sel(pd.read_csv(f), MAIN_LAYOUT, MAIN_THR)
+        if r is not None:
+            row("season", r.cap_mwp_median, r.energy_gwh_median)
+    if "rad.sy_change_pct" in N.raw:     # main energy is radiation-corrected; the uncorrected energy for comparison
+        row("rad_off", b_cap, b_en / (1 + N.raw["rad.sy_change_pct"] / 100))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pp", type=Path, default=Path("results/potential"))
@@ -745,6 +797,13 @@ def main():
     spearman_numbers(N, a.validation, a.nuse)
     pilot_numbers(N, a.pilot, a.jodhpur)
     review_numbers(N, a.pp, a.summary)
+    sens_numbers(N, a.pp)
+    f = a.pp / "supply_curve.csv"
+    if f.exists():
+        sc = pd.read_csv(f)
+        for t in (300, 500):
+            x = float(np.interp(t, sc.capacity_gwp, sc.land_mha_med))
+            N.put(f"supply.gw{t}_mha", x, f"{x:.2f}")
     out = {"meta": {"stages": present, "main_case": {"layout": MAIN_LAYOUT, "thr": MAIN_THR, "slope": "le5",
                                                      "management": "calibrated N"},
                     "headline": N.values.get("head.label"), "din_cap_vertical": 0.6,

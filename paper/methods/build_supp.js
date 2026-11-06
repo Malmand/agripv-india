@@ -143,6 +143,14 @@ if (fill.has("robust.change_pct")) {
   add(FIGAUTO("../../results/figures/fig_india_states_historical_current_thr80.png", 450,
     "As Fig. 5, with calibrated nitrogen alone (upper bound): capacity of the leading states at RY ≥ 0.80 by layout, 1995–2014, slope ≤ 5%, vertical GCR~max~ capped at 0.6. Bars are the five-GCM median and error bars the GCM range."));
 }
+add(H1("S11. Land-supply curve"));
+add(PF(`Fig. S6 shows how much cropland a given APV capacity needs if the cells with the highest yield-constrained power density are used first (east-west layout, RY ≥ 0.80, slope ≤ 5%${fill.has("robust.change_pct") ? ", robust nitrogen" : ""}). For each GCM the cells are sorted by capacity per hectare and capacity and land are accumulated; the curve is the five-GCM median.{? At this order, 300 GWp needs {supply.gw300_mha} Mha and 500 GWp {supply.gw500_mha} Mha, against {frame.gw300.land_mha} and {frame.gw500.land_mha} Mha at the national mean density.?}`));
+add(FIGAUTO("../../results/figures/figS6_supply_curve.png", 600,
+  "Cropland needed for a given APV capacity when the densest cells are used first, east-west layout, RY ≥ 0.80, slope ≤ 5%, 1995–2014. (A) Full range; (B) first 1000 GWp. Solid line: five-GCM median; band: GCM range; dashed line: land at the national mean density."));
+if (fill.has("rad.k_north_pct")) {
+  add(H1("S12. Radiation correction for PV energy"));
+  add(PF(`NEX-GDDP-CMIP6 shortwave radiation was compared, per 0.25° cell and calendar month, with the 2001–2020 NASA POWER all-sky surface shortwave climatology ${cite("nasapower")}, queried on a 0.5° lattice. The ratio of the two (bounded to 0.5–1.3) rescales the daily radiation before the hourly disaggregation in the PV energy model; mid-century periods use the same factors. The correction changes radiation by {rad.k_nat_pct}% on average over the eligible cropland, {rad.k_north_pct}% in the Indo-Gangetic plain (24–31°N, 74–88°E) and {rad.k_south_pct}% south of 16°N, and national specific yield at GCR 0.3 by {rad.sy_change_pct}%. The crop model runs keep the original radiation{?; a test on the {rad.crop_n_cells} most affected cells with corrected radiation changed GCR~max~ by {rad.gcr_change} on average?}.`));
+}
 add(H1("Supplementary references"));
 add(refsList());
 save(body, "Supplementary_Methods_AgriPV_India.docx");

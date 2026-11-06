@@ -91,6 +91,8 @@ $PY src/fig_india.py --pp $PP --stage historical_current --grid $GRID --boundari
 [ $HAVE_REC != 0 ] && $PY src/fig_india.py --pp $PP --stage historical_current_robust --grid $GRID \
   --boundaries data/boundaries/Admin2.shp --out $FIG --calib historical_current
 
+$PY src/fig_supply.py --pp $PP --out $FIG
+
 echo "== headline numbers"
 $PY src/results_summary.py --pp $PP --stages "${SUMSTAGES[@]}" --summary "$SUM" --grid $GRID > /dev/null
 echo "wrote $PP/headline_numbers.md"
