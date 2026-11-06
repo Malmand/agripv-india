@@ -171,13 +171,15 @@ def main():
         elif k == 1:
             for j, (v, nm) in enumerate(((cer, "cereals"), (leg, "legumes"))):
                 xx = cx + cw * (0.27 + 0.46 * j)
-                ax.text(xx, YN + 0.8, v, fontsize=12, **NUM)
-                ax.text(xx, YN - 2.7, nm, fontsize=7, color=MID, ha="center", va="center")
-            ax.plot([mid, mid], [YN - 3.0, YN + 3.2], color=PILL_EC, lw=0.5)
-            ax.text(mid, YC - 1.2, "of each field can\nbe under panels", **CAP)
+                ax.text(xx, YN + 0.6, v, fontsize=12, **NUM)
+                ax.text(xx, YN - 2.5, nm, fontsize=7, color=MID, ha="center", va="center")
+            ax.plot([mid, mid], [YN - 3.1, YN + 2.8], color=PILL_EC, lw=0.5)
+            ax.text(mid, YC - 1.0, "of field under panels", **CAP)
+            ax.text(mid, YC - 4.4, "Set caps by crop", **dict(CAP, fontweight="bold", color=ACC))
         else:
             ax.text(mid, YN, f"{ch}%", fontsize=13, **NUM)
-            ax.text(mid, YC, f"capacity change\nvs today, {scen}", **CAP)
+            ax.text(mid, YC - 1.0, f"capacity, {scen}", **CAP)
+            ax.text(mid, YC - 4.4, "Climate-robust", **dict(CAP, fontweight="bold", color=ACC))
 
     # ---- map: the answer, everywhere
     MX, MY, MH = 70.5, 1.0, 48.0
