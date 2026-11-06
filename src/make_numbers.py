@@ -333,6 +333,10 @@ def robust_numbers(N, pp):
     s = s[s.loss > 0].head(2)
     if len(s):
         N.put("robust.top_states", " and ".join(s.state), " and ".join(s.state))
+    s2 = s2[(s2.config == MAIN_LAYOUT) & (s2.thr.round(2) == MAIN_THR) & (s2.slope_rule == "le5")]
+    for i, r in enumerate(s2.sort_values("cap_mwp_median", ascending=False).head(3).itertuples(), 1):
+        N.put(f"robust.top{i}_state", r.state, r.state)
+        N.put(f"robust.top{i}_twp", r.cap_mwp_median / 1e6, f"{r.cap_mwp_median / 1e6:.1f}")
 
 
 def future_numbers(N, pp, p):
@@ -640,6 +644,16 @@ def main():
     for p, st in present.items():
         t, m, c = stage_numbers(N, p, a.pp, st)
         group_numbers(N, p, m)
+        if p == "robust":   # GCR_max spread for the robust headline (same definitions as hist_extras)
+            d = m[m.config == MAIN_LAYOUT]
+            if len(d):
+                for q, nm in ((0.05, "gcr_p05"), (0.95, "gcr_p95")):
+                    x = wquant(d.gcr_med, d.elig_ha, q)
+                    N.put(f"robust.{nm}", x, f"{x:.2f}")
+                ce = d[d.crop.isin(CEREALS)]
+                if len(ce):
+                    x = wmedian(ce.gcr_med, ce.elig_ha)
+                    N.put("robust.cereal_gcr_med", x, f"{x:.2f}")
         if p == "hist":
             hist_extras(N, a.pp, t, m, c)
             masking_numbers(N, c, a.calib_dir, a.calib_n)

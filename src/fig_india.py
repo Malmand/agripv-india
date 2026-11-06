@@ -3,6 +3,7 @@
   fig_india_gcrmax_<stage>.pdf      map: GCR_max at RY >= thr, crops x layouts (5-GCM median)
   fig_india_capacity_<stage>.pdf    bars: India capacity (GW) by layout and RY threshold,
                                     error bars = range over 5 GCMs; markers = slope-rule cases
+  fig_india_cases_<robust>.pdf     bars: capacity and energy, robust (filled) vs calibrated N (outline)
   fig_india_states_<stage>.pdf      bars: top states, capacity at RY >= thr, by layout
   fig_india_delta_<fut>.pdf         map: change in GCR_max, future minus historical (if given)
 Usage: python fig_india.py --pp results/potential --stage historical_current --grid grid.csv
@@ -135,6 +136,38 @@ def fig_capacity(pp, stage, out):
     plt.close(fig)
 
 
+def fig_cases(pp, calib, robust, out):
+    """Capacity (A) and annual energy (B) by layout and RY threshold: robust case as filled bars with the
+    GCM range, calibrated-nitrogen upper bound as an outline bar behind it (slope <= 5%)."""
+    tc = pd.read_csv(pp / f"india_combined_{calib}.csv")
+    tr = pd.read_csv(pp / f"india_combined_{robust}.csv")
+    thrs = sorted(tr.thr.unique())
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.9), constrained_layout=True)
+    w = 0.26
+    for ax, (col, scale, ylab, lab) in zip(axes, (("cap_mwp", 1e6, "Capacity (TWp)", "A"),
+                                                  ("energy_gwh", 1e6, "Annual energy (PWh yr$^{-1}$)", "B"))):
+        for j, (cfg, ll) in enumerate(LAYOUTS):
+            x = np.arange(len(thrs)) + (j - 1) * w
+            dc = tc[(tc.config == cfg) & (tc.slope_rule == "le5")].set_index("thr").loc[thrs]
+            dr = tr[(tr.config == cfg) & (tr.slope_rule == "le5")].set_index("thr").loc[thrs]
+            ax.bar(x, dc[f"{col}_median"] / scale, w * 0.92, facecolor="white", edgecolor=OI[cfg], linewidth=0.8,
+                   label=None)
+            y = dr[f"{col}_median"] / scale
+            ax.bar(x, y, w * 0.92, color=OI[cfg], edgecolor="none", label=ll)
+            ax.errorbar(x, y, yerr=[y - dr[f"{col}_min"] / scale, dr[f"{col}_max"] / scale - y], fmt="none",
+                        ecolor="black", elinewidth=0.6, capsize=1.5)
+        ax.set_xticks(np.arange(len(thrs)))
+        ax.set_xticklabels([f"RY ≥ {x:.2f}" for x in thrs])
+        ax.set_ylabel(ylab, fontsize=8)
+        ax.text(-0.16, 1.02, lab, transform=ax.transAxes, fontsize=11, fontweight="bold", va="bottom")
+    h, l = axes[0].get_legend_handles_labels()
+    h.append(mpl.patches.Patch(facecolor="white", edgecolor="black", linewidth=0.8))
+    l.append("Outline: calibrated N (upper bound)")
+    fig.legend(h, l, fontsize=6.5, loc="outside lower center", ncol=4)
+    save(fig, out / f"fig_india_cases_{robust}")
+    plt.close(fig)
+
+
 def fig_states(pp, stage, thr, out, top=12):
     t = pd.read_csv(pp / f"state_combined_{stage}.csv")
     t = t[(t.thr.round(2) == thr) & (t.slope_rule == "le5")]
@@ -197,6 +230,7 @@ if __name__ == "__main__":
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--thr", type=float, default=0.8)
     ap.add_argument("--future", nargs="*", default=[])
+    ap.add_argument("--calib", help="calibrated stage: with a robust --stage, also draw fig_india_cases_<stage>")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     grid = pd.read_csv(a.grid)
@@ -209,6 +243,8 @@ if __name__ == "__main__":
     fig_gcrmax(a.pp, a.stage, grid, states, a.thr, a.out)
     fig_capacity(a.pp, a.stage, a.out)
     fig_states(a.pp, a.stage, a.thr, a.out)
+    if a.calib:
+        fig_cases(a.pp, a.calib, a.stage, a.out)
     for f in a.future:
         fig_delta(a.pp, a.stage, f, grid, states, a.thr, a.out)
     print("figures in", a.out)
