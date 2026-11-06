@@ -3,71 +3,89 @@ ew_fixed,0.66,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.
 ew_fixed,0.66,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 ew_fixed,0.66,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
 ew_fixed,0.66,0.42,4,yield constraint (historical_current),39.667,51143,50761,51363,51.035,0.9791
+ew_fixed,0.66,0.42,5,robust management (min with historical_recommended),39.667,47337,47103,47857,51.035,0.9791
 ew_fixed,0.66,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 ew_fixed,0.66,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 ew_fixed,0.66,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
 ew_fixed,0.66,0.75,4,yield constraint (historical_current),39.667,51143,50761,51363,51.035,0.9791
+ew_fixed,0.66,0.75,5,robust management (min with historical_recommended),39.667,47337,47103,47857,51.035,0.9791
 ew_fixed,0.8,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 ew_fixed,0.8,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 ew_fixed,0.8,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
 ew_fixed,0.8,0.42,4,yield constraint (historical_current),39.667,45488,45461,45881,51.035,0.9791
+ew_fixed,0.8,0.42,5,robust management (min with historical_recommended),39.667,39213,38997,39756,51.035,0.9791
 ew_fixed,0.8,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 ew_fixed,0.8,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 ew_fixed,0.8,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
 ew_fixed,0.8,0.75,4,yield constraint (historical_current),39.667,45488,45461,45881,51.035,0.9791
+ew_fixed,0.8,0.75,5,robust management (min with historical_recommended),39.667,39213,38997,39756,51.035,0.9791
 ew_fixed,0.9,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 ew_fixed,0.9,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 ew_fixed,0.9,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
 ew_fixed,0.9,0.42,4,yield constraint (historical_current),39.667,39794,39592,40263,51.035,0.9791
+ew_fixed,0.9,0.42,5,robust management (min with historical_recommended),39.667,30892,30382,31499,51.035,0.9791
 ew_fixed,0.9,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 ew_fixed,0.9,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 ew_fixed,0.9,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
 ew_fixed,0.9,0.75,4,yield constraint (historical_current),39.667,39794,39592,40263,51.035,0.9791
+ew_fixed,0.9,0.75,5,robust management (min with historical_recommended),39.667,30892,30382,31499,51.035,0.9791
 south_fixed,0.66,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 south_fixed,0.66,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 south_fixed,0.66,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
 south_fixed,0.66,0.42,4,yield constraint (historical_current),39.667,40296,40104,40469,51.035,0.9791
+south_fixed,0.66,0.42,5,robust management (min with historical_recommended),39.667,35745,35428,35928,51.035,0.9791
 south_fixed,0.66,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 south_fixed,0.66,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 south_fixed,0.66,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
 south_fixed,0.66,0.75,4,yield constraint (historical_current),39.667,40296,40104,40469,51.035,0.9791
+south_fixed,0.66,0.75,5,robust management (min with historical_recommended),39.667,35745,35428,35928,51.035,0.9791
 south_fixed,0.8,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 south_fixed,0.8,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 south_fixed,0.8,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
 south_fixed,0.8,0.42,4,yield constraint (historical_current),39.667,34237,33878,34340,51.035,0.9791
+south_fixed,0.8,0.42,5,robust management (min with historical_recommended),39.667,28396,27855,28699,51.035,0.9791
 south_fixed,0.8,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 south_fixed,0.8,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 south_fixed,0.8,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
 south_fixed,0.8,0.75,4,yield constraint (historical_current),39.667,34237,33878,34340,51.035,0.9791
+south_fixed,0.8,0.75,5,robust management (min with historical_recommended),39.667,28396,27855,28699,51.035,0.9791
 south_fixed,0.9,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 south_fixed,0.9,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 south_fixed,0.9,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
 south_fixed,0.9,0.42,4,yield constraint (historical_current),39.667,28715,28195,28864,51.035,0.9791
+south_fixed,0.9,0.42,5,robust management (min with historical_recommended),39.667,21075,20343,21315,51.035,0.9791
 south_fixed,0.9,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 south_fixed,0.9,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 south_fixed,0.9,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
 south_fixed,0.9,0.75,4,yield constraint (historical_current),39.667,28715,28195,28864,51.035,0.9791
+south_fixed,0.9,0.75,5,robust management (min with historical_recommended),39.667,21075,20343,21315,51.035,0.9791
 vertical,0.66,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 vertical,0.66,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 vertical,0.66,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
 vertical,0.66,0.42,4,yield constraint (historical_current),39.667,47722,47606,47778,51.035,0.9791
+vertical,0.66,0.42,5,robust management (min with historical_recommended),39.667,47530,47438,47598,51.035,0.9791
 vertical,0.66,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 vertical,0.66,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 vertical,0.66,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
 vertical,0.66,0.75,4,yield constraint (historical_current),39.667,47722,47606,47778,51.035,0.9791
+vertical,0.66,0.75,5,robust management (min with historical_recommended),39.667,47530,47438,47598,51.035,0.9791
 vertical,0.8,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 vertical,0.8,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 vertical,0.8,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
 vertical,0.8,0.42,4,yield constraint (historical_current),39.667,42806,42629,43050,51.035,0.9791
+vertical,0.8,0.42,5,robust management (min with historical_recommended),39.667,41212,40786,41398,51.035,0.9791
 vertical,0.8,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 vertical,0.8,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 vertical,0.8,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
 vertical,0.8,0.75,4,yield constraint (historical_current),39.667,42806,42629,43050,51.035,0.9791
+vertical,0.8,0.75,5,robust management (min with historical_recommended),39.667,41212,40786,41398,51.035,0.9791
 vertical,0.9,0.42,1,"fixed density, all crop area",49.968,20987,20987,20987,51.035,0.9791
 vertical,0.9,0.42,2,slope <= 5%,45.057,18924,18924,18924,51.035,0.9791
 vertical,0.9,0.42,3,double cropping counted once,39.667,16660,16660,16660,51.035,0.9791
 vertical,0.9,0.42,4,yield constraint (historical_current),39.667,38087,37802,38270,51.035,0.9791
+vertical,0.9,0.42,5,robust management (min with historical_recommended),39.667,30413,29399,30793,51.035,0.9791
 vertical,0.9,0.75,1,"fixed density, all crop area",49.968,37476,37476,37476,51.035,0.9791
 vertical,0.9,0.75,2,slope <= 5%,45.057,33793,33793,33793,51.035,0.9791
 vertical,0.9,0.75,3,double cropping counted once,39.667,29750,29750,29750,51.035,0.9791
 vertical,0.9,0.75,4,yield constraint (historical_current),39.667,38087,37802,38270,51.035,0.9791
+vertical,0.9,0.75,5,robust management (min with historical_recommended),39.667,30413,29399,30793,51.035,0.9791
