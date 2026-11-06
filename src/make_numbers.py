@@ -208,6 +208,9 @@ def hist_extras(N, pp, t, m, c):
         N.put(f"hist.top{i}_state", r.state, r.state)
         N.put(f"hist.top{i}_gwp", r.cap_mwp_median / 1e3, f"{r.cap_mwp_median / 1e3:,.0f}")
         N.put(f"hist.top{i}_twp", r.cap_mwp_median / 1e6, f"{r.cap_mwp_median / 1e6:.1f}")
+    if main is not None and len(top):
+        x = 100 * top.cap_mwp_median.sum() / main.cap_mwp_median
+        N.put("hist.top3_share", x, pct(x))
 
 
 def ratio_text(x):
@@ -337,6 +340,11 @@ def robust_numbers(N, pp):
     for i, r in enumerate(s2.sort_values("cap_mwp_median", ascending=False).head(3).itertuples(), 1):
         N.put(f"robust.top{i}_state", r.state, r.state)
         N.put(f"robust.top{i}_twp", r.cap_mwp_median / 1e6, f"{r.cap_mwp_median / 1e6:.1f}")
+    tot = pd.read_csv(pp / f"india_combined_{STAGES['robust']}.csv")
+    tot = tot[(tot.config == MAIN_LAYOUT) & (tot.thr.round(2) == MAIN_THR) & (tot.slope_rule == "le5")]
+    if len(tot):
+        x = 100 * s2.sort_values("cap_mwp_median", ascending=False).head(3).cap_mwp_median.sum() / tot.cap_mwp_median.iloc[0]
+        N.put("robust.top3_share", x, pct(x))
 
 
 def future_numbers(N, pp, p):
