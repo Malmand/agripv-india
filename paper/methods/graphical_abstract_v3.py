@@ -132,7 +132,7 @@ def main():
     ax.text(LX + 0.3, 36.6, "METHOD", ha="left", va="center", **LBL)
     steps = [("Light model", "shade on crops,\n3 panel layouts"),
              ("Crop model", "DSSAT, 4 crops,\n5 climate models"),
-             ("Yield rule", f"densest panels\nkeeping {pct}% yield")]
+             ("Yield rule",  f"densest panels\nat {pct}% of harvest")]
     py, ph = 25.4, 9.6
     for k, (h1, h2) in enumerate(steps):
         px = LX + k * (cw + gap)
@@ -167,17 +167,17 @@ def main():
                 fontsize=7, fontweight="bold", color=MID)
         if k == 0:
             fit(mid, YN, big, cw - 2.4, 13, **NUM)
-            ax.text(mid, YC, f"of solar fits,\n{mult}× India's\nelectricity use", **CAP)
+            ax.text(mid, YC, f"of solar fits;\noutput: {mult}× India's\nelectricity use", **CAP)
         elif k == 1:
             for j, (v, nm) in enumerate(((cer, "cereals"), (leg, "legumes"))):
                 xx = cx + cw * (0.27 + 0.46 * j)
                 ax.text(xx, YN + 0.8, v, fontsize=12, **NUM)
                 ax.text(xx, YN - 2.7, nm, fontsize=7, color=MID, ha="center", va="center")
             ax.plot([mid, mid], [YN - 3.0, YN + 3.2], color=PILL_EC, lw=0.5)
-            ax.text(mid, YC - 1.2, "of land can be\nunder panels", **CAP)
+            ax.text(mid, YC - 1.2, "of each field can\nbe under panels", **CAP)
         else:
             ax.text(mid, YN, f"{ch}%", fontsize=13, **NUM)
-            ax.text(mid, YC, f"capacity change\nunder {scen}", **CAP)
+            ax.text(mid, YC, f"capacity change\nvs today, {scen}", **CAP)
 
     # ---- map: the answer, everywhere
     MX, MY, MH = 70.5, 1.0, 48.0
@@ -226,9 +226,9 @@ def main():
     cb.ax.tick_params(labelsize=7, labelcolor=MID, length=1.5, width=0.5, pad=1)
     cb.ax.minorticks_off()
     cb.outline.set_linewidth(0.4)
-    ax.text(cbx - 0.2, cby + cbh + 8.6, "Max land\nunder panels", ha="left", va="bottom", fontsize=7,
+    ax.text(cbx - 0.2, cby + cbh + 11.6, "Max land\nunder panels", ha="left", va="bottom", fontsize=7,
             fontweight="bold", color=INK, linespacing=0.8)
-    ax.text(cbx - 0.2, cby + cbh + 8.1, f"keeping {pct}%\nof harvest", ha="left", va="top", fontsize=7, color=MID, linespacing=0.8)
+    ax.text(cbx - 0.2, cby + cbh + 11.1, f"per field,\nkeeping {pct}%\nof harvest", ha="left", va="top", fontsize=7, color=MID, linespacing=0.8)
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(a.out.with_suffix(".pdf"))
