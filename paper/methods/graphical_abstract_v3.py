@@ -124,28 +124,28 @@ def main():
     LBL = dict(fontsize=7, fontweight="bold", color=ACC)                  # small section labels
 
     # ---- the question
-    box(LX, 38.6, LW, 10.2, NAVY, rs=2.0)
-    ax.text(LX + LW / 2, 43.7, f"How much solar can India's farmland host\nand still keep {pct}% of each harvest?",
+    box(LX, 39.6, LW, 9.2, NAVY, rs=2.0)
+    ax.text(LX + LW / 2, 44.2, f"How much solar can India's farmland host\nand still keep {pct}% of each harvest?",
             ha="center", va="center", fontsize=10, fontweight="bold", color="white", linespacing=0.9)
 
     # ---- the method: three steps, one line each
-    ax.text(LX + 0.3, 36.6, "METHOD", ha="left", va="center", **LBL)
+    ax.text(LX + 0.3, 37.7, "METHOD", ha="left", va="center", **LBL)
     steps = [("Light model", "shade on crops,\n3 panel layouts"),
              ("Crop model", "DSSAT, 4 crops,\n5 climate models"),
-             ("Yield rule",  f"densest panels\nat {pct}% of harvest")]
-    py, ph = 25.4, 9.6
+             ("Yield rule", f"densest panels\nstill keeping {pct}%")]
+    py, ph = 26.8, 9.4
     for k, (h1, h2) in enumerate(steps):
         px = LX + k * (cw + gap)
         box(px, py, cw, ph, PILL, PILL_EC, 0.5, rs=1.4)
-        ax.text(px + cw / 2, py + 7.1, h1, ha="center", va="center", fontsize=8, fontweight="bold", color=INK)
-        ax.text(px + cw / 2, py + 3.0, h2, ha="center", va="center", fontsize=7, color=MID, linespacing=0.8)
+        ax.text(px + cw / 2, py + 7.4, h1, ha="center", va="center", fontsize=8, fontweight="bold", color=INK)
+        ax.text(px + cw / 2, py + 2.8, h2, ha="center", va="center", fontsize=7, color=MID, linespacing=0.8)
         if k < 2:
             ax.add_patch(FancyArrowPatch((px + cw + 0.35, py + ph / 2), (px + cw + gap - 0.35, py + ph / 2),
                                          arrowstyle="-|>", mutation_scale=6, lw=0.8, color=NAVY, shrinkA=0,
                                          shrinkB=0))
 
     # ---- key findings: one number per card, its caption directly underneath
-    ax.text(LX + 0.3, 22.9, "KEY FINDINGS", ha="left", va="center", **LBL)
+    ax.text(LX + 0.3, 24.7, "KEY FINDINGS", ha="left", va="center", **LBL)
     big, _ = fmt_cap(head)
     mult = num.get("frame.head_multiple", num.get("frame.main_multiple", "[N]"))
     p = a.future.split("_")[0]
@@ -153,8 +153,8 @@ def main():
     ch = num.get(f"{p}.change_pct", "[±X]")
     cer = f"{grp['cereals']:.0f}%" if "cereals" in grp else "[x]%"
     leg = f"{grp['legumes']:.0f}%" if "legumes" in grp else "[y]%"
-    cy, chh = 1.5, 19.6
-    YN, YC = 14.0, 10.3                        # number centre, caption top
+    cy, chh = 1.5, 21.4
+    YN, YC = 15.9, 12.3                        # number centre, caption top
     NUM = dict(fontweight="bold", color=ACC, ha="center", va="center")
     CAP = dict(fontsize=7, color=INK, ha="center", va="top", linespacing=0.8)
     for k in range(3):
@@ -165,21 +165,25 @@ def main():
         mid = cx + cw / 2
         ax.text(mid, cy + chh - 2.6, ("HOW MUCH?", "HOW DENSE?", "BY 2050?")[k], ha="center", va="center",
                 fontsize=7, fontweight="bold", color=MID)
+        # every card: question, number, two grey lines saying what the number is, one bold line saying why it matters
+        G1, G2 = YC - 0.8, YC - 6.9
+        BOLD = dict(CAP, fontweight="bold", color=ACC)
         if k == 0:
             fit(mid, YN, big, cw - 2.4, 13, **NUM)
-            ax.text(mid, YC, f"of solar fits;\noutput: {mult}× India's\nelectricity use", **CAP)
+            ax.text(mid, G1, f"yearly output {mult}×\nIndia's demand", **CAP)
+            ax.text(mid, G2, "Land is ample", **BOLD)
         elif k == 1:
             for j, (v, nm) in enumerate(((cer, "cereals"), (leg, "legumes"))):
                 xx = cx + cw * (0.27 + 0.46 * j)
                 ax.text(xx, YN + 0.6, v, fontsize=12, **NUM)
                 ax.text(xx, YN - 2.5, nm, fontsize=7, color=MID, ha="center", va="center")
             ax.plot([mid, mid], [YN - 3.1, YN + 2.8], color=PILL_EC, lw=0.5)
-            ax.text(mid, YC - 1.0, "of field under panels", **CAP)
-            ax.text(mid, YC - 4.4, "Crop sets the limit", **dict(CAP, fontweight="bold", color=ACC))
+            ax.text(mid, G1, "of each field\nunder panels", **CAP)
+            ax.text(mid, G2, "Limit set by crop", **BOLD)
         else:
             ax.text(mid, YN, f"{ch}%", fontsize=13, **NUM)
-            ax.text(mid, YC - 1.0, f"capacity, {scen}", **CAP)
-            ax.text(mid, YC - 4.4, "Climate-robust", **dict(CAP, fontweight="bold", color=ACC))
+            ax.text(mid, G1, f"capacity change\nvs today, {scen}", **CAP)
+            ax.text(mid, G2, "Climate-robust", **BOLD)
 
     # ---- map: the answer, everywhere
     MX, MY, MH = 70.5, 1.0, 48.0
@@ -234,7 +238,7 @@ def main():
     callout("deccan", "Legume-rich\nDeccan", (81.3, 10.4), (76.6, 16.6))
 
     # colour bar east of the map, beside the Bay of Bengal
-    cbx, cby, cbh = MX + MW + 1.6, 4.0, 18.0
+    cbx, cby, cbh = MX + MW + 1.6, 7.6, 15.6
     cb_ax = axes_mm(cbx, cby, 1.7, cbh)
     ticks = [0, 0.35, 0.7]
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=ticks)
@@ -242,6 +246,8 @@ def main():
     cb.ax.tick_params(labelsize=7, labelcolor=MID, length=1.5, width=0.5, pad=1)
     cb.ax.minorticks_off()
     cb.outline.set_linewidth(0.4)
+    ax.add_patch(FancyBboxPatch((cbx - 1.4, 2.6), 1.6, 1.6, boxstyle="square,pad=0", fc="#EDEDED", ec="#4A4A4A", lw=0.4))
+    ax.text(cbx + 0.9, 3.4, "not assessed", ha="left", va="center", fontsize=7, color=MID)
     ax.text(cbx - 0.2, cby + cbh + 11.6, "Max land\nunder panels", ha="left", va="bottom", fontsize=7,
             fontweight="bold", color=INK, linespacing=0.8)
     ax.text(cbx - 0.2, cby + cbh + 11.1, f"per field,\nkeeping {pct}%\nof harvest", ha="left", va="top", fontsize=7, color=MID, linespacing=0.8)
