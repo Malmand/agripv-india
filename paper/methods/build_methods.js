@@ -10,11 +10,11 @@ add(new Paragraph({ spacing: { after: 300 }, children: [new TextRun({ text: "Yie
 require("./highlights.js").writeHighlights();
 require("./abstract.js").addAbstract(add);
 // remove before submission; Elsevier uploads the graphical abstract as a separate file without caption
-// Graphical abstract (front matter, unnumbered): image and caption from graphical_abstract_simple.py
+// Graphical abstract (front matter, unnumbered): image and caption from graphical_abstract_v3.py
 // (the detailed version, graphical_abstract.py and its files, is kept but no longer used here)
 {
   const fs = require("fs");
-  const ga = "graphical_abstract_simple.png", capf = "graphical_abstract_simple_caption.txt";
+  const ga = "graphical_abstract_v3.png", capf = "graphical_abstract_v3_caption.txt";
   if (fs.existsSync(ga)) {
     const b = fs.readFileSync(ga), w = 600, h = Math.round(w * b.readUInt32BE(20) / b.readUInt32BE(16));
     add(L.H3("Graphical abstract"));

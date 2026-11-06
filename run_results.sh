@@ -98,7 +98,7 @@ echo "  (build the manuscript and highlights with: node paper/methods/build_meth
 
 echo "== graphical abstract"
 FUTGA=ssp585_current; [ -f "$PP/india_combined_ssp585_current.csv" ] || FUTGA=none
-(cd paper/methods && $PY graphical_abstract.py --future $FUTGA && $PY graphical_abstract_simple.py --future $FUTGA)
+(cd paper/methods && $PY graphical_abstract.py --future $FUTGA && $PY graphical_abstract_simple.py --future $FUTGA && $PY graphical_abstract_v3.py --future $FUTGA)
 
 cat <<EOF
 
