@@ -776,6 +776,17 @@ def main():
                 if len(ce):
                     x = wmedian(ce.gcr_med, ce.elig_ha)
                     N.put("robust.cereal_gcr_med", x, f"{x:.2f}")
+            by = pd.read_csv(a.pp / f"india_by_crop_{st}.csv")      # legume share of area and of capacity
+            by = by[(by.config == MAIN_LAYOUT) & (by.thr.round(2) == MAIN_THR) & (by.slope_rule == "le5")]
+            if len(by):
+                leg = by.crop.isin(LEGUMES)
+                x = 100 * by.elig_ha_median[leg].sum() / by.elig_ha_median.sum()
+                y = 100 * by.cap_mwp_median[leg].sum() / by.cap_mwp_median.sum()
+                N.put("robust.legume_area_share", x, pct(x)); N.put("robust.legume_cap_share", y, pct(y))
+            v = c[c.config == "vertical"]
+            if len(v) and "gcr_raw" in v:                            # vertical area where the yield rule alone exceeds 0.6
+                y = 100 * np.average(v.gcr_raw > 0.6 + 1e-9, weights=v.elig_ha)
+                N.put("robust.vertical_gt06_area_share", y, pct(y))
         if p == "hist":
             hist_extras(N, a.pp, t, m, c)
             masking_numbers(N, c, a.calib_dir, a.calib_n)
