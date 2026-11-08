@@ -20,7 +20,7 @@ function abstractText() {
       ? "Calibrated nitrogen alone gives {main.cap_twp_m} TWp, an upper bound, because low nitrogen hides shade loss."
       : "Wheat that met the threshold even at the densest array lay mostly in states calibrated at 60 kg N ha^−1^ or less.",
     "Under the high-emission pathway SSP5-8.5 (calibrated nitrogen), capacity changed by {ssp585.change_pct}% but energy by {ssp585.energy_change_pct}%, through lower irradiance.",
-    "Screening costs show elevated frames need a tariff adder of Indian rupees (Rs) {econ.adder_20}–{econ.adder_38} per kWh; tying it to a relative-yield threshold with crop-specific density caps could suit India's farm-based solar schemes.",
+    "Screening costs show elevated frames need a tariff adder of Indian rupees (Rs) {econ.adder_25}–{econ.adder_38} per kWh; tying it to a relative-yield threshold with crop-specific density caps could suit India's farm-based solar schemes.",
   ].join(" ");
 }
 

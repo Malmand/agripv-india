@@ -6,7 +6,7 @@ Inputs (all sourced in the manuscript):
   * observed state mean yields 1995-2014 (ICRISAT district database, area weighted);
   * PV price: levelised tariff of the PM-KUSUM Component A in Gujarat, ceiling Rs 2.95/kWh and discovered Rs 2.77-2.78/kWh
     (GERC order, Petition 2603 of 2026);
-  * elevated-structure cost premium, +38% on LCOE over ground-mounted PV (Schindele et al. 2020, Appl Energy 265:114737).
+  * elevated-structure cost premium, +38% on LCOE over ground-mounted PV (Schindele et al. 2020, Appl Energy 265:114737) and +25-30% (Union Minister for New and Renewable Energy, Oct 2026).
 The cost of ground-mounted PV is set to the discovered auction price (Rs 2.775/kWh) at the national median specific yield
 of our array; cell LCOE scales inversely with its simulated specific yield. This is a screening estimate, not a project
 appraisal: it ignores land lease, grid connection, crop input costs and the value of the crop under shade beyond RY.
@@ -25,7 +25,7 @@ TAU, SLOPE, CFG = 0.80, "le5", "ew_fixed"
 
 MSP = {"wheat": 2585.0, "chickpea": 5875.0, "pearl_millet": 2900.0, "groundnut": 7517.0}   # Rs per quintal (100 kg)
 TARIFF_CEIL, TARIFF_AUCTION = 2.95, 2.775                                                  # Rs per kWh
-PREMIA = (0.0, 0.2, 0.38)                                                                  # APV structure premium on LCOE
+PREMIA = (0.0, 0.25, 0.30, 0.38)                                                                  # APV structure premium on LCOE
 BASE_PREM = 0.38
 
 # observed state yields (kg/ha), ICRISAT 1995-2014, area weighted
@@ -117,6 +117,7 @@ put("econ.be_ceil_pct", be_ceil, f"{be_ceil:.0f}")
 put("econ.be_crop_pct", be_crop, f"{be_crop:.1f}")
 put("econ.e_ha_mwh", e_ha / 1e3, f"{e_ha / 1e3:,.0f}")
 put("econ.adder_per_ha_lakh", med.adder_38 * e_ha / 1e5, f"{med.adder_38 * e_ha / 1e5:.0f}")
+put("econ.adder25_per_ha_lakh", med.adder_25 * e_ha / 1e5, f"{med.adder_25 * e_ha / 1e5:.0f}")
 put("econ.prem_per_ha_lakh", prem_cost_per_kwh * e_ha / 1e5, f"{prem_cost_per_kwh * e_ha / 1e5:.0f}")
 put("econ.crop_value_per_ha_lakh", cv_ha / 1e5, f"{cv_ha / 1e5:.2f}")
 put("econ.tariff_ceiling", TARIFF_CEIL, f"{TARIFF_CEIL:.2f}")

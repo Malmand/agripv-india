@@ -9,7 +9,7 @@ S = pd.read_csv(R / "results/economics/econ_supply.csv")
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 7, "axes.linewidth": 0.7, "pdf.fonttype": 42})
 fig, ax = plt.subplots(figsize=(3.5, 2.6), dpi=300)
 grid = np.linspace(0, 40, 400)
-sty = {0.0: ("#0072B2", "-", "No structure premium"), 0.2: ("#E69F00", "--", "+20%"), 0.38: ("#D55E00", ":", "+38% (Schindele et al.)")}
+sty = {0.0: ("#0072B2", "-", "No structure premium"), 0.25: ("#E69F00", "--", "+25% (Indian ministry)"), 0.38: ("#D55E00", ":", "+38% (Schindele et al.)")}
 for p, (col, ls, lab) in sty.items():
     cur = []
     for m, g in S[S.premium == p].groupby("model"):
