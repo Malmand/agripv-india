@@ -159,6 +159,10 @@ add(FIGAUTO("../../results/figures/fig_india_delta_ssp245_current_thr80.png", 60
   "Change in GCR~max~ at RY ≥ 0.80, 2041–2060 under SSP2-4.5 minus 1995–2014, by crop and layout (five-GCM median, interpolated for display; calibrated nitrogen)."));
 add(FIGAUTO("../../results/figures/fig_india_delta_ssp585_current_thr80.png", 600,
   "As Fig. S8, for SSP5-8.5."));
+add(H1("S14. Simulated relative yield against reduction in ground light"));
+add(PF(`Fig. S${L.nextFig()} plots the simulated relative yield (RY) of each crop in the east-west layout against the mean reduction in ground light, with calibrated and with recommended nitrogen. The reduction is one minus the season-mean, strip-mean ground-light factor of the light model, computed for a representative central-Indian site (25° N, 78° E) with a rabi season for wheat and chickpea and a kharif season for pearl millet and groundnut. For the east-west layout the mean reduction is close to the GCR (a GCR of 0.2 gives a reduction of 0.20, 0.5 gives 0.49). Curves are medians over all cells, GCMs and water systems of the 1995–2014 runs; the proportional-loss line marks RY = 1 minus the reduction.`));
+add(FIGAUTO("../../results/figures/fig_shade_response_check.png", 380,
+  "Simulated median RY against mean reduction in ground light, east-west layout, 1995–2014. Solid lines with circles: calibrated nitrogen; dashed lines with squares: recommended nitrogen; dotted line: proportional loss; dashed horizontal line: RY = 0.80."));
 add(H1("Supplementary references"));
 add(refsList());
 save(body, "Supplementary_Methods_AgriPV_India.docx");

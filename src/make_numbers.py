@@ -809,6 +809,16 @@ def main():
     pilot_numbers(N, a.pilot, a.jodhpur)
     review_numbers(N, a.pp, a.summary)
     sens_numbers(N, a.pp)
+    f = a.pp.parent / "shade_response_check.csv"          # simulated RY against mean ground-light reduction
+    if f.exists():
+        sr = pd.read_csv(f)
+        for (crop, nm), g in sr.groupby(["crop", "nmode"]):
+            g = g.sort_values("light_reduction")
+            x = np.r_[0, g.light_reduction.values]; y = np.r_[1, g.ry_med.values]
+            for red in (0.2, 0.3, 0.5):
+                v = float(np.interp(red, x, y)); N.put(f"shade.{crop}.{nm}.ry{int(red * 100)}", v, f"{v:.2f}")
+            if y.min() <= 0.8:
+                v = 100 * float(np.interp(0.8, y[::-1], x[::-1])); N.put(f"shade.{crop}.{nm}.red_at_ry80", v, f"{v:.0f}")
     f = a.pp / "supply_curve.csv"
     if f.exists():
         sc = pd.read_csv(f)
