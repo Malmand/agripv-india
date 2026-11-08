@@ -84,6 +84,48 @@
 - Gujarat: 2430
 - Maharashtra: 1906
 
+## ssp245_current: crops combined, slope ≤ 5%
+
+| Layout | τ | Land (Mha) | Capacity (TWp) | Energy (PWh/yr) |
+|---|---|---|---|---|
+| ew_fixed | 0.66 | 39.67 | 50.75 (49.02–51.30) | 86.86 (84.13–87.73) |
+| south_fixed | 0.66 | 39.67 | 40.49 (38.97–41.62) | 74.54 (71.98–76.38) |
+| vertical | 0.66 | 39.67 | 47.90 (47.55–47.98) | 56.61 (56.29–56.68) |
+| ew_fixed | 0.80 | 39.67 | 44.95 (42.28–46.15) | 77.41 (73.11–79.31) |
+| south_fixed | 0.80 | 39.67 | 34.18 (32.30–35.55) | 63.64 (60.38–65.95) |
+| vertical | 0.80 | 39.67 | 42.75 (41.82–43.12) | 51.55 (50.60–51.92) |
+| ew_fixed | 0.90 | 39.67 | 38.80 (35.42–40.64) | 67.14 (61.58–70.08) |
+| south_fixed | 0.90 | 39.67 | 28.35 (26.20–30.03) | 53.25 (49.43–56.16) |
+| vertical | 0.90 | 39.67 | 37.75 (35.56–38.11) | 45.94 (43.59–46.36) |
+
+### ssp245_current: area-weighted mean of the five-GCM median GCR_max at τ = 0.80
+
+| Crop | Layout | GCR_max | Share of area at simulated GCR limit |
+|---|---|---|---|
+| chickpea | ew_fixed | 0.27 | 6% |
+| chickpea | south_fixed | 0.19 | 0% |
+| chickpea | vertical | 0.27 | 7% |
+| groundnut | ew_fixed | 0.32 | 6% |
+| groundnut | south_fixed | 0.32 | 3% |
+| groundnut | vertical | 0.33 | 8% |
+| pearl_millet | ew_fixed | 0.54 | 0% |
+| pearl_millet | south_fixed | 0.49 | 0% |
+| pearl_millet | vertical | 0.59 | 74% |
+| wheat | ew_fixed | 0.62 | 36% |
+| wheat | south_fixed | 0.44 | 0% |
+| wheat | vertical | 0.56 | 74% |
+
+### ssp245_current: top states, best layout, τ = 0.80 (GWp)
+
+- Uttar Pradesh: 14063
+- Rajasthan: 7331
+- Madhya Pradesh: 6425
+- Haryana: 3515
+- Bihar: 3141
+- Punjab: 2646
+- Gujarat: 2356
+- Maharashtra: 2187
+
 ## ssp585_current: crops combined, slope ≤ 5%
 
 | Layout | τ | Land (Mha) | Capacity (TWp) | Energy (PWh/yr) |
@@ -126,6 +168,18 @@
 - Gujarat: 2328
 - Maharashtra: 2166
 
+## Change historical_current → ssp245_current (capacity, %)
+
+- ew_fixed, τ 0.66: -1%
+- ew_fixed, τ 0.80: -1%
+- ew_fixed, τ 0.90: -3%
+- south_fixed, τ 0.66: +0%
+- south_fixed, τ 0.80: -0%
+- south_fixed, τ 0.90: -1%
+- vertical, τ 0.66: +0%
+- vertical, τ 0.80: -0%
+- vertical, τ 0.90: -1%
+
 ## Change historical_current → ssp585_current (capacity, %)
 
 - ew_fixed, τ 0.66: -1%
@@ -161,6 +215,12 @@
 - τ 0.66: capped 47.53, uncapped 52.75 (-10%)
 - τ 0.80: capped 41.21, uncapped 42.95 (-4%)
 - τ 0.90: capped 30.41, uncapped 31.12 (-2%)
+
+## Vertical layout, DIN cap GCR_max ≤ 0.6 (main) vs uncapped, ssp245_current (TWp)
+
+- τ 0.66: capped 47.90, uncapped 53.43 (-10%)
+- τ 0.80: capped 42.75, uncapped 47.91 (-11%)
+- τ 0.90: capped 37.75, uncapped 41.86 (-10%)
 
 ## Vertical layout, DIN cap GCR_max ≤ 0.6 (main) vs uncapped, ssp585_current (TWp)
 
@@ -202,6 +262,22 @@
 
 - historical_current_robust: vertical layout, share of eligible area with uncapped GCR_max > 0.6 (DIN 15% land loss, capped at 0.6 in the main case): τ 0.66 65%, τ 0.80 40%, τ 0.90 14%
 
+### ssp245_current: capacity density and specific yield (slope ≤ 5%)
+
+| Layout | τ | MWp per ha of land | kWh/kWp/yr |
+|---|---|---|---|
+| ew_fixed | 0.66 | 1.28 | 1711 |
+| south_fixed | 0.66 | 1.02 | 1841 |
+| vertical | 0.66 | 1.21 | 1182 |
+| ew_fixed | 0.80 | 1.13 | 1722 |
+| south_fixed | 0.80 | 0.86 | 1862 |
+| vertical | 0.80 | 1.08 | 1206 |
+| ew_fixed | 0.90 | 0.98 | 1731 |
+| south_fixed | 0.90 | 0.71 | 1879 |
+| vertical | 0.90 | 0.95 | 1217 |
+
+- ssp245_current: vertical layout, share of eligible area with uncapped GCR_max > 0.6 (DIN 15% land loss, capped at 0.6 in the main case): τ 0.66 67%, τ 0.80 61%, τ 0.90 52%
+
 ### ssp585_current: capacity density and specific yield (slope ≤ 5%)
 
 | Layout | τ | MWp per ha of land | kWh/kWp/yr |
@@ -226,6 +302,17 @@
 | groundnut | 897 | 2689 | 13 | 2.40 | 1.01 |
 | pearl_millet | 1024 | 982 | 9 | 1.14 | 1.08 |
 | wheat | 2095 | 2803 | 15 | 1.00 | 1.00 |
+
+Legumes are compared with uncalibrated (farmer N) runs; groundnut sim/obs about 2.7 is known.
+
+### ssp245_current: open-field yield (kg/ha, 5-GCM median, SPAM-area weighted)
+
+| Crop | Cells | India mean | States matched | Sim/obs (matched states) | Sim/calibration sim |
+|---|---|---|---|---|---|
+| chickpea | 1462 | 1068 | 15 | 1.34 | 1.32 |
+| groundnut | 897 | 3431 | 13 | 3.01 | 1.27 |
+| pearl_millet | 1024 | 986 | 9 | 1.15 | 1.09 |
+| wheat | 2095 | 2810 | 15 | 1.01 | 1.00 |
 
 Legumes are compared with uncalibrated (farmer N) runs; groundnut sim/obs about 2.7 is known.
 
