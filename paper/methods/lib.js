@@ -65,6 +65,14 @@ const REF = {
   lopez: "Lopez A, Roberts B, Heimiller D, Blair N, Porro G. U.S. renewable energy technical potentials: a GIS-based analysis. NREL/TP-6A20-51946. Golden, CO: National Renewable Energy Laboratory; 2012. https://doi.org/10.2172/1219777.",
   cea: "Central Electricity Authority. Load Generation Balance Report 2026-27. New Delhi: Ministry of Power, Government of India; 2026. https://cea.nic.in/wp-content/uploads/l_g_b_r_reports/2025/LGBR_2026_27.pdf [accessed 2 November 2026].",
   nasapower: "NASA Langley Research Center. Prediction Of Worldwide Energy Resources (POWER) Project, daily and climatology data. Hampton, VA: NASA. https://power.larc.nasa.gov [accessed November 2026].",
+  trommsdorff: "Trommsdorff M, Kang J, Reise C, Schindele S, Bopp G, Ehmann A, et al. Combining food and energy production: design of an agrivoltaic system applied in arable and vegetable farming in Germany. Renew Sustain Energy Rev 2021;140:110694. https://doi.org/10.1016/j.rser.2020.110694.",
+  schindele: "Schindele S, Trommsdorff M, Schlaak A, Obergfell T, Bopp G, Reise C, et al. Implementation of agrophotovoltaics: techno-economic analysis of the price-performance ratio and its policy implications. Appl Energy 2020;265:114737. https://doi.org/10.1016/j.apenergy.2020.114737.",
+  sekiyama: "Sekiyama T, Nagashima A. Solar sharing for both food and clean energy production: performance of agrivoltaic systems for corn, a typical shade-intolerant crop. Environments 2019;6:65. https://doi.org/10.3390/environments6060065.",
+  majumdar: "Majumdar D, Pasqualetti MJ. Dual use of agricultural land: introducing 'agrivoltaics' in Phoenix Metropolitan Statistical Area, USA. Landsc Urban Plan 2018;170:150–68. https://doi.org/10.1016/j.landurbplan.2017.10.011.",
+  feuerbacher: "Feuerbacher A, Laub M, Högy P, Lippert C, Pataczek L, Schindele S, et al. An analytical framework to estimate the economics and adoption potential of dual land-use systems: the case of agrivoltaics. Agric Syst 2021;192:103193. https://doi.org/10.1016/j.agsy.2021.103193.",
+  zeddies: "Zeddies M, et al. Agrivoltaics increases public acceptance of solar energy production on agricultural land. Land Use Policy 2025;107604. https://doi.org/10.1016/j.landusepol.2025.107604.",
+  randle: "Randle-Boggis RJ, et al. Harvesting the sun twice: energy, food and water benefits from agrivoltaics in East Africa. Renew Sustain Energy Rev 2025;115066. https://doi.org/10.1016/j.rser.2024.115066.",
+  abdalla: "Abdalla A, et al. A pathway to food and energy security: agrivoltaic potential in the MENA region. Energy Nexus 2026;100610. https://doi.org/10.1016/j.nexus.2025.100610.",
   kusumfaq: "Ministry of New and Renewable Energy. PM-KUSUM: frequently asked questions. https://pmkusum.mnre.gov.in/landing-faq.html [accessed October 2026].",
 };
 let order = [];
