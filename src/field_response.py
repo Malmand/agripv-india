@@ -9,7 +9,7 @@ ground light follows the observations compiled by Jha et al. (2026), then rerun 
     (simulated median from the east-west curves). RY_field = RY_sim * c(red(config, GCR)). Spatial differences between cells
     are kept; only the average response is aligned with the observations.
  4. postprocess_india.py is run on the rescaled RY (robust case: lower GCR_max of calibrated and recommended nitrogen).
-Usage: python3 src/field_response.py path/to/Data_Clean.xlsx [--skip-run]
+Usage: python3 src/field_response.py [path/to/Data_Clean.xlsx] [--variant=nosoy|c3|millet_c3] [--skip-run] [--relight]
 Outputs: results/shade_field_curves.csv, results/shade_light_reduction.csv, results/potential_field/*"""
 import sys, pathlib, subprocess, tempfile, shutil
 import numpy as np, pandas as pd
@@ -21,6 +21,14 @@ SEASON = {"wheat": ("2019-11-15", 120, 16.0), "chickpea": ("2019-11-01", 110, 16
           "pearl_millet": ("2019-07-01", 90, 19.0), "groundnut": ("2019-07-01", 110, 19.0)}
 OBS = {"wheat": lambda d: d.Crop.isin(["Wheat", "Durum wheat"]), "chickpea": lambda d: d.Crop_type.eq("Grain legumes"),
        "groundnut": lambda d: d.Crop_type.eq("Grain legumes"), "pearl_millet": lambda d: d.Crop_type.eq("Maize")}
+# proxy-choice sensitivity (Supplement S14): alternative observation sets for the same four crops
+VARIANTS = {
+    "main": {},
+    "nosoy": {"chickpea": lambda d: d.Crop_type.eq("Grain legumes") & ~d.Crop.eq("Soybean"),
+              "groundnut": lambda d: d.Crop_type.eq("Grain legumes") & ~d.Crop.eq("Soybean")},
+    "c3": {"wheat": lambda d: d.Crop_type.eq("C3 cereals") | d.Crop.isin(["Wheat", "Durum wheat"])},
+    "millet_c3": {"pearl_millet": lambda d: d.Crop_type.isin(["Maize", "C3 cereals"])},
+}
 LAT, LON = 25.0, 78.0
 GR = np.round(np.arange(0, 0.9 + 1e-9, 0.01), 2)
 
@@ -58,8 +66,23 @@ def light_reduction():
     return pd.DataFrame(rows)
 
 if __name__ == "__main__":
-    obs = observed_curves(sys.argv[1]); obs.to_csv(R / "results/shade_field_curves.csv", index=False, float_format="%.4f")
-    lr = light_reduction(); lr.to_csv(R / "results/shade_light_reduction.csv", index=False, float_format="%.4f")
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    var = next((a.split("=")[1] for a in sys.argv if a.startswith("--variant=")), "main")
+    sfx = "" if var == "main" else "_" + var
+    OBS.update(VARIANTS[var])
+    cur = R / "results/shade_field_curves.csv"
+    if args:                                      # xlsx given: rebuild the observed curves
+        obs = observed_curves(args[0])
+        if var == "main":
+            obs.to_csv(cur, index=False, float_format="%.4f")
+    else:                                         # no data file: use the committed curves (main variant only)
+        assert var == "main", "variants need the Data_Clean.xlsx path"
+        obs = pd.read_csv(cur)
+    lrf = R / "results/shade_light_reduction.csv"
+    if lrf.exists() and "--relight" not in sys.argv:
+        lr = pd.read_csv(lrf)
+    else:
+        lr = light_reduction(); lr.to_csv(lrf, index=False, float_format="%.4f")
     SUM = R / "runs/s1/summary"; tmp = pathlib.Path(tempfile.mkdtemp())
     corr = {}
     for nm in ("current", "recommended"):
@@ -79,10 +102,10 @@ if __name__ == "__main__":
             parts.append(d.assign(ry=d.ry.values * np.interp(red, x, c)))
         pd.concat(parts).sort_index().to_csv(tmp / f"ry_crop_historical_{nm}.csv.gz", index=False)
     pd.DataFrame([dict(nmode=k[0], crop=k[1], reduction=a, factor=b) for k, (x, c) in corr.items() for a, b in zip(x, c)]) \
-        .to_csv(R / "results/shade_field_correction.csv", index=False, float_format="%.4f")
+        .to_csv(R / ("results/shade_field_correction" + sfx + ".csv"), index=False, float_format="%.4f")
     if "--skip-run" not in sys.argv:
         en = SUM / "energy_historical_rc.csv"; en = en if en.exists() else SUM / "energy_historical.csv"
-        out = R / "results/potential_field"; out.mkdir(exist_ok=True)
+        out = R / ("results/potential_field" + sfx); out.mkdir(exist_ok=True)
         subprocess.run([sys.executable, str(R / "prod/postprocess_india.py"), "--summary", str(tmp), "--stage", "historical_current",
                         "--robust-with", "historical_recommended", "--grid", str(R / "data/grid_india_025.csv"),
                         "--slope", str(R / "data/slope_india.csv"), "--energy", str(en), "--din-cap", "0.6", "--outdir", str(out)], check=True)

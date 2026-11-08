@@ -62,9 +62,9 @@ def write_caption(a, hlabel, scen):
         f"the share of land covered by modules) that keeps at least {a.thr:.0%} of the open-field yield. The map "
         f"shows it for east-west elevated arrays under 1995–2014 climate, {case}: the median over five GCMs, "
         "averaged over the four crops with eligible-area weights (MapSPAM harvested area on the share of the "
-        "cell with slope ≤ 5%); cells with less than 1000 ha are blank, the top of the scale (70%) is the largest cover simulated, and the 0.25° values are interpolated for display. Capacity is the crops-combined total "
-        "with double-cropped land counted once (median of five GCMs); the electricity multiple is its annual "
-        "generation divided by India's 2025–26 electricity requirement (1,707 TWh, CEA). Cereal and legume "
+        "cell with slope ≤ 5%); cells with less than 1000 ha are blank, the top of the scale (70%) is the largest cover simulated, and the 0.25° values are interpolated for display. The map is the crop-model (upper) case. Capacity is the crops-combined total "
+        "with double-cropped land counted once (median of five GCMs); the lower end of the range rescales the simulated relative yield to "
+        "field observations of yield under reduced light, and the upper end is the crop-model case. Cereal and legume "
         "values are eligible-area-weighted means; the call-outs give the share of the field covered by panels, the same mean, for the wheat belt (24–31°N, "
         "74–88°E) and the Deccan (12–21°N, 73–80°E); the scale bar holds at 22°N. The 2050 values are the changes by 2041–2060 under "
         f"{scen} against 1995–2014 (five-GCM median, calibrated nitrogen). " + GA.BOUNDARY_SRC)
@@ -172,9 +172,11 @@ def main():
         G1, G2 = YC - 0.8, YC - 6.9
         BOLD = dict(CAP, fontweight="bold", color=ACC)
         if k == 0:
-            fit(mid, YN, big, cw - 2.4, 13, **NUM)
-            ax.text(mid, G1, f"yearly output {mult}×\nIndia's demand", **CAP)
-            ax.text(mid, G2, "Land is ample", **BOLD)
+            lo_t = num.get("field.ew.t80.cap_twp", "[X]")
+            hi_t = num.get("head.cap_twp_m", big.replace(" TWp", ""))
+            fit(mid, YN, f"{lo_t}\u2013{hi_t}", cw - 2.4, 13, **NUM)
+            ax.text(mid, G1, "TWp, technical\npotential", **CAP)
+            ax.text(mid, G2, "Bounds, no forecast", **BOLD)
         elif k == 1:
             for j, (v, nm) in enumerate(((cer, "cereals"), (leg, "legumes"))):
                 xx = cx + cw * (0.27 + 0.46 * j)
@@ -186,7 +188,7 @@ def main():
         else:
             ax.text(mid, YN, f"{ch}%", fontsize=13, **NUM)
             ax.text(mid, G1, f"capacity change\nvs today, {scen}", **CAP)
-            ax.text(mid, G2, "Climate-robust", **BOLD)
+            ax.text(mid, G2, "Small change", **BOLD)
 
     # ---- map: the answer, everywhere
     MX, MY, MH = 70.5, 1.0, 48.0

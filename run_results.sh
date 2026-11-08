@@ -103,6 +103,9 @@ if [ $REBUILD = 0 ]; then
     --din-cap "$DIN" | tail -3
 fi
 
+echo "== field-response scenario (uses the committed observed curves; picks up the radiation-corrected energy table if present)"
+[ -d runs/s1/summary ] && $PY src/field_response.py 2>&1 | tail -3
+
 echo "== manuscript numbers"
 $PY src/make_numbers.py --pp $PP
 echo "  (build the manuscript and highlights with: node paper/methods/build_methods.js)"

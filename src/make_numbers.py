@@ -852,6 +852,11 @@ def main():
         for crop, r in fb.iterrows():
             v = r.cap_mwp_median / r.elig_ha_median / 2.2 / 10 * 10 / 10   # GCR_max = MWp / (ha * eta * 10)
             v = r.cap_mwp_median / (r.elig_ha_median * 0.22 * 10); N.put(f"field.gcr_{crop}", v, f"{v:.2f}")
+    for v in ("nosoy", "c3", "millet_c3"):                       # proxy-choice sensitivity of the field-response bound
+        fv = a.pp.parent / f"potential_field_{v}" / "india_combined_historical_current_robust.csv"
+        if fv.exists():
+            q = pd.read_csv(fv); q = q[(q.slope_rule == "le5") & (q.config == "ew_fixed") & (q.thr.round(2) == 0.8)]
+            N.put(f"field.proxy.{v}.cap_twp", q.cap_mwp_median.iloc[0] / 1e6, f"{q.cap_mwp_median.iloc[0] / 1e6:.1f}")
     f = a.pp / "supply_curve.csv"
     if f.exists():
         sc = pd.read_csv(f)
