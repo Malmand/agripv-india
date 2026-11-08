@@ -8,7 +8,7 @@ const { PF, H3, fill, P } = L;
 function abstractText() {
   const robust = fill.has("head.is_robust") && fill("{head.is_robust}") === "yes";
   const head = robust
-    ? "In the robust case, in which each cell takes the lower density of calibrated and recommended nitrogen, cropland with slopes up to 5% could host {head.cap_twp_m} terawatts peak (TWp) of east-west elevated arrays at 80% relative yield on {head.land_mha} million hectares ({robust.ew.t80.energy_pwh} petawatt-hours per year). The crop models were more shade-tolerant than field observations; rescaled to them, capacity is {field.ew.t80.cap_twp} TWp, so we report {field.ew.t80.cap_twp}–{head.cap_twp_m} TWp as a technical potential, not a forecast."
+    ? "In the robust case (lower of calibrated and recommended nitrogen), cropland with slopes up to 5% could host {head.cap_twp_m} terawatts peak (TWp) of east-west elevated arrays at 80% relative yield on {head.land_mha} million hectares ({robust.ew.t80.energy_pwh} petawatt-hours per year). The crop models were more shade-tolerant than field observations; rescaled to them, capacity is {field.ew.t80.cap_twp} TWp, so we report {field.ew.t80.cap_twp}–{head.cap_twp_m} TWp as a technical potential, not a forecast."
     : "With calibrated nitrogen, cropland with slopes up to 5% could host {head.cap_twp_m} TWp of east-west elevated arrays at 80% relative yield on {head.land_mha} Mha, before grid, economic and land-tenure limits. This is an upper bound: low nitrogen rates hide part of the shade loss.";
   return [
     "National agrivoltaic potential estimates, including those for India, assume fixed power densities and do not test whether crops keep their yield.",
@@ -17,10 +17,10 @@ function abstractText() {
     head,
     "The feasible GCR averaged {head.gcr_cereals} for cereals but {head.gcr_legumes} for legumes.",
     robust
-      ? "Calibrated nitrogen alone gives {main.cap_twp_m} TWp, an upper bound, because low nitrogen hides shade loss. Crop type and nitrogen management thus shape the feasible density."
+      ? "Calibrated nitrogen alone gives {main.cap_twp_m} TWp, an upper bound, because low nitrogen hides shade loss."
       : "Wheat that met the threshold even at the densest array lay mostly in states calibrated at 60 kg N ha^−1^ or less.",
-    "Under the high-emission pathway SSP5-8.5 (calibrated nitrogen), capacity changed by {ssp585.change_pct}% but annual energy by {ssp585.energy_change_pct}%, mainly through lower irradiance.",
-    "India could pair a relative-yield threshold with crop-specific density caps in farm-based solar schemes.",
+    "Under the high-emission pathway SSP5-8.5 (calibrated nitrogen), capacity changed by {ssp585.change_pct}% but energy by {ssp585.energy_change_pct}%, through lower irradiance.",
+    "Screening costs show elevated frames need a tariff adder of Indian rupees (Rs) {econ.adder_20}–{econ.adder_38} per kWh; tying it to a relative-yield threshold with crop-specific density caps could suit India's farm-based solar schemes.",
   ].join(" ");
 }
 

@@ -75,9 +75,21 @@ function addResults(add) {
     add(PF(`The full set of change maps by crop and layout is in Figs. S8 and S9.`));
   }
 
+  // screening economics (src/economics.py): cost-supply curve and the cost of keeping the crop
+  const ECON = fill.has("econ.crop_value_bn");
+  const nclim = 4 + (ROB ? 1 : 0) + ((fill.has("ssp245.change_pct") || fill.has("ssp585.change_pct")) ? 1 : 0);
+  if (ECON) {
+    add(H2(`3.${nclim}. Screening economics`));
+    add(PF(`At the ceiling tariff of Rs {econ.tariff_ceiling} per kWh, an eligible hectare under the robust east-west case would earn about Rs {econ.rev_per_ha_lakh} lakh a year from electricity (1 lakh = 100,000), against a gross crop value of Rs {econ.crop_value_per_ha_lakh} lakh on the same land. Electricity would be worth about {econ.ratio_rev_crop} times the crop, so price alone would favour converting the land fully to PV. The yield rule is what prevents that: at τ = 0.80 the crop loss is at most Rs {econ.crop_loss_max_bn} billion a year, one fifth of the Rs {econ.crop_value_bn} billion of gross crop value on the eligible land.`));
+    add(PF(`Whether the electricity can be sold at that tariff depends on the premium of the elevated frame over ground-mounted PV (Fig. ${L.nextFig()}). With no premium, the energy-weighted LCOE is Rs {econ.lcoe_0} per kWh and {econ.share_ceil_0}% of the capacity ({econ.twp_ceil_0} TWp) costs less than the ceiling tariff, mostly in cells with high specific yield. At a 20% premium the LCOE is Rs {econ.lcoe_20} per kWh and only {econ.twp_ceil_20} TWp clears the ceiling; at 38% it is Rs {econ.lcoe_38} and none does. The discovered auction price leaves only {econ.be_ceil_pct}% headroom below the ceiling, so any larger premium needs a tariff adder of Rs {econ.adder_20} per kWh at 20% and Rs {econ.adder_38} per kWh at 38%.`));
+    add(FIGAUTO("../../results/figures/fig_economics.png", 450,
+      "Cost-supply curve of the yield-constrained agrivoltaic potential, east-west layout, relative yield ≥ 0.80, 1995–2014, robust nitrogen case, slope ≤ 5%. Cells are ordered by levelised cost of electricity. Lines are medians of five climate models and bands their range; colours show the cost premium of the elevated structure over ground-mounted photovoltaics. Horizontal lines mark the ceiling tariff and the discovered auction price of the Gujarat farmer solar scheme."));
+    add(PF(`Per hectare, the adder at a 38% premium is about Rs {econ.adder_per_ha_lakh} lakh a year, many times the Rs {econ.crop_value_per_ha_lakh} lakh of crop value that the yield rule protects. The premium would cost as much as the crop is worth at only {econ.be_crop_pct}% of the LCOE. Crop revenue alone therefore cannot pay for elevated frames; the case for them rests on keeping land in food production (Section 4.4).`));
+  }
+
   // sensitivity (review comment M6): one assumption changed at a time, from src/make_numbers.py sens_numbers
   if (fill.has("sens.base.cap")) {
-    const nsec = 4 + (ROB ? 1 : 0) + ((fill.has("ssp245.change_pct") || fill.has("ssp585.change_pct")) ? 1 : 0);
+    const nsec = nclim + (ECON ? 1 : 0);
     add(H2(`3.${nsec}. Sensitivity`));
     add(PF(`Apart from the array layout, the yield threshold is the strongest lever on the potential (Table 5): moving τ from 0.80 to 0.66 or 0.90 changes capacity by {sens.thr66.chg}% and {sens.thr90.chg}%. Calibrated nitrogen alone changes it by {sens.n_calib.chg}% and dropping the slope limit by {sens.slope_none.chg}%, while module efficiency of 20% or 24% instead of 22%, the span from older modules to 2025 back-contact modules ${cite("itrpv")}, changes capacity and energy by about ±9%.{? Applying the threshold season by season, in at least 16 of 20 seasons, changes capacity by {sens.season.chg}%.?} The spread of the five GCMs, {sens.base.range} TWp, is small against all of these, so the choice of rule and management matters far more than the climate model.`));
     const R = (lab, k, basis) => fill.has(`sens.${k}.cap`) ? [[lab, basis, fill(`{sens.${k}.cap}`), k === "base" ? "–" : fill(`{sens.${k}.chg}`), fill.has(`sens.${k}.en`) ? fill(`{sens.${k}.en}`) : "–"]] : [];

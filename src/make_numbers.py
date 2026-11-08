@@ -868,6 +868,9 @@ def main():
         if fv.exists():
             q = pd.read_csv(fv); q = q[(q.slope_rule == "le5") & (q.config == "ew_fixed") & (q.thr.round(2) == 0.8)]
             N.put(f"field.proxy.{v}.cap_twp", q.cap_mwp_median.iloc[0] / 1e6, f"{q.cap_mwp_median.iloc[0] / 1e6:.1f}")
+    fe = a.pp.parent / "economics" / "econ_numbers.json"               # screening economics (src/economics.py)
+    if fe.exists():
+        for k, v in json.load(open(fe)).items(): N.put(k, v["raw"], v["txt"])
     f = a.pp / "supply_curve.csv"
     if f.exists():
         sc = pd.read_csv(f)

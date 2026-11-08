@@ -1,0 +1,154 @@
+{
+ "econ.crop_value_bn": {
+  "raw": 2843.347895547561,
+  "txt": "2,843"
+ },
+ "econ.crop_loss_max_bn": {
+  "raw": 568.669579109512,
+  "txt": "569"
+ },
+ "econ.crop_value_per_ha": {
+  "raw": 71.68058693869901,
+  "txt": "72"
+ },
+ "econ.rev_ceil_bn": {
+  "raw": 179729.26743649004,
+  "txt": "179,729"
+ },
+ "econ.rev_ceil_tn": {
+  "raw": 179.72926743649003,
+  "txt": "180"
+ },
+ "econ.rev_per_ha_lakh": {
+  "raw": 45.30961336136122,
+  "txt": "45"
+ },
+ "econ.ratio_rev_crop": {
+  "raw": 63.21043855306298,
+  "txt": "63"
+ },
+ "econ.sy_ref": {
+  "raw": 1539.9295361127422,
+  "txt": "1,540"
+ },
+ "econ.lcoe_0": {
+  "raw": 2.7510002989295934,
+  "txt": "2.75"
+ },
+ "econ.share_ceil_0": {
+  "raw": 85.27246420592536,
+  "txt": "85"
+ },
+ "econ.adder_0": {
+  "raw": 0.0,
+  "txt": "0.00"
+ },
+ "econ.net_0": {
+  "raw": 12232.049582139965,
+  "txt": "12,232"
+ },
+ "econ.net_per_ha_0": {
+  "raw": 308.36905145657863,
+  "txt": "308"
+ },
+ "econ.twp_ceil_0": {
+  "raw": 33.488760122479974,
+  "txt": "33.5"
+ },
+ "econ.lcoe_20": {
+  "raw": 3.3012003587155117,
+  "txt": "3.30"
+ },
+ "econ.share_ceil_20": {
+  "raw": 1.0650409980654898,
+  "txt": "1"
+ },
+ "econ.adder_20": {
+  "raw": 0.3512003587155115,
+  "txt": "0.35"
+ },
+ "econ.net_20": {
+  "raw": -21389.28044154645,
+  "txt": "-21,389"
+ },
+ "econ.net_per_ha_20": {
+  "raw": -539.2221538023322,
+  "txt": "-539"
+ },
+ "econ.twp_ceil_20": {
+  "raw": 0.42342156,
+  "txt": "0.4"
+ },
+ "econ.lcoe_38": {
+  "raw": 3.7963804125228386,
+  "txt": "3.80"
+ },
+ "econ.share_ceil_38": {
+  "raw": 0.0,
+  "txt": "0"
+ },
+ "econ.adder_38": {
+  "raw": 0.8463804125228385,
+  "txt": "0.85"
+ },
+ "econ.net_38": {
+  "raw": -51521.10618127191,
+  "txt": "-51,521"
+ },
+ "econ.net_per_ha_38": {
+  "raw": -1298.843218090767,
+  "txt": "-1,299"
+ },
+ "econ.twp_ceil_38": {
+  "raw": 0.0,
+  "txt": "0.0"
+ },
+ "econ.prem_per_kwh": {
+  "raw": 1.0545,
+  "txt": "1.05"
+ },
+ "econ.prem_bn": {
+  "raw": 64245.59746161991,
+  "txt": "64,246"
+ },
+ "econ.prem_ratio_crop": {
+  "raw": 22.595053374306747,
+  "txt": "22.6"
+ },
+ "econ.msp_wheat": {
+  "raw": 2585.0,
+  "txt": "2,585"
+ },
+ "econ.be_ceil_pct": {
+  "raw": 6.3063063063063085,
+  "txt": "6"
+ },
+ "econ.be_crop_pct": {
+  "raw": 1.6817840334562124,
+  "txt": "1.7"
+ },
+ "econ.e_ha_mwh": {
+  "raw": 1535.9190969952956,
+  "txt": "1,536"
+ },
+ "econ.adder_per_ha_lakh": {
+  "raw": 12.999718389165837,
+  "txt": "13"
+ },
+ "econ.prem_per_ha_lakh": {
+  "raw": 16.19626687781539,
+  "txt": "16"
+ },
+ "econ.crop_value_per_ha_lakh": {
+  "raw": 0.7168058693869901,
+  "txt": "0.72"
+ },
+ "econ.tariff_ceiling": {
+  "raw": 2.95,
+  "txt": "2.95"
+ },
+ "econ.tariff_auction": {
+  "raw": 2.775,
+  "txt": "2.77\u20132.78"
+ }
+}
