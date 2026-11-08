@@ -37,7 +37,7 @@ def power_point(pt):
             return [lat, lon] + [float(v[m]) for m in MONTHS]
         except Exception as e:  # noqa: BLE001  (network: retry with back-off)
             err = e
-            time.sleep(5 * (attempt + 1))
+            time.sleep((20 if "429" in str(e) else 5) * (attempt + 1))   # rate limit: wait longer
     print("POWER failed", lat, lon, err)
     return [lat, lon] + [np.nan] * 12
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     ap.add_argument("--cells", required=True)
     ap.add_argument("--grid", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--workers", type=int, default=2)
     a = ap.parse_args()
     g = pd.read_csv(a.grid)
     # query POWER on a 0.5 deg lattice (its solar data are at 1 deg; 0.5 deg keeps the call count low)
