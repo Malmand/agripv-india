@@ -56,7 +56,7 @@ add(P(`where _T_~k~(θ~h~) is the beam transmission of the strip at the projecte
 
 // 2.3
 add(H2("2.3. Climate data"));
-add(P(`Daily climate came from NEX-GDDP-CMIP6, a bias-corrected and downscaled CMIP6 product at 0.25° ${cite("thrasher")}, for five GCMs: GFDL-ESM4, IPSL-CM6A-LR, MPI-ESM1-2-HR, MRI-ESM2-0 and UKESM1-0-LL. These are the GCMs of the ISIMIP3b impact-model protocol and span equilibrium climate sensitivities of about 2.6 to 5.3 K ${cite("meehl")}. Three 20-year periods were simulated: 1995–2014 (reference) and 2041–2060 under SSP2-4.5 and SSP5-8.5. Atmospheric CO~2~ was held at the period mean, 378, 507 and 563 ppm ${cite("meinshausen")}. Variable conversion is described in SM Section S2.`));
+add(P(`Daily climate came from NEX-GDDP-CMIP6, a bias-corrected and downscaled CMIP6 product at 0.25° ${cite("thrasher")}, for five GCMs: GFDL-ESM4, IPSL-CM6A-LR, MPI-ESM1-2-HR, MRI-ESM2-0 and UKESM1-0-LL. These are the GCMs of the ISIMIP3b impact-model protocol and span equilibrium climate sensitivities of about 2.6 to 5.3 K ${cite("meehl")}. Three 20-year periods were simulated: 1995–2014 (reference) and 2041–2060 under SSP2-4.5 and SSP5-8.5. The Shared Socioeconomic Pathways (SSPs) combine a socioeconomic storyline with a radiative forcing in 2100: SSP2-4.5 is an intermediate pathway (4.5 W m^−2^) and SSP5-8.5 a high-emission pathway (8.5 W m^−2^) ${cite("meinshausen")}. They give a moderate and a high case for mid-century; the low-emission SSP1-2.6, although available in NEX-GDDP-CMIP6, was not simulated because of the run time. Atmospheric CO~2~ was held at the period mean, 378, 507 and 563 ppm ${cite("meinshausen")}. Variable conversion is described in SM Section S2.`));
 
 // 2.4
 add(H2("2.4. Crop model and calibration"));
