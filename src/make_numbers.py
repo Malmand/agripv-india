@@ -832,6 +832,26 @@ def main():
             N.put(f"shade.bin.{k}.obs", b.obs_med, f"{b.obs_med:.2f}")
             N.put(f"shade.bin.{k}.mod", b.model_recommended, f"{b.model_recommended:.2f}")
             N.put(f"shade.bin.{k}.red", 100 * b.x, f"{100 * b.x:.0f}")
+    ff = a.pp.parent / "potential_field" / "india_combined_historical_current_robust.csv"   # field-response scenario
+    if ff.exists():
+        fc = pd.read_csv(ff); fc = fc[fc.slope_rule == "le5"]
+        short = {"ew_fixed": "ew", "south_fixed": "south", "vertical": "vertical"}
+        for _, r in fc.iterrows():
+            t = f"t{int(round(r.thr * 100))}"; k = f"field.{short[r.config]}.{t}"
+            N.put(f"{k}.cap_twp", r.cap_mwp_median / 1e6, f"{r.cap_mwp_median / 1e6:.1f}")
+            N.put(f"{k}.energy_pwh", r.energy_gwh_median / 1e6, f"{r.energy_gwh_median / 1e6:.1f}")
+        fe0 = fc[(fc.config == "ew_fixed") & (fc.thr.round(2) == 0.8)].energy_gwh_median.iloc[0]
+        x = fe0 / 1000 / CEA_TWH; N.put("field.multiple", x, f"{x:.0f}")
+        fr = a.pp / "india_combined_historical_current_robust.csv"
+        if fr.exists():
+            br = pd.read_csv(fr); br = br[(br.slope_rule == "le5") & (br.config == "ew_fixed") & (br.thr.round(2) == 0.8)]
+            fe = fc[(fc.config == "ew_fixed") & (fc.thr.round(2) == 0.8)]
+            x = 100 * (1 - fe.cap_mwp_median.iloc[0] / br.cap_mwp_median.iloc[0]); N.put("field.reduction_pct", x, f"{x:.0f}")
+        fb = pd.read_csv(ff.parent / "india_by_crop_historical_current_robust.csv")
+        fb = fb[(fb.slope_rule == "le5") & (fb.config == "ew_fixed") & (fb.thr.round(2) == 0.8)].set_index("crop")
+        for crop, r in fb.iterrows():
+            v = r.cap_mwp_median / r.elig_ha_median / 2.2 / 10 * 10 / 10   # GCR_max = MWp / (ha * eta * 10)
+            v = r.cap_mwp_median / (r.elig_ha_median * 0.22 * 10); N.put(f"field.gcr_{crop}", v, f"{v:.2f}")
     f = a.pp / "supply_curve.csv"
     if f.exists():
         sc = pd.read_csv(f)
