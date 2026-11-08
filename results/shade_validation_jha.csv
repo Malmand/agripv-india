@@ -1,0 +1,7 @@
+group,nmode,n,n_studies,bias,rmse,mae
+Wheat,current,38,10,0.164,0.280,0.186
+Wheat,recommended,38,10,0.091,0.203,0.131
+"Grain legumes (chickpea, groundnut)",current,97,18,0.083,0.180,0.122
+"Grain legumes (chickpea, groundnut)",recommended,97,18,0.087,0.184,0.124
+Maize (proxy for pearl millet),current,66,12,0.258,0.367,0.259
+Maize (proxy for pearl millet),recommended,66,12,0.203,0.311,0.211

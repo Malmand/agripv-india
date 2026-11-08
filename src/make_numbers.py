@@ -819,6 +819,19 @@ def main():
                 v = float(np.interp(red, x, y)); N.put(f"shade.{crop}.{nm}.ry{int(red * 100)}", v, f"{v:.2f}")
             if y.min() <= 0.8:
                 v = 100 * float(np.interp(0.8, y[::-1], x[::-1])); N.put(f"shade.{crop}.{nm}.red_at_ry80", v, f"{v:.0f}")
+    f = a.pp.parent / "shade_validation_jha.csv"          # simulated RY against the Jha et al. (2026) observations
+    if f.exists():
+        sv = pd.read_csv(f); short = {"Wheat": "wheat", "Grain": "legumes", "Maize": "maize"}
+        for _, r in sv.iterrows():
+            k = short[r.group.split()[0]]
+            N.put(f"shade.val.{k}.{r.nmode}.bias", r.bias, f"{r.bias:.2f}")
+            N.put(f"shade.val.{k}.n", r.n, f"{int(r.n)}"); N.put(f"shade.val.{k}.studies", r.n_studies, f"{int(r.n_studies)}")
+        bt = pd.read_csv(a.pp.parent / "shade_validation_jha_bins.csv")
+        for k, grp, i in (("wheat", "Wheat", 2), ("legumes", "Grain legumes (chickpea, groundnut)", 1), ("maize", "Maize (proxy for pearl millet)", 2)):
+            b = bt[bt.group == grp].reset_index(drop=True).iloc[i]
+            N.put(f"shade.bin.{k}.obs", b.obs_med, f"{b.obs_med:.2f}")
+            N.put(f"shade.bin.{k}.mod", b.model_recommended, f"{b.model_recommended:.2f}")
+            N.put(f"shade.bin.{k}.red", 100 * b.x, f"{100 * b.x:.0f}")
     f = a.pp / "supply_curve.csv"
     if f.exists():
         sc = pd.read_csv(f)
