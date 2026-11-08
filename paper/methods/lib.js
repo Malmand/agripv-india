@@ -70,9 +70,11 @@ const REF = {
   sekiyama: "Sekiyama T, Nagashima A. Solar sharing for both food and clean energy production: performance of agrivoltaic systems for corn, a typical shade-intolerant crop. Environments 2019;6:65. https://doi.org/10.3390/environments6060065.",
   majumdar: "Majumdar D, Pasqualetti MJ. Dual use of agricultural land: introducing 'agrivoltaics' in Phoenix Metropolitan Statistical Area, USA. Landsc Urban Plan 2018;170:150–68. https://doi.org/10.1016/j.landurbplan.2017.10.011.",
   feuerbacher: "Feuerbacher A, Laub M, Högy P, Lippert C, Pataczek L, Schindele S, et al. An analytical framework to estimate the economics and adoption potential of dual land-use systems: the case of agrivoltaics. Agric Syst 2021;192:103193. https://doi.org/10.1016/j.agsy.2021.103193.",
-  zeddies: "Zeddies M, et al. Agrivoltaics increases public acceptance of solar energy production on agricultural land. Land Use Policy 2025;107604. https://doi.org/10.1016/j.landusepol.2025.107604.",
-  randle: "Randle-Boggis RJ, et al. Harvesting the sun twice: energy, food and water benefits from agrivoltaics in East Africa. Renew Sustain Energy Rev 2025;115066. https://doi.org/10.1016/j.rser.2024.115066.",
-  abdalla: "Abdalla A, et al. A pathway to food and energy security: agrivoltaic potential in the MENA region. Energy Nexus 2026;100610. https://doi.org/10.1016/j.nexus.2025.100610.",
+  zeddies: "Zeddies H, Parlasca M, Qaim M. Agrivoltaics increases public acceptance of solar energy production on agricultural land. Land Use Policy 2025;156:107604. https://doi.org/10.1016/j.landusepol.2025.107604.",
+  randle: "Randle-Boggis R, Barron-Gafford G, Kimaro A, Lamanna C, Macharia C, Maro J, et al. Harvesting the sun twice: energy, food and water benefits from agrivoltaics in East Africa. Renew Sustain Energy Rev 2025;208:115066. https://doi.org/10.1016/j.rser.2024.115066.",
+  abdalla: "Abdalla M, Ayadi O, Al Omari A, Rinchi B, Al-Bakri J. A pathway to food and energy security: agrivoltaic potential in the MENA region. Energy Nexus 2026;21:100610. https://doi.org/10.1016/j.nexus.2025.100610.",
+  jha: "Jha A, Heiser G, Kelvey R, Huang Q. Crop yield responses to reduced solar radiation in agrivoltaic systems: crop-specific patterns and shading thresholds. Agronomy 2026;16:985. https://doi.org/10.3390/agronomy16100985.",
+  modi: "Modi V, Singh V, Poonia S. Study on agrivoltaic system for interaction among crop production and solar photovoltaic power generation. Ann Arid Zone 2024;63:43–53. https://doi.org/10.56093/aaz.v63i2.145518.",
   kusumfaq: "Ministry of New and Renewable Energy. PM-KUSUM: frequently asked questions. https://pmkusum.mnre.gov.in/landing-faq.html [accessed October 2026].",
 };
 let order = [];
