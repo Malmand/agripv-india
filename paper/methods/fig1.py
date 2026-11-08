@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Polygon
 
 plt.rcParams.update({"font.family": "DejaVu Sans", "pdf.fonttype": 42, "mathtext.default": "regular"})
-TF, BF = 8.4, 7.4                      # title and body font sizes (pt) at 7.2 in width
-fig = plt.figure(figsize=(7.2, 6.95))
+TF, BF = 9.2, 8.4                      # title and body font sizes (pt) at 6.2 in width
+fig = plt.figure(figsize=(6.2, 6.4))
 ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, 100); ax.set_ylim(0, 96.5); ax.axis("off")
 C = {"data": ("white", "0.45"), "proc": ("#DCEBF5", "#0072B2"), "out": ("#FCEFD2", "#E69F00"), "dec": ("#FBE3D6", "#D55E00")}
 XI, WI, XP, WP, XO, WO = 2.5, 25.0, 36.0, 28.0, 72.5, 25.0
@@ -52,7 +52,7 @@ arrow(cl["r"], lm["l"]); arrow(lm["r"], lf["l"])
 
 # B crop
 band(47.5, 76.5, "B  Crop model (2.3–2.4)")
-cs = box(XI, 63.0, WI, H, "Crop land and soils", "MapSPAM, GGCMI, SoilGrids", "data")
+cs = box(XI, 63.0, WI, H, "Land and soils", "area, calendar, soil", "data")
 ob = box(XI, 50.5, WI, H, "Observed yields", "ICRISAT, by state", "data")
 ds = box(XP, 63.0, WP, H, "DSSAT", "4 crops, open + shaded", "proc")
 cb = box(XP, 50.5, WP, H, "Nitrogen calibration", "wheat, pearl millet", "proc")
@@ -77,7 +77,7 @@ arrow(ry["b"], (cx, cy + dh / 2)); arrow(th["r"], (cx - dw / 2, cy)); arrow((cx 
 
 # D potential
 band(1.0, 17.6, "D  Capacity and energy (2.5)")
-tr = box(XI, 2.8, WI, H, "Terrain and PV", "slope ≤ 5%, bifacial module", "data")
+tr = box(XI, 2.8, WI, H, "Terrain and PV", "slope ≤ 5%, bifacial", "data")
 ce = box(XP, 2.8, WP, H, "Capacity and energy", "eligible land × GCR$_{max}$", "proc")
 rs = box(XO, 2.8, WO, H, "Results", "maps, TWp, PWh", "out")
 arrow(tr["r"], ce["l"]); arrow(ce["r"], rs["l"])

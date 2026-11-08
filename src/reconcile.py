@@ -187,7 +187,7 @@ def waterfall(t, a):
     ax.plot([s_ - 1 for s_ in l3], y3, ls="none", marker="D", ms=3, mfc="white", mec="0.1", mew=0.6,
             label=f"Fixed {min(DENS):.2f} MW ha$^{{-1}}$", zorder=3)
     if 4 in steps:
-        ax.plot([2, 3 - w / 2], [y3[-1], lv[4]], ls=":", color="0.1", lw=0.6)
+        pass
     ax.set_xticks(xs)
     ax.set_xticklabels(names, fontsize=6.5)
     ax.set_xlim(-0.6, n + 0.6)
