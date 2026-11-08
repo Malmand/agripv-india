@@ -154,7 +154,7 @@ def waterfall(t, a):
 
     labels = {1: f"Fixed {max(DENS):.2f}\nMW ha$^{{-1}}$, all\ncrop area",
               2: "Slope\n≤ 5%", 3: "Double-cropped\nland once",
-              4: f"Yield limit\nRY ≥ {a.thr:.2f}", 5: "Robust N\nmanagement"}
+              4: f"Yield limit\nRY ≥ {a.thr:.2f}", 5: "Robust nitrogen\nmanagement"}
     xs, names = [], []
     fig, ax = plt.subplots(figsize=(5.51, 2.7))   # 140 mm, 1.5 column
     w = 0.62
