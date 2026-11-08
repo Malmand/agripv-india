@@ -20,6 +20,7 @@ from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 from matplotlib import font_manager
@@ -59,10 +60,10 @@ def write_caption(a, hlabel, scen):
         f"the share of land covered by modules) that keeps at least {a.thr:.0%} of the open-field yield. The map "
         f"shows it for east-west elevated arrays under 1995–2014 climate, {case}: the median over five GCMs, "
         "averaged over the four crops with eligible-area weights (MapSPAM harvested area on the share of the "
-        "cell with slope ≤ 5%); cells with less than 1000 ha are blank. Capacity is the crops-combined total "
+        "cell with slope ≤ 5%); cells with less than 1000 ha are blank, and the top of the scale (70%) is the largest cover simulated. Capacity is the crops-combined total "
         "with double-cropped land counted once (median of five GCMs); the electricity multiple is its annual "
         "generation divided by India's 2025–26 electricity requirement (1,707 TWh, CEA). Cereal and legume "
-        "values are eligible-area-weighted means; the call-outs give the same mean for the wheat belt (24–31°N, "
+        "values are eligible-area-weighted means; the call-outs give the share of the field covered by panels, the same mean, for the wheat belt (24–31°N, "
         "74–88°E) and the Deccan (12–21°N, 73–80°E); the scale bar holds at 22°N. The 2050 values are the changes by 2041–2060 under "
         f"{scen} against 1995–2014 (five-GCM median, calibrated nitrogen). " + GA.BOUNDARY_SRC)
     (HERE / "graphical_abstract_v3_caption.txt").write_text(txt + "\n")
@@ -205,6 +206,9 @@ def main():
         z[np.searchsorted(lats, np.round(lat, 3)), np.searchsorted(lons, np.round(lon, 3))] = v
         b.pcolormesh(np.append(lons - 0.125, lons[-1] + 0.125), np.append(lats - 0.125, lats[-1] + 0.125),
                      np.ma.masked_invalid(z), cmap=cmap, norm=norm, edgecolors="none", rasterized=True)
+    st = gpd.read_file(a.boundaries)                 # faint state borders so the regions can be placed
+    st["geometry"] = st.geometry.buffer(0.03).buffer(-0.03).simplify(0.03, preserve_topology=True)
+    st.boundary.plot(ax=b, color="#FFFFFF", lw=0.35, alpha=0.75)
     india.boundary.plot(ax=b, color="#4A4A4A", lw=0.45)
     b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3); b.set_aspect(1 / np.cos(np.radians(22)))
     b.set_xticks([]); b.set_yticks([]); b.set_xlabel(""); b.set_ylabel("")
@@ -230,7 +234,7 @@ def main():
         tx, ty = geo_to_mm(ax, b, *txt_lonlat)
         px, py_ = geo_to_mm(ax, b, *pt_lonlat)
         t = ax.text(tx, ty, label, ha="left", va="bottom", fontsize=7.5, fontweight="bold", color=INK, linespacing=0.8)
-        ax.text(tx, ty - 0.3, f"{reg[key]:.0f}% of land", ha="left", va="top", fontsize=7, color=MID)
+        ax.text(tx, ty - 0.3, f"{reg[key]:.0f}% covered", ha="left", va="top", fontsize=7, color=MID)
         ax.annotate("", xy=(px, py_), xytext=(tx - 0.6, ty),
                     arrowprops=dict(arrowstyle="-", lw=0.6, color=INK, shrinkA=0, shrinkB=0))
         ax.plot(px, py_, "o", ms=2.4, mfc="white", mec=INK, mew=0.7, zorder=6)
@@ -242,7 +246,7 @@ def main():
     cb_ax = axes_mm(cbx, cby, 1.7, cbh)
     ticks = [0, 0.35, 0.7]
     cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cb_ax, ticks=ticks)
-    cb.ax.set_yticklabels([f"{100 * t:.0f}%" for t in ticks])
+    cb.ax.set_yticklabels([f"{100 * t:.0f}%" for t in ticks[:-1]] + [f"{100 * ticks[-1]:.0f}%+"])
     cb.ax.tick_params(labelsize=7, labelcolor=MID, length=1.5, width=0.5, pad=1)
     cb.ax.minorticks_off()
     cb.outline.set_linewidth(0.4)
@@ -250,7 +254,7 @@ def main():
     ax.text(cbx + 0.9, 3.4, "not assessed", ha="left", va="center", fontsize=7, color=MID)
     ax.text(cbx - 0.2, cby + cbh + 11.6, "Max land\nunder panels", ha="left", va="bottom", fontsize=7,
             fontweight="bold", color=INK, linespacing=0.8)
-    ax.text(cbx - 0.2, cby + cbh + 11.1, f"per field,\nkeeping {pct}%\nof harvest", ha="left", va="top", fontsize=7, color=MID, linespacing=0.8)
+    ax.text(cbx - 0.2, cby + cbh + 11.1, "per field,\neast-west\npanels", ha="left", va="top", fontsize=7, color=MID, linespacing=0.8)
 
     a.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(a.out.with_suffix(".pdf"))

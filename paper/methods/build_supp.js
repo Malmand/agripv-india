@@ -141,7 +141,7 @@ if (fill.has("robust.change_pct")) {
   add(FIGAUTO("../../results/figures/fig_india_gcrmax_historical_current_thr80.png", 600,
     "As Fig. 3, with calibrated nitrogen alone (upper bound): largest ground coverage ratio (GCR~max~) that keeps relative yield at or above 0.80, by crop (columns) and layout (rows), 1995–2014; vertical GCR~max~ capped at 0.6. Cell values are the median over five GCMs; the number in each panel is the area-weighted mean with the GCM range. Boundaries: DataMeet India community, States/Admin2 (CC BY 4.0)."));
   add(FIGAUTO("../../results/figures/fig_india_states_historical_current_thr80.png", 450,
-    "As Fig. 5, with calibrated nitrogen alone (upper bound): capacity of the leading states at RY ≥ 0.80 by layout, 1995–2014, slope ≤ 5%, vertical GCR~max~ capped at 0.6. Bars are the five-GCM median and error bars the GCM range."));
+    "As Fig. 6, with calibrated nitrogen alone (upper bound): capacity of the leading states at RY ≥ 0.80 by layout, 1995–2014, slope ≤ 5%, vertical GCR~max~ capped at 0.6. Bars are the five-GCM median and error bars the GCM range."));
 }
 add(H1("S11. Land-supply curve"));
 add(PF(`Fig. S6 shows how much cropland a given APV capacity needs if the cells with the highest yield-constrained power density are used first (east-west layout, RY ≥ 0.80, slope ≤ 5%${fill.has("robust.change_pct") ? ", robust nitrogen" : ""}). For each GCM the cells are sorted by capacity per hectare and capacity and land are accumulated; the curve is the five-GCM median.{? At this order, 300 GWp needs {supply.gw300_mha} Mha and 500 GWp {supply.gw500_mha} Mha, against {frame.gw300.land_mha} and {frame.gw500.land_mha} Mha at the national mean density.?}`));

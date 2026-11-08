@@ -33,10 +33,10 @@ OI = {"south_fixed": "#E69F00", "ew_fixed": "#56B4E9", "vertical": "#009E73"}   
 MIN_HA = 1000      # cells with less eligible crop area are left blank on maps
 
 
-def save(fig, stem):
-    """Journal PDF (map rasters 400 dpi) plus a 300 dpi PNG that the manuscript builder embeds."""
+def save(fig, stem, png_dpi=300):
+    """Journal PDF (map rasters 400 dpi) plus a PNG that the manuscript builder embeds."""
     fig.savefig(f"{stem}.pdf", dpi=400)
-    fig.savefig(f"{stem}.png", dpi=300)
+    fig.savefig(f"{stem}.png", dpi=png_dpi)
 
 
 def panel_label(ax, s):
@@ -51,6 +51,11 @@ def india_axes(ax, states, bottom, left):
     ax.set_xticks([70, 80, 90]); ax.set_yticks([10, 20, 30])
     ax.set_xticklabels([f"{x}°E" for x in (70, 80, 90)] if bottom else [])
     ax.set_yticklabels([f"{y}°N" for y in (10, 20, 30)] if left else [])
+    ax.tick_params(labelsize=7.5)
+    if not bottom:
+        ax.tick_params(axis="x", length=0)
+    if not left:
+        ax.tick_params(axis="y", length=0)
 
 
 def raster(d, grid, col):
@@ -87,7 +92,8 @@ def fig_gcrmax(pp, stage, grid, states, thr, out):
     bounds = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7001]
     cmap = ListedColormap(mpl.colormaps["viridis"](np.linspace(0, 1, len(bounds) - 1)))
     norm = BoundaryNorm(bounds, cmap.N)
-    fig, axs = plt.subplots(4, 3, figsize=(6.3, 8.6), constrained_layout=True)
+    fig, axs = plt.subplots(4, 3, figsize=(6.3, 8.9), constrained_layout=True)
+    fig.get_layout_engine().set(w_pad=0.01, h_pad=0.01, wspace=0.0, hspace=0.0)
     for i, (crop, cl) in enumerate(CROPS):
         for j, (cfg, ll) in enumerate(LAYOUTS):
             ax = axs[i, j]
@@ -99,16 +105,63 @@ def fig_gcrmax(pp, stage, grid, states, thr, out):
                 lo, hi = rng.get((crop, cfg), (np.nan, np.nan))
                 # area-weighted mean of the 5-GCM median map (range of the per-GCM means)
                 txt = f"{w:.2f}" + (f" ({lo:.2f}–{hi:.2f})" if np.isfinite(lo) else "")
-                ax.text(0.02, 0.01, txt, transform=ax.transAxes, ha="left", va="bottom", fontsize=6)
+                ax.text(0.02, 0.01, txt, transform=ax.transAxes, ha="left", va="bottom", fontsize=7)
             if i == 0:
-                ax.set_title(ll, fontsize=8)
+                ax.set_title(ll, fontsize=8.5)
             if j == 0:
-                ax.text(-0.38, 0.5, cl, transform=ax.transAxes, rotation=90, va="center", fontsize=8)
+                ax.text(-0.42, 0.5, cl, transform=ax.transAxes, rotation=90, va="center", fontsize=8.5)
             panel_label(ax, "ABCDEFGHIJKL"[3 * i + j])
-    cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.5, aspect=35, pad=0.01)
-    cb.set_label(f"Maximum ground coverage ratio with relative yield ≥ {thr:.2f} (–)", fontsize=8)
-    cb.ax.tick_params(labelsize=7)
+    cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.6, aspect=35, pad=0.01)
+    cb.set_label(f"Maximum ground coverage ratio with relative yield ≥ {thr:.2f} (–)", fontsize=8.5)
+    cb.ax.tick_params(labelsize=7.5)
     save(fig, out / f"fig_india_gcrmax_{stage}_thr{int(thr * 100)}")
+    plt.close(fig)
+
+
+def fig_capmap(pp, stage, grid, states, thr, out):
+    """One large map of the headline result: yield-constrained capacity density (MWp per ha of eligible
+    cropland, all crops combined, east-west layout, slope <= 5%), median over the five GCMs, with the three
+    leading states labelled and the national total."""
+    import matplotlib.patheffects as pe
+    c = pd.read_csv(pp / f"cell_combined_{stage}.csv.gz")
+    c = c[(c.config == "ew_fixed") & (c.thr.round(2) == thr) & (c.slope_rule == "le5")]
+    tot = c.groupby("model").agg(cap=("cap_mwp", "sum"), land=("land_ha", "sum"))     # all cells, as in Table 4
+    cap_tw, land_mha = tot.cap.median() / 1e6, tot.land.median() / 1e6
+    c = c[c.land_ha >= MIN_HA].assign(dens=lambda x: x.cap_mwp / x.land_ha)           # map: cells with >= 1000 ha
+    d = c.groupby("cell").dens.median().rename("v").reset_index()
+    st = pd.read_csv(pp / f"state_combined_{stage}.csv")
+    st = st[(st.thr.round(2) == thr) & (st.slope_rule == "le5") & (st.config == "ew_fixed")]
+    top = st.sort_values("cap_mwp_median", ascending=False).head(3)
+    bounds = np.round(np.arange(0, 1.61, 0.2), 2)
+    cmap = ListedColormap(mpl.colormaps["viridis"](np.linspace(0, 1, len(bounds) - 1)))
+    norm = BoundaryNorm(bounds, cmap.N)
+    fig, ax = plt.subplots(figsize=(6.3, 6.3), constrained_layout=True)
+    g = grid.set_index("cell_id").loc[d.cell]
+    pm = draw_cells(ax, g.lon.values, g.lat.values, d.v.values, cmap, norm)
+    states.boundary.plot(ax=ax, color="0.3", linewidth=0.35)
+    ax.set_xlim(68, 97.5); ax.set_ylim(6.5, 37.2)
+    ax.set_aspect(1 / np.cos(np.radians(22)))
+    ax.set_xlabel(""); ax.set_ylabel("")
+    ax.set_xticks([70, 75, 80, 85, 90, 95]); ax.set_yticks([10, 15, 20, 25, 30, 35])
+    ax.set_xticklabels([f"{x}°E" for x in (70, 75, 80, 85, 90, 95)])
+    ax.set_yticklabels([f"{y}°N" for y in (10, 15, 20, 25, 30, 35)])
+    ax.tick_params(labelsize=7.5)
+    halo = [pe.withStroke(linewidth=2.2, foreground="white")]
+    for r in top.itertuples():
+        geom = states[states.ST_NM == r.state].geometry.union_all().representative_point()
+        ax.text(geom.x, geom.y, f"{r.state}\n{r.cap_mwp_median / 1e6:.1f} TWp", ha="center", va="center",
+                fontsize=7.5, fontweight="bold", path_effects=halo, zorder=6)
+    km5 = 500 / (111.32 * np.cos(np.radians(22)))                  # 500 km in degrees of longitude at 22 N
+    ax.plot([69.2, 69.2 + km5], [8.3, 8.3], color="black", lw=1.6, solid_capstyle="butt")
+    ax.text(69.2 + km5 / 2, 9.0, "500 km", ha="center", va="bottom", fontsize=7.5)
+    ax.annotate("", xy=(70.2, 14.6), xytext=(70.2, 11.6), arrowprops=dict(arrowstyle="-|>", color="black", lw=1.0))
+    ax.text(70.2, 14.9, "N", ha="center", va="bottom", fontsize=8, fontweight="bold")
+    ax.text(0.99, 0.99, f"India: {cap_tw:.1f} TWp on {land_mha:.1f} Mha\n(median of five GCMs)", transform=ax.transAxes,
+            ha="right", va="top", fontsize=8, fontweight="bold", path_effects=halo)
+    cb = fig.colorbar(pm, ax=ax, shrink=0.62, aspect=26, pad=0.02)
+    cb.set_label("Capacity density (MWp per ha of cropland)", fontsize=8.5)
+    cb.ax.tick_params(labelsize=7.5)
+    save(fig, out / f"fig_india_capmap_{stage}_thr{int(thr * 100)}", png_dpi=400)
     plt.close(fig)
 
 
@@ -241,6 +294,7 @@ if __name__ == "__main__":
     # union territories stay, including the Andaman & Nicobar Islands and Lakshadweep.
     states["geometry"] = states.geometry.buffer(0.03).buffer(-0.03).simplify(0.02, preserve_topology=True)
     fig_gcrmax(a.pp, a.stage, grid, states, a.thr, a.out)
+    fig_capmap(a.pp, a.stage, grid, states, a.thr, a.out)
     fig_capacity(a.pp, a.stage, a.out)
     fig_states(a.pp, a.stage, a.thr, a.out)
     if a.calib:
