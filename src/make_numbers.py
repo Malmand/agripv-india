@@ -852,6 +852,17 @@ def main():
         for crop, r in fb.iterrows():
             v = r.cap_mwp_median / r.elig_ha_median / 2.2 / 10 * 10 / 10   # GCR_max = MWp / (ha * eta * 10)
             v = r.cap_mwp_median / (r.elig_ha_median * 0.22 * 10); N.put(f"field.gcr_{crop}", v, f"{v:.2f}")
+    sp = a.pp / "state_combined_historical_current_robust.csv"                       # state concentration
+    sf = a.pp.parent / "potential_field" / "state_combined_historical_current_robust.csv"
+    if sp.exists():
+        def _st(p):
+            d = pd.read_csv(p); d = d[(d.config == "ew_fixed") & (d.slope_rule == "le5") & (d.thr.round(2) == 0.8)]
+            return d.set_index("state").cap_mwp_median / 1e6
+        hi = _st(sp).sort_values(ascending=False); lo = _st(sf) if sf.exists() else None
+        N.put("state.top5_share", 100 * hi.head(5).sum() / hi.sum(), f"{100 * hi.head(5).sum() / hi.sum():.0f}")
+        for k, nm in (("up", "Uttar Pradesh"), ("rj", "Rajasthan"), ("mp", "Madhya Pradesh")):
+            N.put(f"state.{k}.hi", hi[nm], f"{hi[nm]:.1f}")
+            if lo is not None: N.put(f"state.{k}.lo", lo[nm], f"{lo[nm]:.1f}")
     for v in ("nosoy", "c3", "millet_c3"):                       # proxy-choice sensitivity of the field-response bound
         fv = a.pp.parent / f"potential_field_{v}" / "india_combined_historical_current_robust.csv"
         if fv.exists():
@@ -863,6 +874,9 @@ def main():
         for t in (300, 500):
             x = float(np.interp(t, sc.capacity_gwp, sc.land_mha_med))
             N.put(f"supply.gw{t}_mha", x, f"{x:.2f}")
+        x = float(np.interp(10, sc.capacity_gwp, sc.land_mha_med))      # PM-KUSUM component A target, 10 GW
+        N.put("supply.gw10_mha", x, f"{x:.4f}"); N.put("supply.gw10_km2", x * 1e4, f"{x * 1e4:.0f}")
+        if "head.land_mha" in N.raw: N.put("supply.gw10_share", 100 * x / N.raw["head.land_mha"], f"{100 * x / N.raw['head.land_mha']:.2f}")
     out = {"meta": {"stages": present, "main_case": {"layout": MAIN_LAYOUT, "thr": MAIN_THR, "slope": "le5",
                                                      "management": "calibrated N"},
                     "headline": N.values.get("head.label"), "din_cap_vertical": 0.6,
