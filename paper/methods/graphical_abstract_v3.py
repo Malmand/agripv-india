@@ -21,6 +21,8 @@ from pathlib import Path
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import geopandas as gpd
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+import fig_india as FI  # noqa: E402
 import numpy as np
 import pandas as pd
 from matplotlib import font_manager
@@ -60,7 +62,7 @@ def write_caption(a, hlabel, scen):
         f"the share of land covered by modules) that keeps at least {a.thr:.0%} of the open-field yield. The map "
         f"shows it for east-west elevated arrays under 1995–2014 climate, {case}: the median over five GCMs, "
         "averaged over the four crops with eligible-area weights (MapSPAM harvested area on the share of the "
-        "cell with slope ≤ 5%); cells with less than 1000 ha are blank, and the top of the scale (70%) is the largest cover simulated. Capacity is the crops-combined total "
+        "cell with slope ≤ 5%); cells with less than 1000 ha are blank, the top of the scale (70%) is the largest cover simulated, and the 0.25° values are interpolated for display. Capacity is the crops-combined total "
         "with double-cropped land counted once (median of five GCMs); the electricity multiple is its annual "
         "generation divided by India's 2025–26 electricity requirement (1,707 TWh, CEA). Cereal and legume "
         "values are eligible-area-weighted means; the call-outs give the share of the field covered by panels, the same mean, for the wheat belt (24–31°N, "
@@ -201,11 +203,8 @@ def main():
     india.plot(ax=b, color="#EDEDED", edgecolor="none")
     if cells is not None:
         lon, lat, v = cells
-        lons = np.round(np.arange(68.125, 97.5, 0.25), 3); lats = np.round(np.arange(6.625, 37.25, 0.25), 3)
-        z = np.full((len(lats), len(lons)), np.nan)
-        z[np.searchsorted(lats, np.round(lat, 3)), np.searchsorted(lons, np.round(lon, 3))] = v
-        b.pcolormesh(np.append(lons - 0.125, lons[-1] + 0.125), np.append(lats - 0.125, lats[-1] + 0.125),
-                     np.ma.masked_invalid(z), cmap=cmap, norm=norm, edgecolors="none", rasterized=True)
+        FI.CLIP = india.union_all().buffer(0.02)          # smoothed cells stay inside the outline
+        FI.draw_cells(b, lon, lat, v, cmap, norm)
     st = gpd.read_file(a.boundaries)                 # faint state borders so the regions can be placed
     st["geometry"] = st.geometry.buffer(0.03).buffer(-0.03).simplify(0.03, preserve_topology=True)
     st.boundary.plot(ax=b, color="#FFFFFF", lw=0.35, alpha=0.75)

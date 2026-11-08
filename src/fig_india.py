@@ -63,14 +63,46 @@ def raster(d, grid, col):
     return g.lon.values, g.lat.values, d[col].values
 
 
+CLIP = None      # India outline (shapely geometry); set in main so smoothed cells never spill into sea or neighbours
+SMOOTH = 6       # display up-sampling factor of the 0.25 deg cells (bilinear, within the cells that have data)
+
+
+def geom_path(geom):
+    """Matplotlib path of a (multi)polygon, holes included."""
+    from matplotlib.path import Path
+    polys = list(geom.geoms) if hasattr(geom, "geoms") else [geom]
+    verts, codes = [], []
+    for pg in polys:
+        for ring in [pg.exterior, *pg.interiors]:
+            xy = np.asarray(ring.coords)
+            verts.extend(xy); codes.extend([Path.MOVETO] + [Path.LINETO] * (len(xy) - 2) + [Path.CLOSEPOLY])
+    return Path(verts, codes)
+
+
 def draw_cells(ax, lon, lat, val, cmap, norm):
-    # 0.25 deg cells as squares (scatter in data units is unreliable; use pcolormesh on a full grid)
+    """0.25 deg cells on a full grid. With SMOOTH > 1 the values are interpolated bilinearly, using only cells
+    that have data (so blanks do not pull values down), and drawn on a finer mesh clipped to the India outline;
+    this is a display choice, the data resolution stays 0.25 deg."""
+    from matplotlib.patches import PathPatch
+    from scipy.ndimage import zoom
     lons = np.round(np.arange(68.125, 97.5, 0.25), 3)
     lats = np.round(np.arange(6.625, 37.25, 0.25), 3)
     z = np.full((len(lats), len(lons)), np.nan)
     z[np.searchsorted(lats, np.round(lat, 3)), np.searchsorted(lons, np.round(lon, 3))] = val
-    return ax.pcolormesh(np.append(lons - 0.125, lons[-1] + 0.125), np.append(lats - 0.125, lats[-1] + 0.125),
-                         np.ma.masked_invalid(z), cmap=cmap, norm=norm, edgecolors="none", rasterized=True)
+    xe = np.append(lons - 0.125, lons[-1] + 0.125); ye = np.append(lats - 0.125, lats[-1] + 0.125)
+    if SMOOTH > 1:
+        ok = np.isfinite(z)
+        zz = zoom(np.where(ok, z, 0.0), SMOOTH, order=1, grid_mode=True, mode="nearest")
+        ww = zoom(ok.astype(float), SMOOTH, order=1, grid_mode=True, mode="nearest")
+        from scipy.ndimage import gaussian_filter
+        sg = 0.45 * SMOOTH                                  # ~0.45 cell: rounds the stair-steps, keeps the pattern
+        zz, ww = gaussian_filter(zz, sg), gaussian_filter(ww, sg)
+        z = np.round(np.where(ww >= 0.5, zz / np.maximum(ww, 1e-9), np.nan), 5)   # rounding: capped values sit on class edges
+        xe = np.linspace(xe[0], xe[-1], z.shape[1] + 1); ye = np.linspace(ye[0], ye[-1], z.shape[0] + 1)
+    pm = ax.pcolormesh(xe, ye, np.ma.masked_invalid(z), cmap=cmap, norm=norm, edgecolors="none", rasterized=True)
+    if CLIP is not None:
+        pm.set_clip_path(PathPatch(geom_path(CLIP), transform=ax.transData))
+    return pm
 
 
 def mean_range(pp, stage, thr):
@@ -293,6 +325,7 @@ if __name__ == "__main__":
     # between islets, and simplify (~2 km), else they draw as dark blobs and bloat the PDF. All states and
     # union territories stay, including the Andaman & Nicobar Islands and Lakshadweep.
     states["geometry"] = states.geometry.buffer(0.03).buffer(-0.03).simplify(0.02, preserve_topology=True)
+    CLIP = states.geometry.union_all().buffer(0.02)
     fig_gcrmax(a.pp, a.stage, grid, states, a.thr, a.out)
     fig_capmap(a.pp, a.stage, grid, states, a.thr, a.out)
     fig_capacity(a.pp, a.stage, a.out)

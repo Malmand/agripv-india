@@ -139,7 +139,7 @@ if (fill.has("robust.change_pct")) {
   add(H1("S10. Results with calibrated nitrogen alone"));
   add(PF(`The main text reports the robust nitrogen case. Figs. S4 and S5 show the same results with calibrated nitrogen alone, the upper bound of Section 3.4 (east-west layout, τ = 0.80: {main.cap_twp_m} TWp against {robust.ew.t80.cap_twp_m} TWp in the robust case).`));
   add(FIGAUTO("../../results/figures/fig_india_gcrmax_historical_current_thr80.png", 600,
-    "As Fig. 3, with calibrated nitrogen alone (upper bound): largest ground coverage ratio (GCR~max~) that keeps relative yield at or above 0.80, by crop (columns) and layout (rows), 1995–2014; vertical GCR~max~ capped at 0.6. Cell values are the median over five GCMs; the number in each panel is the area-weighted mean with the GCM range. Boundaries: DataMeet India community, States/Admin2 (CC BY 4.0)."));
+    "As Fig. 3, with calibrated nitrogen alone (upper bound): largest ground coverage ratio (GCR~max~) that keeps relative yield at or above 0.80, by crop (columns) and layout (rows), 1995–2014; vertical GCR~max~ capped at 0.6. Cell values are the median over five GCMs, interpolated for display; the number in each panel is the area-weighted mean with the GCM range. Boundaries: DataMeet India community, States/Admin2 (CC BY 4.0)."));
   add(FIGAUTO("../../results/figures/fig_india_states_historical_current_thr80.png", 450,
     "As Fig. 6, with calibrated nitrogen alone (upper bound): capacity of the leading states at RY ≥ 0.80 by layout, 1995–2014, slope ≤ 5%, vertical GCR~max~ capped at 0.6. Bars are the five-GCM median and error bars the GCM range."));
 }
