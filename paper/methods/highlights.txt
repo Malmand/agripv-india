@@ -1,5 +1,5 @@
 Coupled light and crop models find the panel cover that keeps 80% of crop yield.
-Cropland on slopes up to 5% could host 39.2 TWp of agrivoltaics (robust).
-At 80% relative yield, wheat allows GCR 0.52, chickpea 0.27 (robust).
+India's farmland could host 22.6–39.2 TWp of agrivoltaics at 80% crop yield.
+Panel cover that keeps 80% of yield: 0.52 for wheat and 0.27 for chickpea.
 Low nitrogen hides shade losses; robust management cuts the potential by 14%.
-Under SSP5-8.5, mid-century climate changes the potential by −1% (CO2 included).
+Mid-century climate changes the potential by only −1% under high emissions.
