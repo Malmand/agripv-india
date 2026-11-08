@@ -97,6 +97,8 @@ require("./discussion.js").addDiscussion(add);
 
 require("./conclusions.js").addConclusions(add);
 
+add(H1("CRediT authorship contribution statement"));
+add(P("Mohamed Al-Mandhari: Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Visualization, Writing – original draft. Aritra Ghosh: Conceptualization, Methodology, Supervision, Project administration, Funding acquisition, Writing – review & editing."));
 add(H1("References"));
 add(refsList());
 save(body, "Manuscript_AgriPV_India.docx");
