@@ -75,6 +75,12 @@ const REF = {
   abdalla: "Abdalla M, Ayadi O, Al Omari A, Rinchi B, Al-Bakri J. A pathway to food and energy security: agrivoltaic potential in the MENA region. Energy Nexus 2026;21:100610. https://doi.org/10.1016/j.nexus.2025.100610.",
   jha: "Jha A, Heiser G, Kelvey R, Huang Q. Crop yield responses to reduced solar radiation in agrivoltaic systems: crop-specific patterns and shading thresholds. Agronomy 2026;16:985. https://doi.org/10.3390/agronomy16100985.",
   modi: "Modi V, Singh V, Poonia S. Study on agrivoltaic system for interaction among crop production and solar photovoltaic power generation. Ann Arid Zone 2024;63:43–53. https://doi.org/10.56093/aaz.v63i2.145518.",
+  jadhav: "Jadhav AV, Bhawar RL. Future changes in surface solar radiation over India: a bias-corrected and downscaled assessment of CMIP6 projections for renewable energy planning. Energy Clim Change 2025;6:100213. https://doi.org/10.1016/j.egycc.2025.100213.",
+  adigun: "Adigun P, Ogunrinde AT, Dairaku K, Adebiyi AA, Xian X. The future of photovoltaic energy potential in Africa under higher emission scenarios: insights from CMIP6 multi-model ensemble analysis. Sol Energy 2025;285:113078. https://doi.org/10.1016/j.solener.2024.113078.",
+  ramirez: "Ramírez-Ruiz C, Cabrales S, Valencia C. Assessing the impacts of climate change on photovoltaic energy generation in Colombia using 3-hourly CMIP6 projections. Energy Clim Change 2026;7:100266. https://doi.org/10.1016/j.egycc.2026.100266.",
+  zagre: "Zagre I, Akinseye F, Worou ON, Faye A, Kone M, Whitbread A. Assessing CMIP6-based future climate impacts on pearl millet yield under climate-smart management across Senegal's agroecological zones using the DSSAT-CERES-millet model. Clim Serv 2026;44:100749. https://doi.org/10.1016/j.cliser.2026.100749.",
+  nakata: "Nakata H, Ogata S. Balancing energy and agriculture in Japan: a techno-economic assessment of agrivoltaics based on the levelized cost of electricity. Agronomy 2026;16:1776. https://doi.org/10.3390/agronomy16181776.",
+  rabasoma: "Rabasoma K, Jenkins N, Ekanayake J. Improving the land use efficiency of farmland by using agrivoltaics. Food Energy Secur 2026;15:e70207. https://doi.org/10.1002/fes3.70207.",
   kusumfaq: "Ministry of New and Renewable Energy. PM-KUSUM: frequently asked questions. https://pmkusum.mnre.gov.in/landing-faq.html [accessed October 2026].",
 };
 let order = [];
