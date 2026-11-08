@@ -3,8 +3,8 @@
 set -u
 APP=/opt/agripv
 md() { curl -s -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/attributes/$1"; }
-[ -f /data/ALL_DONE ] && exit 0
 MODE=$(md mode)
+[ -f /data/ALL_DONE ] && [ "$MODE" != "extra" ] && exit 0   # extra mode may run after the full run
 [ -f /data/TEST_DONE ] && [ "$MODE" = "test" ] && exit 0
 [ -f /data/CALIB_DONE ] && [ "$MODE" = "calib" ] && exit 0
 [ -f /data/EXTRA_DONE ] && [ "$MODE" = "extra" ] && exit 0
