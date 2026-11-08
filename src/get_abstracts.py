@@ -14,6 +14,8 @@ DOIS = """10.1016/j.rser.2020.110694
 10.1007/s13593-022-00783-7""".split()
 def get(u):
     return json.load(urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "agripv-refcheck (mailto:almandharimohammed90@gmail.com)"}), timeout=30))
+import sys
+if len(sys.argv) > 1: DOIS = sys.argv[1:]
 for d in DOIS:
     print("\n=====", d)
     try:
