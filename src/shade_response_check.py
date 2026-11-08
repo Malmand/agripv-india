@@ -36,7 +36,7 @@ OI = {"wheat": "#0072B2", "chickpea": "#D55E00", "pearl_millet": "#009E73", "gro
 LAB = {"wheat": "Wheat", "chickpea": "Chickpea", "pearl_millet": "Pearl millet", "groundnut": "Groundnut"}
 fig, ax = plt.subplots(figsize=(3.4, 3.0))
 ax.plot([0, 1], [1, 0], color="0.6", lw=0.6, ls=":", label="Proportional loss")
-ax.plot([], [], "k-o", ms=2.5, lw=0.9, label="Calibrated N"); ax.plot([], [], "k--s", ms=2.5, lw=0.9, label="Recommended N")
+ax.plot([], [], "k-o", ms=2.5, lw=0.9, label="Calibrated nitrogen"); ax.plot([], [], "k--s", ms=2.5, lw=0.9, label="Recommended nitrogen")
 for (crop, nm), s in t.groupby(["crop", "nmode"]):
     s = s.sort_values("light_reduction")
     x = np.r_[0, s.light_reduction.values]; y = np.r_[1, s.ry_med.values]
@@ -45,7 +45,7 @@ for (crop, nm), s in t.groupby(["crop", "nmode"]):
     x80 = np.interp(0.80, y[::-1], x[::-1]) if y.min() <= 0.8 else np.nan
     print(f"  {crop} {nm}: {x80:.3f}")
 ax.axhline(0.80, color="k", lw=0.5, ls="--")
-ax.set_xlabel("Mean reduction in ground light (-)", fontsize=8); ax.set_ylabel("Median relative yield (-)", fontsize=8)
+ax.set_xlabel("Mean reduction in ground light (–)", fontsize=8); ax.set_ylabel("Median relative yield (–)", fontsize=8)
 ax.set_xlim(0, 0.8); ax.set_ylim(0.1, 1.15)
 for s_ in ("top", "right"): ax.spines[s_].set_visible(False)
 ax.tick_params(direction="out", labelsize=7); ax.legend(fontsize=6.5, frameon=False, loc="lower left")

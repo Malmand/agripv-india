@@ -28,15 +28,15 @@ for ax, (lab, (msk, crops)) in zip(axs, GROUPS.items()):
         ys = [np.interp(o.rsr, *curve(c, nm)) for c in crops]
         pred = np.mean(ys, axis=0)
         x = np.linspace(0, XM, 50); ycurve = np.mean([np.interp(x, *curve(c, nm)) for c in crops], axis=0)
-        ax.plot(x, ycurve, ls, color=col, lw=1.0, label=("Calibrated N" if nm == "current" else "Recommended N"))
+        ax.plot(x, ycurve, ls, color=col, lw=1.0, label=("Calibrated nitrogen" if nm == "current" else "Recommended nitrogen"))
         e = pred - o.ry.values
         rows.append(dict(group=lab, nmode=nm, n=len(o), n_studies=o.Reference.nunique(),
                          bias=e.mean(), rmse=np.sqrt((e ** 2).mean()), mae=np.abs(e).mean()))
-    ax.set_title(lab, fontsize=7); ax.set_xlabel("Reduction in light (-)", fontsize=8)
+    ax.set_title(lab, fontsize=7); ax.set_xlabel("Reduction in light (–)", fontsize=8)
     ax.set_xlim(0, 0.72); ax.set_ylim(0, 1.4)
     for s_ in ("top", "right"): ax.spines[s_].set_visible(False)
     ax.tick_params(direction="out", labelsize=7)
-axs[0].set_ylabel("Relative yield (-)", fontsize=8); axs[0].legend(fontsize=5.5, frameon=False, loc="lower left")
+axs[0].set_ylabel("Relative yield (–)", fontsize=8); axs[0].legend(fontsize=5.5, frameon=False, loc="lower left")
 for a, t in zip(axs, "ABC"): a.text(-0.02, 1.12, t, transform=a.transAxes, fontsize=10, fontweight="bold")
 fig.tight_layout(); fig.savefig(R / "results/figures/fig_shade_validation_jha.pdf"); fig.savefig(R / "results/figures/fig_shade_validation_jha.png", dpi=300)
 t = pd.DataFrame(rows); t.to_csv(R / "results/shade_validation_jha.csv", index=False, float_format="%.3f")

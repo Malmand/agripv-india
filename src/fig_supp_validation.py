@@ -44,7 +44,7 @@ def fig_s1():
     d = pd.read_csv(ROOT / "results/validation_before_after.csv")
     d = d[d.obs_area >= 50]
     crops = {"wheat": ("Wheat", OI["blue"], 5.0), "pearl_millet": ("Pearl millet", OI["orange"], 3.0)}
-    cases = {"before": "before calibration (farmer N)", "after": "after N calibration"}
+    cases = {"before": "farmer nitrogen", "after": "calibrated nitrogen"}
     fig, axs = plt.subplots(2, 2, figsize=(5.2, 5.0), constrained_layout=True)
     stats = {}
     for i, (crop, (name, col, lim)) in enumerate(crops.items()):
@@ -57,7 +57,7 @@ def fig_s1():
             r = np.corrcoef(x, y)[0, 1]
             mape = np.average((y / x - 1).abs(), weights=w)
             stats[(crop, case)] = (r, mape, len(s))
-            ax.text(0.96, 0.04, f"r = {r:.2f}\nMAPE = {100 * mape:.0f}%\nn = {len(s)} states",
+            ax.text(0.96, 0.04, f"r = {r:.2f}\nMean absolute\npercentage error = {100 * mape:.0f}%\nn = {len(s)} states",
                     transform=ax.transAxes, va="bottom", ha="right", fontsize=7)
             ax.set_xlim(0, lim); ax.set_ylim(0, lim); ax.set_aspect("equal")
             ax.set_title(f"{name}, {title}", fontsize=7.5, loc="left", pad=4)
@@ -86,9 +86,9 @@ def fig_s2():
         panel(ax, lab)
     axs[0].text(0.03, 0.04, f"Largest pointwise difference {d.svf_max_abs_diff.max():.3f}",
                 transform=axs[0].transAxes, fontsize=6.5)
-    axs[1].text(0.03, 0.04, f"Hourly MAE {d.sunlit_mae_hourly.min():.4f}–{d.sunlit_mae_hourly.max():.4f}",
+    axs[1].text(0.03, 0.04, f"Hourly mean absolute\nerror {d.sunlit_mae_hourly.min():.4f}–{d.sunlit_mae_hourly.max():.4f}",
                 transform=axs[1].transAxes, fontsize=6.5)
-    axs[1].legend(loc="upper right", fontsize=6, handlelength=1.6)
+    axs[0].legend(*axs[1].get_legend_handles_labels(), loc="upper right", fontsize=6, handlelength=1.6)
     save(fig, "figS2_light_vs_pvlib")
 
 
@@ -102,18 +102,18 @@ def fig_s3():
     fig, axs = plt.subplots(1, 2, figsize=(5.4, 2.95), constrained_layout=True)
     stats = {}
     for ax, v, title, lim, lab in [(axs[0], "total", "Whole system (pitch mean)", (0.4, 0.7), "A"),
-                                   (axs[1], "below", "Below the PV array", (0.0, 0.6), "B")]:
+                                   (axs[1], "below", "Below the photovoltaic array", (0.0, 0.6), "B")]:
         ax.plot(lim, lim, color="black", lw=0.6, ls=(0, (4, 2)))
         for _, r in d.iterrows():
             ax.plot(r[f"obs_{v}"], r[f"mod_{v}"], ls="none", marker=mk[r.time], ms=5,
                     color=col[r.block], mec="white", mew=0.5)
         e = d[f"mod_{v}"] - d[f"obs_{v}"]
         stats[v] = (e.mean(), np.sqrt((e ** 2).mean()))
-        ax.text(0.96, 0.04, f"Bias {e.mean():+.3f}\nRMSE {np.sqrt((e ** 2).mean()):.3f}".replace("-", "\u2212"),
+        ax.text(0.96, 0.04, f"Bias {e.mean():+.3f}".replace("-", "\u2212") + f"\nRoot-mean-square\nerror {np.sqrt((e ** 2).mean()):.3f}",
                 transform=ax.transAxes, va="bottom", ha="right", fontsize=7)
         ax.set_xlim(lim); ax.set_ylim(lim); ax.set_aspect("equal")
         ax.set_title(title, fontsize=7.5, loc="left", pad=4)
-        ax.set_xlabel("Measured relative PPFD (–)")
+        ax.set_xlabel("Measured relative photon flux (–)")
         ax.set_ylabel("Modelled relative irradiance (–)")
         panel(ax, lab)
     h = [plt.Line2D([], [], ls="none", marker="o", color=c, ms=5, label=b) for b, c in col.items()]

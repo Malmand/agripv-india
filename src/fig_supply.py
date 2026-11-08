@@ -52,22 +52,22 @@ def main():
     out.to_csv(a.pp / "supply_curve.csv", index=False, float_format="%.5g")
 
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.7), constrained_layout=True)
-    for k, (ax, xmax, unit, sc) in enumerate(zip(axes, (grid[-1], 1000), ("TWp", "GWp"), (1e3, 1))):
+    for k, (ax, xmax, unit, sc) in enumerate(zip(axes, (grid[-1], 1000), ("TW peak", "GW peak"), (1e3, 1))):
         x = grid / sc
         m = grid <= xmax * (1 if sc == 1 else 1e3) + 1e-9
-        ax.fill_between(x[m], lo[m], hi[m], color="#56B4E9", alpha=0.4, lw=0, label="GCM range")
+        ax.fill_between(x[m], lo[m], hi[m], color="#56B4E9", alpha=0.4, lw=0, label="Range across climate models")
         ax.plot(x[m], med[m], color="#0072B2", lw=1.2, label="Densest cells first (median)")
         ax.plot(x[m], grid[m] / 1e3 / md, color="0.3", lw=0.8, ls="--",
                 label=f"National mean density ({md:.2f} MWp ha$^{{-1}}$)")
         ax.set_xlim(0, x[m][-1]); ax.set_ylim(0, None)
-        ax.set_xlabel(f"Cumulative APV capacity ({unit})", fontsize=8)
-        ax.set_ylabel("Cropland needed (Mha)", fontsize=8)
+        ax.set_xlabel(f"Cumulative agrivoltaic capacity ({unit})", fontsize=8)
+        ax.set_ylabel("Cropland needed (million ha)", fontsize=8)
         ax.text(-0.17, 1.02, "AB"[k], transform=ax.transAxes, fontsize=11, fontweight="bold", va="bottom")
     ax = axes[1]
     for t in TARGETS:
         y = np.interp(t, grid, med)
         ax.plot(t, y, "o", ms=3.5, mfc="white", mec="#0072B2", mew=0.8, zorder=5)
-        ax.annotate(f"{t} GWp: {y:.2f} Mha", (t, y), xytext=(6, -9), textcoords="offset points", ha="left", fontsize=6.5)
+        ax.annotate(f"{t} GW peak: {y:.2f} million ha", (t, y), xytext=(6, -9), textcoords="offset points", ha="left", fontsize=6.5)
     axes[0].legend(fontsize=6, loc="upper left")
     a.out.mkdir(parents=True, exist_ok=True)
     fig.savefig(a.out / "figS6_supply_curve.pdf")

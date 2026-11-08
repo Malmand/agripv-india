@@ -423,7 +423,7 @@ def fig_delta(pp, hist, fut, grid, states, thr, out):
     cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.5, aspect=35, pad=0.01, extend="both")
     cb.set_ticks([-0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3], labels=["−0.3", "−0.2", "−0.1", "0", "0.1", "0.2", "0.3"])
     cb.ax.tick_params(labelsize=7)
-    cb.set_label(f"Change in maximum GCR at RY ≥ {thr:.2f}, 2041–2060 minus 1995–2014 (–)", fontsize=8)
+    cb.set_label(f"Change in maximum ground coverage ratio at relative yield ≥ {thr:.2f}, 2041–2060 minus 1995–2014 (–)", fontsize=8)
     save(fig, out / f"fig_india_delta_{fut}_thr{int(thr * 100)}")
     plt.close(fig)
 
