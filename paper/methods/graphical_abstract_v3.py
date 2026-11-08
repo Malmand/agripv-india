@@ -179,10 +179,10 @@ def main():
             ax.text(mid, G2, "Not a forecast", **BOLD)
         elif k == 1:
             for j, (v, nm) in enumerate(((cer, "cereals"), (leg, "legumes"))):
-                xx = cx + cw * (0.27 + 0.46 * j)
+                xx = cx + cw * (0.25 + 0.50 * j)
                 ax.text(xx, YN + 0.6, v, fontsize=12, **NUM)
                 ax.text(xx, YN - 2.5, nm, fontsize=7, color=MID, ha="center", va="center")
-            ax.plot([mid, mid], [YN - 3.1, YN + 2.8], color=PILL_EC, lw=0.5)
+            ax.plot([mid, mid], [YN - 1.0, YN + 2.8], color=PILL_EC, lw=0.5)
             ax.text(mid, G1, "of each field\nunder panels", **CAP)
             ax.text(mid, G2, "Limit set by crop", **BOLD)
         else:

@@ -82,7 +82,7 @@ const REF = {
   nakata: "Nakata H, Ogata S. Balancing energy and agriculture in Japan: a techno-economic assessment of agrivoltaics based on the levelized cost of electricity. Agronomy 2026;16:1776. https://doi.org/10.3390/agronomy16181776.",
   rabasoma: "Rabasoma K, Jenkins N, Ekanayake J. Improving the land use efficiency of farmland by using agrivoltaics. Food Energy Secur 2026;15:e70207. https://doi.org/10.1002/fes3.70207.",
   aswal: "Aswal P, Sundriyal N, Jhajharia T, Rawat A. Competition for land use between solar energy and agriculture in India: modelling agrivoltaic solutions. Sustain Energy Res 2026;13:47. https://doi.org/10.1186/s40807-026-00277-0.",
-  curioni: "Curioni M, et al. Global land-water competition and synergy between solar energy and agriculture. Earth's Future 2025. https://doi.org/10.1029/2024ef005291.",
+  curioni: "Curioni M, Galli N, Manzolini G, Rulli MC. Global land-water competition and synergy between solar energy and agriculture. Earth's Future 2025;13:e2024EF005291. https://doi.org/10.1029/2024ef005291.",
   guo: "Guo C, Gao Z, Miao G. Effect of shading at post flowering on photosynthetic characteristics of flag leaf and response of grain yield and quality to shading in wheat. Acta Agron Sin 2010;36:673–9. https://doi.org/10.3724/SP.J.1006.2010.00673.",
   kusumfaq: "Ministry of New and Renewable Energy. PM-KUSUM: frequently asked questions. https://pmkusum.mnre.gov.in/landing-faq.html [accessed October 2026].",
 };

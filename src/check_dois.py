@@ -12,7 +12,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-src = (Path(__file__).resolve().parents[1] / "paper" / "methods" / "lib.js").read_text(encoding="utf-8")
+_m = Path(__file__).resolve().parents[1] / "paper" / "methods"
+src = "\n".join((_m / f).read_text(encoding="utf-8") for f in ("lib.js", "intro.js"))
 refs = dict(re.findall(r'^\s+([a-z0-9_]+): "(.*)",\s*$', src, flags=re.M))
 bad = 0
 for key, txt in refs.items():
