@@ -15,7 +15,6 @@ import sys, pathlib, subprocess, tempfile, shutil
 import numpy as np, pandas as pd
 R = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(R / "prod"))
-import pv_shading as ps
 
 SEASON = {"wheat": ("2019-11-15", 120, 16.0), "chickpea": ("2019-11-01", 110, 16.0),
           "pearl_millet": ("2019-07-01", 90, 19.0), "groundnut": ("2019-07-01", 110, 19.0)}
@@ -54,6 +53,7 @@ def observed_curves(path):
     return pd.DataFrame(rows)
 
 def light_reduction():
+    import pv_shading as ps          # needs pvlib; only used when the light reduction is recomputed
     rows = []
     for crop, (start, nd, srad) in SEASON.items():
         dates = pd.date_range(start, periods=nd + 2)

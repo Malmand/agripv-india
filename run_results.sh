@@ -104,7 +104,7 @@ if [ $REBUILD = 0 ]; then
 fi
 
 echo "== field-response scenario (uses the committed observed curves; picks up the radiation-corrected energy table if present)"
-[ -d runs/s1/summary ] && $PY src/field_response.py 2>&1 | tail -3
+[ -d runs/s1/summary ] && { $PY src/field_response.py 2>&1 | tail -3; }
 
 echo "== manuscript numbers"
 $PY src/make_numbers.py --pp $PP
