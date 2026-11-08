@@ -176,7 +176,7 @@ def main():
             hi_t = num.get("head.cap_twp_m", big.replace(" TWp", ""))
             fit(mid, YN, f"{lo_t}\u2013{hi_t}", cw - 2.4, 13, **NUM)
             ax.text(mid, G1, "TWp, technical\npotential", **CAP)
-            ax.text(mid, G2, "Bounds, no forecast", **BOLD)
+            ax.text(mid, G2, "Not a forecast", **BOLD)
         elif k == 1:
             for j, (v, nm) in enumerate(((cer, "cereals"), (leg, "legumes"))):
                 xx = cx + cw * (0.27 + 0.46 * j)
