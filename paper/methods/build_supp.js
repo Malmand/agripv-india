@@ -151,6 +151,14 @@ if (fill.has("rad.k_north_pct")) {
   add(H1("S12. Radiation correction for PV energy"));
   add(PF(`NEX-GDDP-CMIP6 shortwave radiation was compared, per 0.25° cell and calendar month, with the 2001–2020 NASA POWER all-sky surface shortwave climatology ${cite("nasapower")}, queried on a 0.5° lattice. The ratio of the two (bounded to 0.5–1.3) rescales the daily radiation before the hourly disaggregation in the PV energy model; mid-century periods use the same factors (linear scaling ${cite("teutschbein")}). The correction changes radiation by {rad.k_nat_pct}% on average over the eligible cropland, {rad.k_north_pct}% in the Indo-Gangetic plain (24–31°N, 74–88°E) and {rad.k_south_pct}% south of 16°N, and national specific yield at GCR 0.3 by {rad.sy_change_pct}%. The crop model runs keep the original radiation{?; a test on the {rad.crop_n_cells} most affected cells with corrected radiation changed GCR~max~ by {rad.gcr_change} on average?}.`));
 }
+add(H1("S13. Maps by crop and layout"));
+add(PF(`Fig. S7 shows the largest ground coverage ratio for all four crops and all three layouts in the robust nitrogen case, the maps of which only the east-west layout is shown in the main text (Fig. 3). Figs. S8 and S9 show the change in GCR~max~ by 2041–2060 under SSP2-4.5 and SSP5-8.5, with calibrated nitrogen, for every crop and layout.`));
+add(FIGAUTO("../../results/figures/fig_india_gcrmax_historical_current_robust_thr80.png", 600,
+  "As Fig. 3, for all crops and layouts: largest ground coverage ratio (GCR~max~) that keeps relative yield at or above 0.80, by crop (rows) and layout (columns), 1995–2014, robust nitrogen case; vertical GCR~max~ capped at 0.6. Cell values are the median over five GCMs, interpolated for display; the number in each panel is the eligible-area-weighted mean with the GCM range. Boundaries: DataMeet India community, States/Admin2 (CC BY 4.0)."));
+add(FIGAUTO("../../results/figures/fig_india_delta_ssp245_current_thr80.png", 600,
+  "Change in GCR~max~ at RY ≥ 0.80, 2041–2060 under SSP2-4.5 minus 1995–2014, by crop and layout (five-GCM median, interpolated for display; calibrated nitrogen)."));
+add(FIGAUTO("../../results/figures/fig_india_delta_ssp585_current_thr80.png", 600,
+  "As Fig. S8, for SSP5-8.5."));
 add(H1("Supplementary references"));
 add(refsList());
 save(body, "Supplementary_Methods_AgriPV_India.docx");

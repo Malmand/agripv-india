@@ -150,6 +150,128 @@ def fig_gcrmax(pp, stage, grid, states, thr, out):
     plt.close(fig)
 
 
+def fig_gcrmain(pp, stage, grid, states, thr, out):
+    """Compact main-text version of the GCR_max maps: the four crops for the east-west layout (A-D) and, in E,
+    the mean GCR_max by crop and layout with the GCM range. All twelve maps go to the Supplementary."""
+    m = pd.read_csv(pp / f"map_gcr_{stage}.csv.gz")
+    m = m[(m.thr.round(2) == thr) & (m.elig_ha >= MIN_HA)]
+    rng = mean_range(pp, stage, thr)
+    bounds = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7001]
+    cmap = ListedColormap(mpl.colormaps["viridis"](np.linspace(0, 1, len(bounds) - 1)))
+    norm = BoundaryNorm(bounds, cmap.N)
+    fig = plt.figure(figsize=(6.3, 7.7), constrained_layout=True)
+    gs = fig.add_gridspec(3, 2, height_ratios=[1, 1, 0.62])
+    axs = [fig.add_subplot(gs[i // 2, i % 2]) for i in range(4)]
+    for i, ((crop, cl), ax) in enumerate(zip(CROPS, axs)):
+        d = m[(m.crop == crop) & (m.config == "ew_fixed")]
+        pm = draw_cells(ax, *raster(d, grid, "gcr_med"), cmap, norm)
+        india_axes(ax, states, i >= 2, i % 2 == 0)
+        ax.set_title(cl, fontsize=9, pad=3)
+        w = np.average(d.gcr_med, weights=d.elig_ha)
+        ax.text(0.03, 0.03, f"Mean {w:.2f}", transform=ax.transAxes, ha="left", va="bottom", fontsize=8,
+                fontweight="bold")
+        panel_label(ax, "ABCD"[i])
+    cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.6, aspect=35, pad=0.02)
+    cb.set_label(f"Maximum ground coverage ratio with relative yield ≥ {thr:.2f} (–)", fontsize=8.5)
+    cb.ax.tick_params(labelsize=7.5)
+    ax = fig.add_subplot(gs[2, :])
+    wd = 0.26
+    for j, (cfg, ll) in enumerate(LAYOUTS):
+        ys, es = [], []
+        for crop, _ in CROPS:
+            d = m[(m.crop == crop) & (m.config == cfg)]
+            ys.append(np.average(d.gcr_med, weights=d.elig_ha))
+            lo, hi = rng.get((crop, cfg), (np.nan, np.nan))
+            es.append((ys[-1] - min(lo, ys[-1]), max(hi, ys[-1]) - ys[-1]))
+        x = np.arange(len(CROPS)) + (j - 1) * wd
+        ax.bar(x, ys, wd * 0.92, color=OI[cfg], label=ll, edgecolor="none")
+        ax.errorbar(x, ys, yerr=np.array(es).T, fmt="none", ecolor="black", elinewidth=0.6, capsize=1.5)
+        for xx, yy in zip(x, ys):
+            ax.text(xx, yy + 0.035, f"{yy:.2f}", ha="center", va="bottom", fontsize=7)
+    ax.set_xticks(np.arange(len(CROPS))); ax.set_xticklabels([c for _, c in CROPS], fontsize=8)
+    ax.set_ylabel("Mean maximum GCR (–)", fontsize=8.5)
+    ax.set_ylim(0, 0.8); ax.tick_params(labelsize=7.5)
+    ax.legend(fontsize=7.5, loc="upper center", ncol=3, bbox_to_anchor=(0.5, 1.04))
+    ax.text(-0.09, 1.02, "E", transform=ax.transAxes, fontsize=10, fontweight="bold", ha="right", va="bottom")
+    save(fig, out / f"fig_india_gcrmain_{stage}_thr{int(thr * 100)}", png_dpi=400)
+    plt.close(fig)
+
+
+def fig_deltamain(pp, hist, futs, grid, states, thr, out):
+    """Compact main-text version of the mid-century change: national capacity change by layout (A) and change in
+    mean GCR_max by crop for the east-west layout (B), both with the range of the per-GCM paired changes, and maps
+    of the change in capacity density (C, D) for each scenario."""
+    names = {"ssp245_current": "SSP2-4.5", "ssp585_current": "SSP5-8.5"}
+    cc = lambda st: pd.read_csv(pp / f"cell_combined_{st}.csv.gz").query("slope_rule == 'le5'")
+    cc = lambda st: (lambda c: c[(c.thr.round(2) == thr) & (c.slope_rule == "le5")])(pd.read_csv(pp / f"cell_combined_{st}.csv.gz"))
+    ch = pd.read_csv(pp / f"cell_crop_{hist}.csv.gz", usecols=["cell", "model", "crop", "config", "thr", "slope_rule",
+                                                            "gcr_max", "elig_ha"])
+    ch = ch[(ch.slope_rule == "le5") & (ch.thr.round(2) == thr) & (ch.elig_ha >= MIN_HA) & (ch.config == "ew_fixed")]
+    H = cc(hist)
+    fig = plt.figure(figsize=(6.3, 6.6), constrained_layout=True)
+    gs = fig.add_gridspec(2, 2, height_ratios=[0.8, 1.25])
+    axA, axB = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
+    axs = [fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[1, 1])]
+    fills = {futs[0]: ("white", "black"), futs[-1]: ("0.45", "0.45")} if len(futs) > 1 else {futs[0]: ("0.45", "0.45")}
+    bw = 0.34
+    bounds = [-0.3, -0.2, -0.1, -0.05, 0.05, 0.1, 0.2, 0.3]
+    cols = mpl.colormaps["PuOr"](np.linspace(0.05, 0.95, len(bounds) + 1))
+    cols[len(cols) // 2] = mpl.colors.to_rgba("0.85")
+    cmap = ListedColormap(cols[1:-1]).with_extremes(under=cols[0], over=cols[-1])
+    norm = BoundaryNorm(bounds, cmap.N)
+    for k, f in enumerate(futs):
+        fc, ec = fills[f]
+        F = cc(f)
+        for j, (cfg, ll) in enumerate(LAYOUTS):
+            h = H[H.config == cfg].groupby("model").cap_mwp.sum(); u = F[F.config == cfg].groupby("model").cap_mwp.sum()
+            d = ((u / h - 1) * 100).dropna()
+            x = j + (k - (len(futs) - 1) / 2) * bw
+            axA.bar(x, d.median(), bw * 0.92, facecolor=fc, edgecolor=ec, linewidth=0.8,
+                    label=names[f] if j == 0 else None)
+            axA.errorbar(x, d.median(), yerr=[[d.median() - d.min()], [d.max() - d.median()]], fmt="none",
+                         ecolor="black", elinewidth=0.6, capsize=1.5)
+        cf = pd.read_csv(pp / f"cell_crop_{f}.csv.gz", usecols=["cell", "model", "crop", "config", "thr", "slope_rule",
+                                                              "gcr_max", "elig_ha"])
+        cf = cf[(cf.slope_rule == "le5") & (cf.thr.round(2) == thr) & (cf.config == "ew_fixed")]
+        mm = ch.merge(cf[["cell", "model", "crop", "gcr_max"]], on=["cell", "model", "crop"], suffixes=("_h", "_f"))
+        for i, (crop, cl) in enumerate(CROPS):
+            r = mm[mm.crop == crop]
+            dd = r.groupby("model").apply(lambda g: np.average(g.gcr_max_f - g.gcr_max_h, weights=g.elig_ha),
+                                          include_groups=False)
+            x = i + (k - (len(futs) - 1) / 2) * 0.28
+            axB.errorbar(x, dd.median(), yerr=[[dd.median() - dd.min()], [dd.max() - dd.median()]], fmt="o", ms=4,
+                         mfc=fc, mec=ec, mew=0.9, ecolor="black", elinewidth=0.7, capsize=1.5)
+        e = cc(f)[lambda c: c.config == "ew_fixed"].merge(
+            H[H.config == "ew_fixed"], on=["cell", "model"], suffixes=("_f", "_h"))
+        e = e[e.land_ha_h >= MIN_HA]
+        e["d"] = e.cap_mwp_f / e.land_ha_f - e.cap_mwp_h / e.land_ha_h
+        dm = e.groupby("cell").d.median().rename("v").reset_index()
+        g = grid.set_index("cell_id").loc[dm.cell]
+        ax = axs[k]
+        pm = draw_cells(ax, g.lon.values, g.lat.values, dm.v.values, cmap, norm)
+        india_axes(ax, states, True, k == 0)
+        ax.set_title(names[f], fontsize=9, pad=3)
+        panel_label(ax, "CD"[k])
+    axA.axhline(0, color="black", lw=0.5)
+    axA.set_xticks(range(3)); axA.set_xticklabels(["South-facing", "East-west", "Vertical"], fontsize=8)
+    axA.set_ylabel("Capacity change (%)", fontsize=8.5); axA.tick_params(labelsize=7.5)
+    axA.legend(fontsize=7.5, loc="lower right"); panel_label(axA, "A")
+    axB.axhline(0, color="black", lw=0.5)
+    axB.set_xticks(range(len(CROPS))); axB.set_xticklabels([c.replace("Pearl millet", "Pearl\nmillet") for _, c in CROPS], fontsize=8)
+    axB.set_ylabel("Change in mean GCR$_{max}$ (–)", fontsize=8.5); axB.tick_params(labelsize=7.5)
+    hd = [mpl.lines.Line2D([], [], marker="o", ls="none", ms=4, mfc=fills[x][0], mec=fills[x][1], mew=0.9, label=names[x])
+          for x in futs]
+    axB.legend(handles=hd, fontsize=7.5, loc="lower left")
+    panel_label(axB, "B")
+    cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.7, aspect=35, pad=0.02, extend="both")
+    cb.set_ticks([-0.3, -0.2, -0.1, -0.05, 0.05, 0.1, 0.2, 0.3],
+                 labels=["−0.3", "−0.2", "−0.1", "−0.05", "0.05", "0.1", "0.2", "0.3"])
+    cb.ax.tick_params(labelsize=7)
+    cb.set_label("Change in capacity density, 2041–2060 minus 1995–2014 (MWp per ha of cropland)", fontsize=8)
+    save(fig, out / f"fig_india_deltamain_thr{int(thr * 100)}", png_dpi=400)
+    plt.close(fig)
+
+
 def fig_capmap(pp, stage, grid, states, thr, out):
     """One large map of the headline result: yield-constrained capacity density (MWp per ha of eligible
     cropland, all crops combined, east-west layout, slope <= 5%), median over the five GCMs, with the three
@@ -327,11 +449,14 @@ if __name__ == "__main__":
     states["geometry"] = states.geometry.buffer(0.03).buffer(-0.03).simplify(0.02, preserve_topology=True)
     CLIP = states.geometry.union_all().buffer(0.02)
     fig_gcrmax(a.pp, a.stage, grid, states, a.thr, a.out)
+    fig_gcrmain(a.pp, a.stage, grid, states, a.thr, a.out)
     fig_capmap(a.pp, a.stage, grid, states, a.thr, a.out)
     fig_capacity(a.pp, a.stage, a.out)
     fig_states(a.pp, a.stage, a.thr, a.out)
     if a.calib:
         fig_cases(a.pp, a.calib, a.stage, a.out)
+    if a.future:
+        fig_deltamain(a.pp, a.stage, a.future, grid, states, a.thr, a.out)
     for f in a.future:
         fig_delta(a.pp, a.stage, f, grid, states, a.thr, a.out)
     print("figures in", a.out)
