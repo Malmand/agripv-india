@@ -8,16 +8,16 @@ const { PF, H3, fill, P } = L;
 function abstractText() {
   const robust = fill.has("head.is_robust") && fill("{head.is_robust}") === "yes";
   const head = robust
-    ? "In the robust case, in which each cell takes the lower density of calibrated and recommended nitrogen, cropland with slopes up to 5% could host {head.cap_twp_m} terawatts peak (TWp) of east-west elevated arrays at 80% relative yield on {head.land_mha} million hectares ({robust.ew.t80.energy_pwh} petawatt-hours per year). The crop models were more shade-tolerant than field observations; rescaling them to the observations gives {field.ew.t80.cap_twp} TWp, so we report {field.ew.t80.cap_twp}–{head.cap_twp_m} TWp as a technical potential, not a deployment forecast. Vertical rows gave slightly more capacity but less energy."
+    ? "In the robust case, in which each cell takes the lower density of calibrated and recommended nitrogen, cropland with slopes up to 5% could host {head.cap_twp_m} terawatts peak (TWp) of east-west elevated arrays at 80% relative yield on {head.land_mha} million hectares ({robust.ew.t80.energy_pwh} petawatt-hours per year). The crop models were more shade-tolerant than field observations; rescaled to them, capacity is {field.ew.t80.cap_twp} TWp, so we report {field.ew.t80.cap_twp}–{head.cap_twp_m} TWp as a technical potential, not a forecast."
     : "With calibrated nitrogen, cropland with slopes up to 5% could host {head.cap_twp_m} TWp of east-west elevated arrays at 80% relative yield on {head.land_mha} Mha, before grid, economic and land-tenure limits. This is an upper bound: low nitrogen rates hide part of the shade loss.";
   return [
-    "National estimates of India's agrivoltaic potential assume fixed power densities without testing crop yield under the panels.",
-    "We coupled a strip-resolved light model for three array layouts with crop models of wheat, chickpea, pearl millet and groundnut on 2977 cells of a 0.25° grid, driven by five downscaled climate models for 1995–2014 and 2041–2060, with nitrogen calibrated to observed state yields.",
+    "National agrivoltaic potential estimates, including those for India, assume fixed power densities and do not test whether crops keep their yield.",
+    "To our knowledge, this is the first yield-constrained national potential for India. We coupled a strip-resolved light model for three array layouts with crop models of wheat, chickpea, pearl millet and groundnut on 2977 cells of a 0.25° grid, driven by five downscaled climate models for 1995–2014 and 2041–2060, with nitrogen calibrated to observed state yields.",
     "For each cell we found the largest ground coverage ratio (GCR) that keeps relative yield at or above 0.66, 0.80 or 0.90, the thresholds of German, Japanese and French rules.",
     head,
     "The feasible GCR averaged {head.gcr_cereals} for cereals but {head.gcr_legumes} for legumes.",
     robust
-      ? "Calibrated nitrogen alone gives {main.cap_twp_m} TWp, an upper bound: there wheat met the threshold even at the densest array on {main.atcap_wheat}% of its area, against {robust.ew.t80.atcap_wheat}% in the robust case."
+      ? "Calibrated nitrogen alone gives {main.cap_twp_m} TWp, an upper bound, because low nitrogen hides shade loss. Crop type and nitrogen management thus shape the feasible density."
       : "Wheat that met the threshold even at the densest array lay mostly in states calibrated at 60 kg N ha^−1^ or less.",
     "Under the high-emission pathway SSP5-8.5 (calibrated nitrogen), capacity changed by {ssp585.change_pct}% but annual energy by {ssp585.energy_change_pct}%, mainly through lower irradiance.",
     "India could pair a relative-yield threshold with crop-specific density caps in farm-based solar schemes.",
