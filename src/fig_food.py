@@ -61,7 +61,7 @@ def main():
 
     # B: share of production given up by crop
     x = np.arange(len(CROPS)); bw = 0.36
-    for k, (tag, fc, lab) in enumerate((("cur", "0.35", "Current N"), ("rec", "white", "Recommended N"))):
+    for k, (tag, fc, lab) in enumerate((("cur", "0.35", "Calibrated N (current practice)"), ("rec", "white", "Recommended N"))):
         t = by[by.mgmt == tag].set_index("crop")
         m = np.array([t.loc[c, "lost_pct_median"] for c, _ in CROPS])
         lo = np.array([t.loc[c, "lost_pct_min"] for c, _ in CROPS]); hi = np.array([t.loc[c, "lost_pct_max"] for c, _ in CROPS])
@@ -77,7 +77,7 @@ def main():
     F.panel_label(axB, "B")
 
     # C: cumulative curve
-    for tag, ls, lab in (("cur", "-", "Current N"), ("rec", "--", "Recommended N")):
+    for tag, ls, lab in (("rec", "-", "Recommended N"),):   # one line: the conservative case quoted in the text
         c = cu[cu.mgmt == tag]
         axC.plot(np.r_[0, c.cum_energy_pwh], np.r_[0, c.cum_lost_mt], color="black", ls=ls, lw=1.0, label=lab)
     axC.axvline(CEA_PWH, color="0.4", lw=0.6, ls=":")
@@ -86,7 +86,6 @@ def main():
     axC.set_xlim(0, None); axC.set_ylim(0, 17)
     axC.set_xlabel("Cumulative electricity (PWh yr$^{-1}$)", fontsize=8)
     axC.set_ylabel("Crop given up (Mt yr$^{-1}$)", fontsize=8); axC.tick_params(labelsize=7)
-    axC.legend(fontsize=6.5, loc="center left", bbox_to_anchor=(0.0, 0.55))
     F.panel_label(axC, "C")
     a.out.mkdir(parents=True, exist_ok=True)
     F.save(fig, a.out / "fig_food", png_dpi=400)
