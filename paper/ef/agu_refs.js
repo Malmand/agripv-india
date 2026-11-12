@@ -23,6 +23,7 @@ const JOURNAL = {
   "Sustain Prod Consum": "Sustainable Production and Consumption",
 };
 const AGU_MANUAL = {
+  ifct: "Longvah, T., Ananthan, R., Bhaskarachary, K., & Venkaiah, K. (2017). *Indian food composition tables*. National Institute of Nutrition, Indian Council of Medical Research. https://www.nin.res.in/ebooks/IFCT2017.pdf",
   fhg: "Fraunhofer ISE, EY, & CSTEP. (2024). *Agrivoltaics in India*. Indo-German Energy Forum. https://energyforum.in/fileadmin/india/media_elements/publications/20240502_AgriPV_in_India/Agrivoltaics_in_India.pdf",
   ndc: "Government of India. (2022). *India's updated first Nationally Determined Contribution under the Paris Agreement (2021–2030)*. UNFCCC. https://unfccc.int/sites/default/files/NDC/2022-08/India%20Updated%20First%20Nationally%20Determined%20Contrib.pdf",
   kusum: "Ministry of New and Renewable Energy. (2024). *Comprehensive guidelines for implementation of Pradhan Mantri Kisan Urja Suraksha evam Utthaan Mahabhiyaan (PM-KUSUM) scheme*. MNRE. https://mnre.gov.in/?p=22280",

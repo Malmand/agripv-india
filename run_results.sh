@@ -116,6 +116,13 @@ fi
 echo "== field-response scenario (uses the committed observed curves; picks up the radiation-corrected energy table if present)"
 [ -d runs/s1/summary ] && { $PY src/field_response.py 2>&1 | tail -3; }
 
+echo "== food given up under the arrays (observed state yields x (1 - RY) at the robust GCR_max)"
+if [ -f "$PP/cell_crop_historical_current_robust.csv.gz" ] && [ -f "$SUM/ry_crop_historical_current.csv.gz" ] \
+   && [ -f "$SUM/ry_crop_historical_recommended.csv.gz" ]; then
+  $PY src/food_tradeoff.py --pp $PP --summary "$SUM" | tail -2
+  $PY src/fig_food.py --pp $PP --out $FIG --grid $GRID
+fi
+
 echo "== manuscript numbers"
 $PY src/make_numbers.py --pp $PP
 echo "  (build the manuscript and highlights with: node paper/methods/build_methods.js)"

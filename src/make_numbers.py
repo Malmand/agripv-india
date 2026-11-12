@@ -436,6 +436,38 @@ def future_headline(N):
         N.put("fut.n_compare", t, t)
 
 
+def food_numbers(N, pp):
+    """Food given up under the arrays (src/food_tradeoff.py): east-west, RY >= 0.80, robust GCR_max, observed state
+    yields. food.<cur|rec>.*: RY under current (calibrated) management or recommended nitrogen."""
+    f = pp / "food_by_crop.csv"
+    if not f.exists():
+        return
+    b = pd.read_csv(f)
+    for r in b.itertuples():
+        k = f"food.{r.mgmt}.{r.crop}"
+        N.put(f"{k}.lost_pct", r.lost_pct_median, f"{r.lost_pct_median:.0f}" if r.lost_pct_median >= 10 else f"{r.lost_pct_median:.1f}")
+        N.put(f"{k}.lost_mt", r.lost_t_median / 1e6, f"{r.lost_t_median / 1e6:.1f}")
+        N.put(f"{k}.prod_mt", r.prod_t_median / 1e6, f"{r.prod_t_median / 1e6:.0f}")
+        if r.crop == "all":
+            N.put(f"food.{r.mgmt}.kg_per_mwh", r.kg_per_mwh_median, f"{r.kg_per_mwh_median:.2f}")
+            N.put(f"food.{r.mgmt}.kcal_pct", r.lost_pj_pct_median, f"{r.lost_pj_pct_median:.0f}" if r.lost_pj_pct_median >= 10 else f"{r.lost_pj_pct_median:.1f}")
+            N.put(f"food.{r.mgmt}.lost_pct_lo", r.lost_pct_min, f"{r.lost_pct_min:.1f}")
+            N.put(f"food.{r.mgmt}.lost_pct_hi", r.lost_pct_max, f"{r.lost_pct_max:.1f}")
+    cu = pp / "food_curve.csv"
+    if cu.exists():
+        c = pd.read_csv(cu)
+        for tag, g in c.groupby("mgmt"):
+            g = g.sort_values("cum_energy_pwh")
+            e, l = np.r_[0, g.cum_energy_pwh.values], np.r_[0, g.cum_lost_mt.values]
+            kt = 1000 * float(np.interp(CEA_TWH / 1000, e, l))          # crop given up for one year of India's demand
+            N.put(f"food.{tag}.cea_kt", kt, f"{kt:.0f}")
+            z = float(e[np.searchsorted(l, 1e-6)]) if (l > 1e-6).any() else float(e[-1])   # energy with no crop loss
+            N.put(f"food.{tag}.zero_pwh", z, f"{z:.0f}")
+            for pwh in (10,):
+                v = float(np.interp(pwh, e, l))
+                N.put(f"food.{tag}.at{pwh}_mt", v, f"{v:.1f}")
+
+
 def ga_numbers(N):
     """Same text as graphical_abstract.py (ew_fixed, tau 0.8, slope <= 5%, badge = SSP5-8.5).
     Headline = robust case when present, else calibrated N labelled "upper bound"."""
@@ -854,6 +886,7 @@ def main():
             if "hist" in present:
                 open_field_change_numbers(N, a.summary, c_hist, p)
     future_headline(N)
+    food_numbers(N, a.pp)
     ga_numbers(N)
     reconcile_numbers(N, a.pp)
     calib_numbers(N, a.validation)

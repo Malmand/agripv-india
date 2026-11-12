@@ -39,6 +39,7 @@ const REF = {
   poggio: "Poggio L, de Sousa LM, Batjes NH, Heuvelink GBM, Kempen B, Ribeiro E, et al. SoilGrids 2.0: producing soil information for the globe with quantified spatial uncertainty. SOIL 2021;7:217–40. https://doi.org/10.5194/soil-7-217-2021.",
   saxton: "Saxton KE, Rawls WJ. Soil water characteristic estimates by texture and organic matter for hydrologic solutions. Soil Sci Soc Am J 2006;70:1569–78. https://doi.org/10.2136/sssaj2005.0117.",
   copdem: "European Space Agency, Airbus. Copernicus DEM, global 90 m (GLO-90). 2022. https://doi.org/10.5270/ESA-c5d3d65.",
+  ifct: "Longvah T, Ananthan R, Bhaskarachary K, Venkaiah K. Indian Food Composition Tables. Hyderabad: National Institute of Nutrition, Indian Council of Medical Research; 2017. https://www.nin.res.in/ebooks/IFCT2017.pdf.",
   icrisat: "Swamikannu N, Pingali PR, Padmanabhan J, Ravula P, Gumma MK, Mohammed IA, et al. District Level Data (DLD) and Dashboard for Agriculture and Allied-sectors in India, version 1. ICRISAT Dataverse; 2021. https://doi.org/10.21421/D2/XFB1BZ.",
   ineichen: "Ineichen P, Perez R. A new airmass independent formulation for the Linke turbidity coefficient. Sol Energy 2002;73:151–7. https://doi.org/10.1016/S0038-092X(02)00045-2.",
   erbs: "Erbs DG, Klein SA, Duffie JA. Estimation of the diffuse radiation fraction for hourly, daily and monthly-average global radiation. Sol Energy 1982;28:293–302. https://doi.org/10.1016/0038-092X(82)90302-4.",
