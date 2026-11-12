@@ -156,7 +156,16 @@ def waterfall(t, a):
               2: "Slope\n≤ 5%", 3: "Double-cropped\nland once",
               4: f"Yield limit\nRY ≥ {a.thr:.2f}", 5: "Robust nitrogen\nmanagement"}
     xs, names = [], []
-    fig, ax = plt.subplots(figsize=(5.51, 2.7))   # 140 mm, 1.5 column
+    # field-response scenario (src/field_response.py): the same robust potential with the crop-model shade response
+    # rescaled to field observations; drawn as a last step and a second total when the file exists
+    ff = ROOT / "results/potential_field/india_combined_historical_current_robust.csv"
+    fld = None
+    if 5 in steps and ff.exists():
+        f_ = pd.read_csv(ff)
+        f_ = f_[(f_.config == a.layout) & np.isclose(f_.thr, a.thr) & (f_.slope_rule == "le5")]
+        if len(f_):
+            fld = f_.iloc[0][["cap_mwp_median", "cap_mwp_min", "cap_mwp_max"]].values / 1e3 * k   # MWp -> GWp -> unit
+    fig, ax = plt.subplots(figsize=(6.3 if fld is not None else 5.51, 2.7))
     w = 0.62
     # start total
     ax.bar(0, lv[1], w, color=C_TOTAL, lw=0)
@@ -180,7 +189,19 @@ def waterfall(t, a):
     lo_, hi_ = hi.loc[steps[-1], "gw_min"] * k, hi.loc[steps[-1], "gw_max"] * k
     ax.errorbar(n, lv[steps[-1]], yerr=[[lv[steps[-1]] - lo_], [hi_ - lv[steps[-1]]]], color="0.1", lw=0.6,
                 capsize=1.5, capthick=0.6)
-    xs.append(n); names.append("This study" if 5 in steps else "This study\n(upper bound)")
+    xs.append(n); names.append("Robust\npotential" if 5 in steps else "This study\n(upper bound)")
+    if fld is not None:
+        top0, (fm, fl, fh) = lv[steps[-1]], fld
+        ax.bar(n + 1, fm - top0, w, bottom=top0, color=C_DOWN, lw=0)
+        ax.plot([n + w / 2, n + 1 - w / 2], [top0, top0], color="0.2", lw=0.5)
+        ax.errorbar(n + 1, fm, yerr=[[fm - fl], [fh - fm]], color="0.1", lw=0.6, capsize=1.5, capthick=0.6)
+        ax.text(n + 1, top0 + 0.02 * lv[1], f"{100 * (fm - top0) / top0:+.0f}%".replace("-", "−"), ha="center",
+                va="bottom", fontsize=6)
+        ax.plot([n + 1 + w / 2, n + 2 - w / 2], [fm, fm], color="0.2", lw=0.5)
+        ax.bar(n + 2, fm, w, color=C_TOTAL, lw=0)
+        ax.errorbar(n + 2, fm, yerr=[[fm - fl], [fh - fm]], color="0.1", lw=0.6, capsize=1.5, capthick=0.6)
+        xs += [n + 1, n + 2]; names += ["Field shade\nresponse", "Field-response\nscenario"]
+        n += 2
     # low fixed density (0.42 MW/ha) chain for steps 1-3 (step s sits at x = s - 1), joining step 4
     l3 = [s_ for s_ in (1, 2, 3) if s_ in lo.index]
     y3 = lo.loc[l3, "gw_median"].values * k

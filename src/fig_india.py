@@ -268,7 +268,9 @@ def fig_deltamain(pp, hist, futs, grid, states, thr, out, fut_robust=None, robus
     panel_label(axA, "A")
     axB.axhline(0, color="black", lw=0.5)
     axB.set_xticks(range(len(CROPS))); axB.set_xticklabels([c.replace("Pearl millet", "Pearl\nmillet") for _, c in CROPS], fontsize=8)
-    axB.set_ylabel("Change in mean GCR$_{max}$ (–)", fontsize=8.5); axB.tick_params(labelsize=7.5)
+    axB.set_ylabel("Change in mean GCR$_{\mathrm{max}}$ (–)", fontsize=8.5); axB.tick_params(labelsize=7.5)
+    axB.set_xlim(-0.5, len(CROPS) - 0.5)
+    axB.set_xlim(-0.5, len(CROPS) - 0.5)
     axB.legend(fontsize=7 if n > 2 else 7.5, loc="lower left")
     panel_label(axB, "B")
     cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.7, aspect=35, pad=0.02, extend="both")
@@ -318,7 +320,7 @@ def fig_capmap(pp, stage, grid, states, thr, out):
     ax.text(69.2 + km5 / 2, 9.0, "500 km", ha="center", va="bottom", fontsize=7.5)
     ax.annotate("", xy=(70.2, 14.6), xytext=(70.2, 11.6), arrowprops=dict(arrowstyle="-|>", color="black", lw=1.0))
     ax.text(70.2, 14.9, "N", ha="center", va="bottom", fontsize=8, fontweight="bold")
-    ax.text(0.99, 0.99, f"India: {cap_tw:.1f} TWp on {land_mha:.1f} Mha\n(median of five GCMs)", transform=ax.transAxes,
+    ax.text(0.99, 0.99, f"India: {cap_tw:.1f} TWp on {land_mha:.1f} Mha\n(median of five climate models)", transform=ax.transAxes,
             ha="right", va="top", fontsize=8, fontweight="bold", path_effects=halo)
     cb = fig.colorbar(pm, ax=ax, shrink=0.62, aspect=26, pad=0.02)
     cb.set_label("Capacity density (MWp per ha of cropland)", fontsize=8.5)
@@ -356,6 +358,8 @@ def fig_cases(pp, calib, robust, out):
     GCM range, calibrated-nitrogen upper bound as an outline bar behind it (slope <= 5%)."""
     tc = pd.read_csv(pp / f"india_combined_{calib}.csv")
     tr = pd.read_csv(pp / f"india_combined_{robust}.csv")
+    ff = pp.parent / "potential_field" / f"india_combined_{robust}.csv"   # field-response scenario (lower bound)
+    tf = pd.read_csv(ff) if ff.exists() else None
     thrs = sorted(tr.thr.unique())
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.9), constrained_layout=True)
     w = 0.26
@@ -371,14 +375,25 @@ def fig_cases(pp, calib, robust, out):
             ax.bar(x, y, w * 0.92, color=OI[cfg], edgecolor="none", label=ll)
             ax.errorbar(x, y, yerr=[y - dr[f"{col}_min"] / scale, dr[f"{col}_max"] / scale - y], fmt="none",
                         ecolor="black", elinewidth=0.6, capsize=1.5)
+            if tf is not None:
+                df = tf[(tf.config == cfg) & (tf.slope_rule == "le5")].set_index("thr").loc[thrs]
+                yf = df[f"{col}_median"] / scale
+                ax.errorbar(x, yf, yerr=[yf - df[f"{col}_min"] / scale, df[f"{col}_max"] / scale - yf], fmt="D",
+                            ms=3.6, mfc="white", mec="black", mew=0.8, ecolor="black", elinewidth=0.6, capsize=1.5,
+                            zorder=4)
         ax.set_xticks(np.arange(len(thrs)))
         ax.set_xticklabels([f"RY ≥ {x:.2f}" for x in thrs])
+        ax.set_xlabel("Relative-yield (RY) threshold", fontsize=8)
         ax.set_ylabel(ylab, fontsize=8)
         ax.text(-0.16, 1.02, lab, transform=ax.transAxes, fontsize=11, fontweight="bold", va="bottom")
     h, l = axes[0].get_legend_handles_labels()
-    h.append(mpl.patches.Patch(facecolor="white", edgecolor="black", linewidth=0.8))
-    l.append("Outline: calibrated nitrogen alone")
-    fig.legend(h, l, fontsize=6.5, loc="outside lower center", ncol=4)
+    h = [x for x, y in zip(h, l) if y in [ll for _, ll in LAYOUTS]]; l = [ll for _, ll in LAYOUTS]
+    h.append(mpl.patches.Patch(facecolor="0.55", edgecolor="none")); l.append("Filled: robust nitrogen")
+    h.append(mpl.patches.Patch(facecolor="white", edgecolor="black", linewidth=0.8)); l.append("Outline: calibrated nitrogen alone")
+    if tf is not None:
+        h.append(mpl.lines.Line2D([], [], ls="none", marker="D", ms=3.6, mfc="white", mec="black", mew=0.8))
+        l.append("Diamond: field-response scenario")
+    fig.legend(h, l, fontsize=6.5, loc="outside lower center", ncol=3)
     save(fig, out / f"fig_india_cases_{robust}")
     plt.close(fig)
 
