@@ -6,12 +6,13 @@ cd "$(dirname "$0")"
 FILES="sim.py sim_india.py run_cells_india.py summarise_india.py status_india.py fetch_soil.py nex_to_cells.py pv_shading.py \
 dssat_inputs.py dssat_pilot.py get_nex_gddp.py energy_india.py radiation_ref.py season_check.py pipeline_india.sh grid_india_025.csv test_cells.txt"
 [ -f calib_n.csv ] && FILES="$FILES calib_n.csv"
+[ -f rs_cells.txt ] && FILES="$FILES rs_cells.txt"
 CODE=$(tar -czf - $FILES | base64 -w0)
 START=$(base64 -w0 startup_india.sh)
 cat > update_india.sh <<UPD
 #!/bin/bash
 set -e
-MODE=\${1:?usage: bash update_india.sh calib|full|extra|futrobust [ack]}
+MODE=\${1:?usage: bash update_india.sh calib|full|extra|futrobust|radsample [ack]}
 ACK=no; [ "\${2:-}" = "ack" ] && ACK=yes   # ack = resume after a health-check stop
 gcloud config set project project-293bae4b-5e94-4c63-bac >/dev/null
 TMP=\$(mktemp -d)

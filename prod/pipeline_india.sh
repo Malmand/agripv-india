@@ -145,6 +145,24 @@ PYEOF
   push; shutdown -h now; exit 0
 fi
 
+if [ "$MODE" = "radsample" ]; then
+  # 3f. crop runs with bias-corrected radiation on 200 cells drawn with probability proportional to crop area
+  #     (rs_cells.txt, fixed seed), calibrated and recommended N, 1995-2014; national radiation sensitivity.
+  #     Needs rad_factors.csv from mode extra. Stages historical_<mgmt>_rs; each step skips finished work.
+  S=$DATA/out/summary
+  [ -f $S/rad_factors.csv ] || { say "STOP: $S/rad_factors.csv missing (run mode extra first)"; push; shutdown -h now; exit 1; }
+  export AGRIPV_SRAD_FACTORS=$S/rad_factors.csv AGRIPV_STAGE_SUFFIX=_rs
+  for g in current recommended; do
+    run historical $g --only $APP/rs_cells.txt
+    $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage historical_${g}_rs | tail -3
+    status; push
+  done
+  unset AGRIPV_SRAD_FACTORS AGRIPV_STAGE_SUFFIX
+  touch $DATA/RADSAMPLE_DONE && gsutil -q cp $DATA/RADSAMPLE_DONE "gs://$BUCKET/RADSAMPLE_DONE"
+  say "=== radiation sample finished; shutting down"
+  push; shutdown -h now; exit 0
+fi
+
 if [ "$MODE" = "futrobust" ]; then
   # 3e. robust-nitrogen case for mid-century: recommended-N stage for SSP5-8.5 (SSP2-4.5 reported under calibrated N only)
   #     (PV energy per period already exists from the production run; each step skips finished work)
