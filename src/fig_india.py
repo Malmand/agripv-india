@@ -39,6 +39,10 @@ def save(fig, stem, png_dpi=300):
     fig.savefig(f"{stem}.png", dpi=png_dpi)
 
 
+# semi-transparent white box behind text on maps, so labels stay legible over the coloured cells
+LABEL_BOX = dict(boxstyle="round,pad=0.25", fc="white", ec="none", alpha=0.75)
+
+
 def panel_label(ax, s):
     ax.text(-0.02, 1.02, s, transform=ax.transAxes, fontsize=10, fontweight="bold", ha="right", va="bottom")
 
@@ -137,7 +141,7 @@ def fig_gcrmax(pp, stage, grid, states, thr, out):
                 lo, hi = rng.get((crop, cfg), (np.nan, np.nan))
                 # area-weighted mean of the 5-GCM median map (range of the per-GCM means)
                 txt = f"{w:.2f}" + (f" ({lo:.2f}–{hi:.2f})" if np.isfinite(lo) else "")
-                ax.text(0.02, 0.01, txt, transform=ax.transAxes, ha="left", va="bottom", fontsize=7)
+                ax.text(0.03, 0.035, txt, transform=ax.transAxes, ha="left", va="bottom", fontsize=7, bbox=LABEL_BOX, zorder=6)
             if i == 0:
                 ax.set_title(ll, fontsize=8.5)
             if j == 0:
@@ -168,7 +172,7 @@ def fig_gcrmain(pp, stage, grid, states, thr, out):
         india_axes(ax, states, i >= 2, i % 2 == 0)
         ax.set_title(cl, fontsize=9, pad=3)
         w = np.average(d.gcr_med, weights=d.elig_ha)
-        ax.text(0.03, 0.03, f"Mean {w:.2f}", transform=ax.transAxes, ha="left", va="bottom", fontsize=8,
+        ax.text(0.03, 0.03, f"Mean {w:.2f}", transform=ax.transAxes, ha="left", va="bottom", fontsize=8, bbox=LABEL_BOX, zorder=6,
                 fontweight="bold")
         panel_label(ax, "ABCD"[i])
     cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.6, aspect=35, pad=0.02)
@@ -321,7 +325,7 @@ def fig_capmap(pp, stage, grid, states, thr, out):
     ax.annotate("", xy=(70.2, 14.6), xytext=(70.2, 11.6), arrowprops=dict(arrowstyle="-|>", color="black", lw=1.0))
     ax.text(70.2, 14.9, "N", ha="center", va="bottom", fontsize=8, fontweight="bold")
     ax.text(0.99, 0.99, f"India: {cap_tw:.1f} TWp on {land_mha:.1f} Mha\n(median of five climate models)", transform=ax.transAxes,
-            ha="right", va="top", fontsize=8, fontweight="bold", path_effects=halo)
+            ha="right", va="top", fontsize=8, fontweight="bold", bbox=LABEL_BOX, zorder=6)
     cb = fig.colorbar(pm, ax=ax, shrink=0.62, aspect=26, pad=0.02)
     cb.set_label("Capacity density (MWp per ha of cropland)", fontsize=8.5)
     cb.ax.tick_params(labelsize=7.5)
