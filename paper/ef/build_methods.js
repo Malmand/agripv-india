@@ -8,7 +8,7 @@ const { Paragraph, TextRun, FONT } = L;
 
 add(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Yield-Constrained Agrivoltaic Potential of India Under Current and Mid-Century Climate", bold: true, size: 32, font: FONT })] }));
 add(P("M. Al-Mandhari^1^ and A. Ghosh^1*^"));
-add(P("^1^[Affiliation of each author: department, institution, city, country.]"));
+add(P("^1^Renewable Energy, Electric and Electronic Engineering, Faculty of Environment, Science and Economy, University of Exeter, Penryn TR10 9FE, UK"));
 add(P("*Corresponding author: Aritra Ghosh ([email address])"));
 require("./abstract.js").addAbstract(add);
 require("./intro.js").addIntro(add);
@@ -77,7 +77,7 @@ add(P("Mohamed Al-Mandhari: Conceptualization, Methodology, Software, Validation
 add(H1("Conflict of Interest Statement"));
 add(P("The authors declare there are no conflicts of interest for this manuscript."));
 add(H1("Acknowledgments"));
-add(P("[Funding information for both authors, and any thanks, to be added. If there is no funding, state that no specific funding supported this work.]"));
+add(P(`We thank the DataMeet India community for the India state boundaries ${cite("datameet")}, shared under a Creative Commons Attribution 4.0 (CC BY 4.0) licence, and the teams behind the other open data sets used here: NEX-GDDP-CMIP6, MapSPAM, SoilGrids, the Copernicus digital elevation model, the GGCMI crop calendar, the ICRISAT District Level Database and NASA POWER. [Funding information for both authors to be added; if there was none, state that no specific funding supported this work.]`));
 add(H1("Open Research"));
 add(P("[The simulation outputs behind the figures and tables (cell-level capacity, relative yield and economics tables) will be deposited in a public repository, with its DOI cited here and in the reference list. Software availability statement to be added if the editor requires it.]"));
 add(P(`All input data are public: climate from NEX-GDDP-CMIP6 ${cite("thrasher")}, crop area from MapSPAM ${cite("yu")}, crop calendars from GGCMI Phase 3 ${cite("jagermeyr")}, soils from SoilGrids 2.0 ${cite("poggio")}, terrain from the Copernicus digital elevation model ${cite("copdem")}, observed yields from the ICRISAT District Level Database ${cite("icrisat")}, radiation for the energy correction from NASA POWER ${cite("nasapower")}, food energy from the Indian Food Composition Tables ${cite("ifct")} and state boundaries from DataMeet ${cite("datameet")} (CC BY 4.0).`));
