@@ -6,3 +6,4 @@ update_india*.sh
 *.xls
 node_modules/
 paper/ef/node_modules
+zenodo/

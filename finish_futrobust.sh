@@ -38,4 +38,5 @@ print("\nRobust mid-century result")
 for k in keys:
     print(f"  {k:32s} {v.get(k, 'MISSING')}")
 PY
+bash make_zenodo.sh   # rebuild the Zenodo package with the final tables
 echo "Built paper/ef/*.docx. Check them, then commit (git add -A results paper/ef; git commit)."
