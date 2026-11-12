@@ -11,7 +11,7 @@ START=$(base64 -w0 startup_india.sh)
 cat > update_india.sh <<UPD
 #!/bin/bash
 set -e
-MODE=\${1:?usage: bash update_india.sh calib|full|extra [ack]}
+MODE=\${1:?usage: bash update_india.sh calib|full|extra|futrobust [ack]}
 ACK=no; [ "\${2:-}" = "ack" ] && ACK=yes   # ack = resume after a health-check stop
 gcloud config set project project-293bae4b-5e94-4c63-bac >/dev/null
 TMP=\$(mktemp -d)

@@ -145,6 +145,20 @@ PYEOF
   push; shutdown -h now; exit 0
 fi
 
+if [ "$MODE" = "futrobust" ]; then
+  # 3e. robust-nitrogen case for mid-century: recommended-N stages for SSP5-8.5 then SSP2-4.5
+  #     (PV energy per period already exists from the production run; each step skips finished work)
+  for p in ssp585 ssp245; do
+    run $p recommended
+    $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage ${p}_recommended | tail -40
+    status; push
+    say "stage ${p}_recommended uploaded"
+  done
+  touch $DATA/FUTROBUST_DONE && gsutil -q cp $DATA/FUTROBUST_DONE "gs://$BUCKET/FUTROBUST_DONE"
+  say "=== future robust stages finished; shutting down"
+  push; shutdown -h now; exit 0
+fi
+
 # 4. production stages, most important first (a stop part-way still leaves usable results)
 #    current = state-calibrated N (main case); recommended = adequate N (sensitivity)
 for stage in historical:current ssp585:current historical:recommended ssp245:current; do
