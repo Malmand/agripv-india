@@ -80,7 +80,9 @@ def main():
         # cells run south -> north, so early files are all southern (low-yield wheat in Karnataka,
         # Maharashtra): only a coarse floor until one full climate-model pass (2977 cells) is done
         if s["files"] >= 60 and not re.search(r"_n\d+_open$", os.path.basename(sd)):
-            full_pass = s["files"] >= 2977 or "_open" in os.path.basename(sd) or "recommended" in sd
+            # recommended-N stages also run south -> north, so they get the coarse floor too until a full pass
+            # (ssp585_recommended stopped falsely at 346 tasks: southern wheat median 733 < 800)
+            full_pass = s["files"] >= 2977 or "_open" in os.path.basename(sd)
             for crop, v in s["open_median"].items():
                 lo, hi = PLAUSIBLE.get(crop, (0, 1e9)) if full_pass else (200, 9000)
                 if not lo <= v <= hi:
