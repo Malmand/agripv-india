@@ -146,9 +146,9 @@ PYEOF
 fi
 
 if [ "$MODE" = "futrobust" ]; then
-  # 3e. robust-nitrogen case for mid-century: recommended-N stages for SSP5-8.5 then SSP2-4.5
+  # 3e. robust-nitrogen case for mid-century: recommended-N stage for SSP5-8.5 (SSP2-4.5 reported under calibrated N only)
   #     (PV energy per period already exists from the production run; each step skips finished work)
-  for p in ssp585 ssp245; do
+  for p in ssp585; do
     run $p recommended
     $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage ${p}_recommended | tail -40
     status; push
