@@ -18,5 +18,7 @@ p("The paper goes beyond resource characterization, as the journal’s theme ask
 p("Thank you for considering our work."),
 p("Sincerely,",{spacing:{after:60}}),
 p("Aritra Ghosh (corresponding author) and Mohamed Al-Mandhari",{spacing:{after:0}}),
+p("Renewable Energy, Electric and Electronic Engineering, Faculty of Environment, Science and Economy, University of Exeter, Penryn TR10 9FE, UK",{spacing:{after:0}}),
+p("a.ghosh@exeter.ac.uk",{spacing:{after:0}}),
 ]}]});
 Packer.toBuffer(doc).then(b=>fs.writeFileSync("CoverLetter_AgriPV_India_EarthsFuture.docx",b));
