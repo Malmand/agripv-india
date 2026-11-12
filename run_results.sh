@@ -125,6 +125,7 @@ fi
 
 echo "== manuscript numbers"
 $PY src/make_numbers.py --pp $PP
+$PY src/fig_tornado.py --numbers $PP/numbers.json --out $FIG   # sensitivity ranking (main-text figure), reads numbers.json
 echo "  (build the manuscript and highlights with: node paper/methods/build_methods.js)"
 
 echo "== graphical abstract"

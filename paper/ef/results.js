@@ -99,28 +99,8 @@ function addResults(add) {
   if (fill.has("sens.base.cap")) {
     const nsec = nclim + (ECON ? 1 : 0);
     add(H2(`3.${nsec} Sensitivity`));
-    add(PF(`Table 5 ranks the assumptions. Apart from the layout, the yield threshold is the strongest lever: moving τ from 0.80 to 0.66 or 0.90 changes capacity by {sens.thr66.chg}% and {sens.thr90.chg}%. Calibrated nitrogen alone adds {sens.n_calib.chg}%, dropping the slope limit {sens.slope_none.chg}%. A module efficiency of 20% or 24% instead of 22% moves capacity and energy by about ±9%.{? Applying the threshold season by season, so that it must hold in at least 16 of 20 seasons, changes capacity by {sens.season.chg}%.?} Against all of these, the five GCMs differ little ({sens.base.range} TWp). The choice of rule and management therefore matters far more than the choice of climate model.`));
-    const R = (lab, k, basis) => fill.has(`sens.${k}.cap`) ? [[lab, basis, fill(`{sens.${k}.cap}`), k === "base" ? "–" : fill(`{sens.${k}.chg}`), fill.has(`sens.${k}.en`) ? fill(`{sens.${k}.en}`) : "–"]] : [];
-    const rows = [
-      ...R(`Base: ${ROB ? "robust nitrogen" : "calibrated nitrogen"}, east-west, τ = 0.80, slope ≤ 5%`, "base",
-        `Japanese threshold ${cite("maff")}; 5% PV slope limit for India ${cite("deshmukh")}`),
-      ...R("Threshold τ = 0.66", "thr66", `DIN SPEC 91434 minimum ${cite("din")}`),
-      ...R("Threshold τ = 0.90", "thr90", `French decree ${cite("decret")}`),
-      ...R("No slope limit", "slope_none", "No terrain screening"),
-      ...R("Slope ≤ 10%", "slope_le10", "Relaxed terrain limit"),
-      ...(ROB ? R("Calibrated nitrogen alone (less conservative)", "n_calib", "State-calibrated nitrogen, Section 2.4") : []),
-      ...R("Module efficiency 20%", "eta20", `Older modules; 2025 mass production 21.7% (PERC) ${cite("itrpv")}`),
-      ...R("Module efficiency 24%", "eta24", `Back-contact modules, 24.1% in 2025 ${cite("itrpv")}`),
-      ...R("South-facing layout", "south", "Alternative design, Section 2.2"),
-      ...R("Vertical layout, GCR ≤ 0.6", "vertical", "Alternative design, Section 2.2"),
-      ...R("Vertical layout, no DIN cap", "vertical_nodin", `15% land-loss limit removed ${cite("din")}`),
-      ...R("Threshold met in ≥ 16 of 20 seasons", "season", `Rules judge single seasons ${cite("din", "decret")}; one failure in five tolerated`),
-      ...R("Radiation not corrected (energy only)", "rad_off", "NEX-GDDP radiation as supplied, Supplementary Section S12"),
-    ];
-    if (fill.has("sens.base.range")) rows.push(["Range of five GCMs (base case)", "CMIP6 ensemble, Section 2.3", fill("{sens.base.range}"), "–", "–"]);
-    add(TABLE("Sensitivity of the national APV potential, 1995–2014: one assumption changed at a time from the base case, with the basis of each tested value.",
-      ["Case", "Basis of the tested value", "Capacity, TWp", "Change, %", "Energy, PWh yr^−1^"], rows, [2900, 2900, 1100, 1000, 1426],
-      "Five-GCM median. Module efficiency scales capacity and energy in proportion, because GCR~max~ depends on shade, not on the module rating."));
+    add(PF(`Fig. ${L.nextFig()} ranks the assumptions one at a time, and Table S11 lists every case with the basis of the tested value. The shade response is the largest single uncertainty: rescaled to field observations, the potential falls by {field.reduction_pct}%. Of the remaining choices, the yield threshold is the strongest lever, with τ = 0.66 or 0.90 instead of 0.80 changing capacity by {sens.thr66.chg}% and {sens.thr90.chg}%. Calibrated nitrogen alone adds {sens.n_calib.chg}% and dropping the slope limit {sens.slope_none.chg}%, while a module efficiency of 20% or 24% instead of 22% moves capacity and energy by about ±9%.{? Applying the threshold season by season, so that it must hold in at least 16 of 20 seasons, changes capacity by {sens.season.chg}%.?} Climate comes last. The five GCMs span only {sens.base.range} TWp, and even the mid-century change under SSP5-8.5 is smaller than any rule or management choice. The layout is left out of the ranking because it is a design choice rather than an uncertainty; a south-facing array would give {sens.south.cap} TWp. The potential therefore turns on how crops respond to shade and on the rules and management chosen, far more than on the climate model.`));
+    add(FIGAUTO("../../results/figures/fig_tornado.png", 600, fill(`Sensitivity of the national potential (east-west layout, relative yield (RY) ≥ 0.80, robust nitrogen, slope ≤ 5%, 1995–2014) to one assumption changed at a time. Bars run from the base case ({head.cap_twp_m} TWp, vertical line) to each tested value; vermillion, lower potential; blue, higher. Shade response, the field-response scenario; season rule, RY ≥ 0.80 in at least 16 of 20 seasons; climate model, range of five global climate models (GCMs); mid-century climate, range of the five paired GCM changes under SSP5-8.5 applied to the base. Table S11 lists all cases.`)));
   }
 }
 module.exports = { addResults };
