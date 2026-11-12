@@ -240,8 +240,11 @@ function FIG(path, w, h, cap) {
 const nextFig = () => fign + 1;   // number the next FIG/FIGAUTO will get (for "Fig. N shows ...")
 function resetCounters(){ order = []; eqn = 0; tabn = 0; fign = 0; }
 function refsList(){ const ks = [...order].sort((a, b) => { const A = labelOf(a), B = labelOf(b); return A.name.replace(/[^A-Za-z]/g, "").toLowerCase().localeCompare(B.name.replace(/[^A-Za-z]/g, "").toLowerCase()) || parseInt(A.year) - parseInt(B.year) || String(A.year).localeCompare(String(B.year)); });
+  const { agu } = require("./agu_refs.js");   // AGU style; *...* marks italics (journal names, report titles)
   return ks.map(k => new Paragraph({ spacing: { after: 80 }, indent: { left: 440, hanging: 440 },
-    children: [new TextRun({ text: REF[k], font: FONT, size: 20 })] })); }
+    children: agu(k, REF[k], labelOf(k).year).split(/(\*[^*]+\*)/).filter(Boolean).map(t => t.startsWith("*")
+      ? new TextRun({ text: t.slice(1, -1), italics: true, font: FONT, size: 20 })
+      : new TextRun({ text: t, font: FONT, size: 20 })) })); }
 function setPrefix(t, f, e){ TP = t; FP = f; EP = e; }
 function save(body, file){
   const doc = new Document({

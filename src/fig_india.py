@@ -377,7 +377,7 @@ def fig_cases(pp, calib, robust, out):
         ax.text(-0.16, 1.02, lab, transform=ax.transAxes, fontsize=11, fontweight="bold", va="bottom")
     h, l = axes[0].get_legend_handles_labels()
     h.append(mpl.patches.Patch(facecolor="white", edgecolor="black", linewidth=0.8))
-    l.append("Outline: calibrated nitrogen (upper bound)")
+    l.append("Outline: calibrated nitrogen alone")
     fig.legend(h, l, fontsize=6.5, loc="outside lower center", ncol=4)
     save(fig, out / f"fig_india_cases_{robust}")
     plt.close(fig)
