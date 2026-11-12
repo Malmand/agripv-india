@@ -139,7 +139,7 @@ if (fill.has("robust.change_pct")) {
   add(H1("Text S10. Results with calibrated nitrogen alone"));
   add(PF(`The main text reports the robust nitrogen case. Figs. S4 and S5 show the same results with calibrated nitrogen alone, the less conservative case of Section 3.4 (east-west layout, τ = 0.80: {main.cap_twp_m} TWp against {robust.ew.t80.cap_twp_m} TWp in the robust case).`));
   add(FIGAUTO("../../results/figures/fig_india_gcrmax_historical_current_thr80.png", 600,
-    "As Fig. 3, for all crops (rows) and layouts (columns), with calibrated nitrogen alone (less conservative); vertical rows capped at 0.6. Five-model median, interpolated for display; number, area-weighted mean and range of the models. Boundaries: DataMeet India (github.com/datameet/maps, CC BY 4.0)."));
+    `As Fig. 3, for all crops (rows) and layouts (columns), with calibrated nitrogen alone (less conservative); vertical rows capped at 0.6. Five-model median, interpolated for display; number, area-weighted mean and range of the models. State boundaries from ${L.ncite("datameet")}, CC BY 4.0.`));
   add(FIGAUTO("../../results/figures/fig_india_states_historical_current_thr80.png", 450,
     "Capacity of the leading states at relative yield ≥ 0.80 by layout, 1995–2014, calibrated nitrogen alone (less conservative), slope ≤ 5%, vertical rows capped at 0.6. Bars, five-model median; error bars, their range."));
 }
@@ -154,11 +154,11 @@ if (fill.has("rad.k_north_pct")) {
 add(H1("Text S13. Maps by crop and layout"));
 add(PF(`Fig. S7 shows the largest ground coverage ratio for all four crops and all three layouts in the robust nitrogen case, the maps of which only the east-west layout is shown in the main text (Fig. 3). Fig. S8 gives the capacity of the leading states for each layout, of which the main text names the three largest (Fig. 4). Figs. S9 and S10 show the change in GCR~max~ by 2041–2060 under SSP2-4.5 and SSP5-8.5, with calibrated nitrogen, for every crop and layout.`));
 add(FIGAUTO("../../results/figures/fig_india_gcrmax_historical_current_robust_thr80.png", 600,
-  "As Fig. 3, for all crops (rows) and layouts (columns), robust nitrogen; vertical rows capped at 0.6. Five-model median, interpolated for display; number, area-weighted mean and range of the models. Boundaries: DataMeet India (github.com/datameet/maps, CC BY 4.0)."));
+  `As Fig. 3, for all crops (rows) and layouts (columns), robust nitrogen; vertical rows capped at 0.6. Five-model median, interpolated for display; number, area-weighted mean and range of the models. State boundaries from ${L.ncite("datameet")}, CC BY 4.0.`));
 add(FIGAUTO("../../results/figures/fig_india_states_historical_current_robust_thr80.png", 450,
   "Capacity of the leading states at relative yield ≥ 0.80 by layout, 1995–2014, robust nitrogen (the lower GCR~max~ of the calibrated and recommended nitrogen runs in each cell), slope ≤ 5%, vertical rows capped at 0.6. Bars, five-model median; error bars, their range."));
 add(FIGAUTO("../../results/figures/fig_india_delta_ssp245_current_thr80.png", 600,
-  "Change in the largest ground coverage ratio at relative yield ≥ 0.80, 2041–2060 under SSP2-4.5 minus 1995–2014, by crop (rows) and layout (columns), calibrated nitrogen; five-model median, interpolated for display."));
+  `Change in the largest ground coverage ratio at relative yield ≥ 0.80, 2041–2060 under SSP2-4.5 minus 1995–2014, by crop (rows) and layout (columns), calibrated nitrogen; five-model median, interpolated for display. State boundaries from ${L.ncite("datameet")}, CC BY 4.0.`));
 add(FIGAUTO("../../results/figures/fig_india_delta_ssp585_current_thr80.png", 600,
   "As Fig. S9, for SSP5-8.5."));
 add(H1("Text S14. Simulated relative yield against reduction in ground light"));

@@ -23,6 +23,7 @@ const JOURNAL = {
   "Sustain Prod Consum": "Sustainable Production and Consumption",
 };
 const AGU_MANUAL = {
+  datameet: "DataMeet India Community. (2021). *India state boundaries (States/Admin2)* [Dataset]. GitHub. https://github.com/datameet/maps/tree/master/States",
   ifct: "Longvah, T., Ananthan, R., Bhaskarachary, K., & Venkaiah, K. (2017). *Indian food composition tables*. National Institute of Nutrition, Indian Council of Medical Research. https://www.nin.res.in/ebooks/IFCT2017.pdf",
   fhg: "Fraunhofer ISE, EY, & CSTEP. (2024). *Agrivoltaics in India*. Indo-German Energy Forum. https://energyforum.in/fileadmin/india/media_elements/publications/20240502_AgriPV_in_India/Agrivoltaics_in_India.pdf",
   ndc: "Government of India. (2022). *India's updated first Nationally Determined Contribution under the Paris Agreement (2021–2030)*. UNFCCC. https://unfccc.int/sites/default/files/NDC/2022-08/India%20Updated%20First%20Nationally%20Determined%20Contrib.pdf",

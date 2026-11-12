@@ -38,6 +38,7 @@ const REF = {
   jagermeyr: "Jägermeyr J, Müller C, Ruane AC, Elliott J, Balkovic J, Castillo O, et al. Climate impacts on global agriculture emerge earlier in new generation of climate and crop models. Nat Food 2021;2:873–85. https://doi.org/10.1038/s43016-021-00400-y.",
   poggio: "Poggio L, de Sousa LM, Batjes NH, Heuvelink GBM, Kempen B, Ribeiro E, et al. SoilGrids 2.0: producing soil information for the globe with quantified spatial uncertainty. SOIL 2021;7:217–40. https://doi.org/10.5194/soil-7-217-2021.",
   saxton: "Saxton KE, Rawls WJ. Soil water characteristic estimates by texture and organic matter for hydrologic solutions. Soil Sci Soc Am J 2006;70:1569–78. https://doi.org/10.2136/sssaj2005.0117.",
+  datameet: "DataMeet India Community. India state boundaries (States/Admin2) [dataset], CC BY 4.0 licence. 2021. https://github.com/datameet/maps/tree/master/States.",
   copdem: "European Space Agency, Airbus. Copernicus DEM, global 90 m (GLO-90). 2022. https://doi.org/10.5270/ESA-c5d3d65.",
   ifct: "Longvah T, Ananthan R, Bhaskarachary K, Venkaiah K. Indian Food Composition Tables. Hyderabad: National Institute of Nutrition, Indian Council of Medical Research; 2017. https://www.nin.res.in/ebooks/IFCT2017.pdf.",
   icrisat: "Swamikannu N, Pingali PR, Padmanabhan J, Ravula P, Gumma MK, Mohammed IA, et al. District Level Data (DLD) and Dashboard for Agriculture and Allied-sectors in India, version 1. ICRISAT Dataverse; 2021. https://doi.org/10.21421/D2/XFB1BZ.",
@@ -96,7 +97,7 @@ let order = [];
 const OVR = {
   pibrabi: ["Press Information Bureau", 2025], pibkharif: ["Press Information Bureau", 2026], mnre25: ["Economic Times EnergyWorld", 2026],
   gerc: ["Gujarat Electricity Regulatory Commission", 2026], itrpv: ["VDMA Photovoltaic Equipment", 2026], yu: ["Yu et al.", 2020],
-  copdem: ["European Space Agency", 2022], din: ["DIN", 2021], maff: ["Ministry of Agriculture, Forestry and Fisheries of Japan", 2024],
+  copdem: ["European Space Agency", 2022], datameet: ["DataMeet India Community", 2021], din: ["DIN", 2021], maff: ["Ministry of Agriculture, Forestry and Fisheries of Japan", 2024],
   decret: ["Décret n° 2024-318", 2024], fao2005: ["FAO", 2005], iec61724: ["IEC", 2021], cea: ["Central Electricity Authority", 2026],
   nasapower: ["NASA", 2026], ndc: ["Government of India", 2022], mnre: ["Ministry of New and Renewable Energy", 2026],
   kusumfaq: ["Ministry of New and Renewable Energy", 2026], kusum: ["Ministry of New and Renewable Energy", 2024], plfs: ["National Statistics Office", 2024],
