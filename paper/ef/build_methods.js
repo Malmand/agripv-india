@@ -10,7 +10,6 @@ add(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Yie
 add(P("M. Al-Mandhari^1^ and A. Ghosh^1*^"));
 add(P("^1^Renewable Energy, Electric and Electronic Engineering, Faculty of Environment, Science and Economy, University of Exeter, Penryn TR10 9FE, UK"));
 add(P("*Corresponding author: Aritra Ghosh (a.ghosh@exeter.ac.uk)"));
-add(P("ORCID: Mohamed Al-Mandhari, https://orcid.org/0009-0000-8533-8702; Aritra Ghosh, https://orcid.org/0000-0001-9409-7592"));
 require("./abstract.js").addAbstract(add);
 require("./intro.js").addIntro(add);
 
@@ -78,7 +77,7 @@ add(P("Mohamed Al-Mandhari: Conceptualization, Methodology, Software, Validation
 add(H1("Conflict of Interest Statement"));
 add(P("The authors declare there are no conflicts of interest for this manuscript."));
 add(H1("Acknowledgments"));
-add(P(`We thank the DataMeet India community for the India state boundaries ${cite("datameet")}, shared under a Creative Commons Attribution 4.0 (CC BY 4.0) licence, and the teams behind the other open data sets used here: NEX-GDDP-CMIP6, MapSPAM, SoilGrids, the Copernicus digital elevation model, the GGCMI crop calendar, the ICRISAT District Level Database and NASA POWER. The authors received no specific funding for this work.`));
+add(P(`We thank the DataMeet India community for the India state boundaries ${cite("datameet")}, shared under a Creative Commons Attribution 4.0 (CC BY 4.0) licence, and the teams behind the other open data sets used here: NEX-GDDP-CMIP6, MapSPAM, SoilGrids, the Copernicus digital elevation model, the GGCMI crop calendar, the ICRISAT District Level Database and NASA POWER. The authors received no specific funding for this work. For the purpose of open access, the authors have applied a Creative Commons Attribution (CC BY) licence to any Author Accepted Manuscript version arising from this submission.`));
 add(H1("Open Research"));
 add(P("[The simulation outputs behind the figures and tables (cell-level capacity, relative yield and economics tables) will be deposited in a public repository, with its DOI cited here and in the reference list. Software availability statement to be added if the editor requires it.]"));
 add(P(`All input data are public: climate from NEX-GDDP-CMIP6 ${cite("thrasher")}, crop area from MapSPAM ${cite("yu")}, crop calendars from GGCMI Phase 3 ${cite("jagermeyr")}, soils from SoilGrids 2.0 ${cite("poggio")}, terrain from the Copernicus digital elevation model ${cite("copdem")}, observed yields from the ICRISAT District Level Database ${cite("icrisat")}, radiation for the energy correction from NASA POWER ${cite("nasapower")}, food energy from the Indian Food Composition Tables ${cite("ifct")} and state boundaries from DataMeet ${cite("datameet")} (CC BY 4.0).`));
