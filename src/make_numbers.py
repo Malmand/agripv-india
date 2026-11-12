@@ -17,6 +17,11 @@ Key scheme (main case: east-west layout, RY >= 0.80, calibrated N, slope <= 5%):
               vertical_gt06_share, top<1-3>_state / top<1-3>_gwp, best_layout
   main.*      aliases of hist.ew.t80.* plus cmp_teri, cmp_fhg (comparison phrases)
   robust.*    change_pct (signed), reduction_pct, top_states (largest absolute reductions)
+  ssp585r.*   robust nitrogen at SSP5-8.5 (ssp585_current_robust), changes against robust 1995-2014;
+              same keys as ssp585.* plus n_diff_pp (robust minus calibrated change, percentage points)
+  fut.*       headline mid-century case: ssp585r when present, else ssp585; change_pct, change_lo/hi,
+              energy_change_pct, irr_change_pct, cap_twp_m, energy_pwh, gcr_<crop>_delta, is_robust, n_text,
+              kp_phrase (key-point verb phrase), size (small | moderate | large), n_compare (sentence part)
   ssp245.*, ssp585.*  change_pct (+ per-layout), change_lo / change_hi (GCM range of the change),
               agree4_share (share of land where >= 4 of 5 GCMs agree on the sign), gcr_<crop>_delta
   calib.*     state-yield calibration statistics (results/validation_before_after.csv)
@@ -46,7 +51,11 @@ import numpy as np
 import pandas as pd
 
 STAGES = {"hist": "historical_current", "robust": "historical_current_robust",
-          "ssp245": "ssp245_current", "ssp585": "ssp585_current"}
+          "ssp245": "ssp245_current", "ssp585": "ssp585_current", "ssp585r": "ssp585_current_robust"}
+# base period of each future stage: the robust mid-century case is compared with the robust 1995-2014 case
+FUT_BASE = {"ssp245": "hist", "ssp585": "hist", "ssp585r": "robust"}
+# recommended-N stage behind each robust stage (open-field and RY change at GCR 0.3)
+REC_STAGE = {"robust": "historical_recommended", "ssp585r": "ssp585_recommended"}
 LAYOUTS = {"south": "south_fixed", "ew": "ew_fixed", "vertical": "vertical"}
 LAYOUT_TEXT = {"south_fixed": "south-facing", "ew_fixed": "east-west", "vertical": "vertical"}
 THRS = {"t66": 0.66, "t80": 0.8, "t90": 0.9}
@@ -348,7 +357,8 @@ def robust_numbers(N, pp):
 
 
 def future_numbers(N, pp, p):
-    st, hs = STAGES[p], STAGES["hist"]
+    b = FUT_BASE[p]
+    st, hs = STAGES[p], STAGES[b]
     f, h = pp / f"india_combined_{st}.csv", pp / f"india_combined_{hs}.csv"
     if not (f.exists() and h.exists()):
         return
@@ -384,9 +394,46 @@ def future_numbers(N, pp, p):
         x = 100 * np.average(ag, weights=a.land) if a.land.sum() > 0 else np.nan
         N.put(f"{p}.agree4_share", x, pct(x))
     for crop in CROPS:
-        g0, g1 = N.raw.get(f"hist.ew.t80.gcr_{crop}"), N.raw.get(f"{p}.ew.t80.gcr_{crop}")
+        g0, g1 = N.raw.get(f"{b}.ew.t80.gcr_{crop}"), N.raw.get(f"{p}.ew.t80.gcr_{crop}")
         if g0 is not None and g1 is not None:
             N.put(f"{p}.gcr_{crop}_delta", g1 - g0, f"{g1 - g0:+.2f}".replace("-", MINUS))
+
+
+def future_headline(N):
+    """fut.*: the mid-century case quoted in the abstract, key points and conclusions. Robust nitrogen at SSP5-8.5
+    (ssp585r) when that stage exists, otherwise calibrated nitrogen at SSP5-8.5. Also the phrases that let the text
+    follow the result: kp_phrase (key point), size, and n_compare (robust against calibrated change)."""
+    p = "ssp585r" if "ssp585r.change_pct" in N.raw else "ssp585" if "ssp585.change_pct" in N.raw else None
+    if p is None:
+        return
+    for k in ("change_pct", "change_lo", "change_hi", "energy_change_pct", "irr_change_pct", "pr_change_pct",
+              "sy_change_pct", "agree4_share", "ew.t80.cap_twp_m", "ew.t80.energy_pwh") + \
+             tuple(f"gcr_{c}_delta" for c in CROPS) + tuple(f"open_{c}_pct" for c in CROPS) + \
+             tuple(f"ry03_{c}_delta" for c in CROPS):
+        if f"{p}.{k}" in N.raw:
+            N.values[f"fut.{k}"], N.raw[f"fut.{k}"] = N.values[f"{p}.{k}"], N.raw[f"{p}.{k}"]
+    rob = p == "ssp585r"
+    N.put("fut.is_robust", float(rob), "yes" if rob else "no")
+    N.put("fut.n_text", "robust" if rob else "calibrated", "robust" if rob else "calibrated")
+    ch = N.raw["fut.change_pct"]
+    lo, hi = N.raw.get("fut.change_lo", ch), N.raw.get("fut.change_hi", ch)
+    # small: median within 3% and no GCM beyond 10%; large: median beyond 10%
+    size = "small" if abs(ch) < 3 and max(abs(lo), abs(hi)) <= 10 else "large" if abs(ch) >= 10 else "moderate"
+    N.put("fut.size", size, size)
+    v = N.values["fut.change_pct"].lstrip("+" + MINUS)
+    kp = ("barely changes this capacity" if size == "small" else
+          f"cuts this capacity by {v}%" if ch < 0 else f"raises this capacity by {v}%")
+    N.put("fut.kp_phrase", kp, kp)
+    if rob and "ssp585.change_pct" in N.raw:
+        d = N.raw["ssp585r.change_pct"] - N.raw["ssp585.change_pct"]
+        N.put("ssp585r.n_diff_pp", d, f"{abs(d):.0f}")
+        if abs(d) < 3:
+            t = "close to the change with calibrated nitrogen"
+        elif d < 0:
+            t = "a larger loss than with calibrated nitrogen" if ch < 0 else "a smaller gain than with calibrated nitrogen"
+        else:
+            t = "a smaller loss than with calibrated nitrogen" if ch < 0 else "a larger gain than with calibrated nitrogen"
+        N.put("fut.n_compare", t, t)
 
 
 def ga_numbers(N):
@@ -403,8 +450,8 @@ def ga_numbers(N):
         else:
             N.put("ga.headline", med, f"{med / 1e3:.0f} GWp")
             N.put("ga.range", lo, f"GCM range {lo / 1e3:.0f}–{hi / 1e3:.0f}")
-    if "ssp585.change_pct" in N.raw:
-        N.put("ga.change_2050", N.raw["ssp585.change_pct"], N.values["ssp585.change_pct"] + "%")
+    if "fut.change_pct" in N.raw:
+        N.put("ga.change_2050", N.raw["fut.change_pct"], N.values["fut.change_pct"] + "%")
     for crop in CROPS:
         if f"head.gcr_{crop}" in N.raw:
             N.put(f"ga.gcr_{crop}", N.raw[f"head.gcr_{crop}"], N.values[f"head.gcr_{crop}"])
@@ -535,17 +582,18 @@ def spearman_numbers(N, f, nuse_file):
 def energy_change_numbers(N, pp, summary, p):
     """Mid-century change in energy, specific yield, front plane-of-array irradiance and the remainder
     (performance ratio, mainly module temperature), main layout and threshold."""
-    e0, e1 = N.raw.get(f"hist.ew.t80.energy_pwh"), N.raw.get(f"{p}.ew.t80.energy_pwh")
+    b = FUT_BASE[p]
+    e0, e1 = N.raw.get(f"{b}.ew.t80.energy_pwh"), N.raw.get(f"{p}.ew.t80.energy_pwh")
     if e0 and e1:
         x = 100 * (e1 / e0 - 1)
         N.put(f"{p}.energy_change_pct", x, pct(x, True))
-    s0, s1 = N.raw.get("hist.ew.t80.sy"), N.raw.get(f"{p}.ew.t80.sy")
+    s0, s1 = N.raw.get(f"{b}.ew.t80.sy"), N.raw.get(f"{p}.ew.t80.sy")
     if s0 and s1:
         x = 100 * (s1 / s0 - 1)
         N.put(f"{p}.sy_change_pct", x, pct(x, True))
-    per = {"ssp245": "ssp245", "ssp585": "ssp585"}[p]
+    per = {"ssp245": "ssp245", "ssp585": "ssp585", "ssp585r": "ssp585"}[p]
     fh, ff = summary / "energy_historical.csv", summary / f"energy_{per}.csv"
-    cl = pp / f"cell_combined_{STAGES['hist']}.csv.gz"
+    cl = pp / f"cell_combined_{STAGES[b]}.csv.gz"
     if not (fh.exists() and ff.exists() and cl.exists()):
         return
     x = pd.read_csv(fh).merge(pd.read_csv(ff), on=["cell", "config", "gcr"], suffixes=("_h", "_f"))
@@ -568,7 +616,10 @@ def energy_change_numbers(N, pp, summary, p):
 def open_field_change_numbers(N, summary, c, p):
     """Mid-century change of open-field legume yields and of RY at GCR 0.3 (main layout); per cell the mean over
     GCMs, then the eligible-area-weighted median over cells. CO2 is included in the future runs."""
-    fh, ff = summary / "ry_crop_historical_current.csv.gz", summary / f"ry_crop_{STAGES[p]}.csv.gz"
+    if p in REC_STAGE:   # robust case: the shade response at recommended N, against recommended N in 1995-2014
+        fh, ff = summary / f"ry_crop_{REC_STAGE['robust']}.csv.gz", summary / f"ry_crop_{REC_STAGE[p]}.csv.gz"
+    else:
+        fh, ff = summary / "ry_crop_historical_current.csv.gz", summary / f"ry_crop_{STAGES[p]}.csv.gz"
     if not (fh.exists() and ff.exists()):
         return
     k = ["cell", "crop", "config", "gcr"]
@@ -796,12 +847,13 @@ def main():
     headline_numbers(N)
     framing_numbers(N)
     din_numbers(N, a.pp)
-    for p in ("ssp245", "ssp585"):
+    for p in ("ssp245", "ssp585", "ssp585r"):
         future_numbers(N, a.pp, p)
         if p in present:
             energy_change_numbers(N, a.pp, a.summary, p)
             if "hist" in present:
                 open_field_change_numbers(N, a.summary, c_hist, p)
+    future_headline(N)
     ga_numbers(N)
     reconcile_numbers(N, a.pp)
     calib_numbers(N, a.validation)

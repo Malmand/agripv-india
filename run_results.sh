@@ -76,6 +76,15 @@ if [ $HAVE_REC != 0 ]; then
   SUMSTAGES=(historical_current historical_current_robust "${STAGES[@]:1}")
   [ $HAVE_REC = 1 ] && SUMSTAGES+=(historical_recommended)
 fi
+# robust nitrogen at mid-century (VM mode futrobust): ssp585_current with ssp585_recommended
+FUTROB=0
+[ $HAVE_REC != 0 ] && [ -f "$SUM/ry_crop_ssp585_recommended.csv.gz" ] && [ -f "$SUM/ry_crop_ssp585_current.csv.gz" ] && FUTROB=1
+[ $REBUILD = 1 ] && [ -f "$PP/cell_crop_ssp585_current_robust.csv.gz" ] && FUTROB=1
+if [ $FUTROB = 1 ]; then
+  echo "== postprocess ssp585_current, robust with ssp585_recommended"
+  pp ssp585_current --robust-with ssp585_recommended
+  SUMSTAGES+=(ssp585_current_robust)
+fi
 if [ -f "$SUM/ry_crop_historical_current_season.csv.gz" ] && [ $REBUILD = 0 ]; then
   # season-by-season yield rule (season_check.py): "ry" is the share of seasons with RY >= 0.80
   echo "== postprocess season rule"
@@ -87,7 +96,8 @@ fi
 echo "== figures"
 FUT=("${STAGES[@]:1}")
 $PY src/fig_india.py --pp $PP --stage historical_current --grid $GRID --boundaries data/boundaries/Admin2.shp \
-  --out $FIG ${FUT[@]:+--future "${FUT[@]}"}
+  --out $FIG ${FUT[@]:+--future "${FUT[@]}"} \
+  $([ $FUTROB = 1 ] && echo --future-robust ssp585_current_robust --robust-base historical_current_robust)
 [ $HAVE_REC != 0 ] && $PY src/fig_india.py --pp $PP --stage historical_current_robust --grid $GRID \
   --boundaries data/boundaries/Admin2.shp --out $FIG --calib historical_current
 

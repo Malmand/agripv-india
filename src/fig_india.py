@@ -197,71 +197,79 @@ def fig_gcrmain(pp, stage, grid, states, thr, out):
     plt.close(fig)
 
 
-def fig_deltamain(pp, hist, futs, grid, states, thr, out):
+def fig_deltamain(pp, hist, futs, grid, states, thr, out, fut_robust=None, robust_base=None):
     """Compact main-text version of the mid-century change: national capacity change by layout (A) and change in
     mean GCR_max by crop for the east-west layout (B), both with the range of the per-GCM paired changes, and maps
-    of the change in capacity density (C, D) for each scenario."""
+    of the change in capacity density (C, D). Each future stage is paired with its own 1995-2014 base. With a
+    robust-nitrogen future stage (fut_robust, paired with robust_base), A and B get a third series (black) and the
+    maps show SSP5-8.5 with calibrated (C) and robust (D) nitrogen; otherwise the maps show the two pathways."""
     names = {"ssp245_current": "SSP2-4.5", "ssp585_current": "SSP5-8.5"}
-    cc = lambda st: pd.read_csv(pp / f"cell_combined_{st}.csv.gz").query("slope_rule == 'le5'")
+    series = [(hist, f, names[f], *({futs[0]: ("white", "black"), futs[-1]: ("0.6", "0.6")} if len(futs) > 1
+                                    else {futs[0]: ("0.6", "0.6")})[f]) for f in futs]
+    if fut_robust:
+        series = [(h, f, l + ", calibrated N", fc, ec) for h, f, l, fc, ec in series]
+        series.append((robust_base, fut_robust, "SSP5-8.5, robust N", "black", "black"))
+        maps = [x for x in series if x[1] in ("ssp585_current", fut_robust)][-2:]
+    else:
+        maps = series[-2:]
     cc = lambda st: (lambda c: c[(c.thr.round(2) == thr) & (c.slope_rule == "le5")])(pd.read_csv(pp / f"cell_combined_{st}.csv.gz"))
-    ch = pd.read_csv(pp / f"cell_crop_{hist}.csv.gz", usecols=["cell", "model", "crop", "config", "thr", "slope_rule",
-                                                            "gcr_max", "elig_ha"])
-    ch = ch[(ch.slope_rule == "le5") & (ch.thr.round(2) == thr) & (ch.elig_ha >= MIN_HA) & (ch.config == "ew_fixed")]
-    H = cc(hist)
+    def crop_tab(st):
+        c = pd.read_csv(pp / f"cell_crop_{st}.csv.gz", usecols=["cell", "model", "crop", "config", "thr", "slope_rule",
+                                                               "gcr_max", "elig_ha"])
+        return c[(c.slope_rule == "le5") & (c.thr.round(2) == thr) & (c.config == "ew_fixed")]
     fig = plt.figure(figsize=(6.3, 6.6), constrained_layout=True)
     gs = fig.add_gridspec(2, 2, height_ratios=[0.8, 1.25])
     axA, axB = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[0, 1])
     axs = [fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[1, 1])]
-    fills = {futs[0]: ("white", "black"), futs[-1]: ("0.45", "0.45")} if len(futs) > 1 else {futs[0]: ("0.45", "0.45")}
-    bw = 0.34
+    n = len(series)
+    bw = 0.8 / n
     bounds = [-0.3, -0.2, -0.1, -0.05, 0.05, 0.1, 0.2, 0.3]
     cols = mpl.colormaps["PuOr"](np.linspace(0.05, 0.95, len(bounds) + 1))
     cols[len(cols) // 2] = mpl.colors.to_rgba("0.85")
     cmap = ListedColormap(cols[1:-1]).with_extremes(under=cols[0], over=cols[-1])
     norm = BoundaryNorm(bounds, cmap.N)
-    for k, f in enumerate(futs):
-        fc, ec = fills[f]
-        F = cc(f)
+    pm = None
+    for k, (h0, f, lab, fc, ec) in enumerate(series):
+        H, F = cc(h0), cc(f)
         for j, (cfg, ll) in enumerate(LAYOUTS):
             h = H[H.config == cfg].groupby("model").cap_mwp.sum(); u = F[F.config == cfg].groupby("model").cap_mwp.sum()
             d = ((u / h - 1) * 100).dropna()
-            x = j + (k - (len(futs) - 1) / 2) * bw
-            axA.bar(x, d.median(), bw * 0.92, facecolor=fc, edgecolor=ec, linewidth=0.8,
-                    label=names[f] if j == 0 else None)
+            x = j + (k - (n - 1) / 2) * bw
+            axA.bar(x, d.median(), bw * 0.92, facecolor=fc, edgecolor=ec, linewidth=0.8, label=lab if j == 0 else None)
             axA.errorbar(x, d.median(), yerr=[[d.median() - d.min()], [d.max() - d.median()]], fmt="none",
-                         ecolor="black", elinewidth=0.6, capsize=1.5)
-        cf = pd.read_csv(pp / f"cell_crop_{f}.csv.gz", usecols=["cell", "model", "crop", "config", "thr", "slope_rule",
-                                                              "gcr_max", "elig_ha"])
-        cf = cf[(cf.slope_rule == "le5") & (cf.thr.round(2) == thr) & (cf.config == "ew_fixed")]
+                         ecolor="black" if fc != "black" else "0.5", elinewidth=0.6, capsize=1.5)
+        ch, cf = crop_tab(h0), crop_tab(f)
+        ch = ch[ch.elig_ha >= MIN_HA]
         mm = ch.merge(cf[["cell", "model", "crop", "gcr_max"]], on=["cell", "model", "crop"], suffixes=("_h", "_f"))
         for i, (crop, cl) in enumerate(CROPS):
             r = mm[mm.crop == crop]
             dd = r.groupby("model").apply(lambda g: np.average(g.gcr_max_f - g.gcr_max_h, weights=g.elig_ha),
                                           include_groups=False)
-            x = i + (k - (len(futs) - 1) / 2) * 0.28
+            x = i + (k - (n - 1) / 2) * min(0.28, 0.8 / n)
             axB.errorbar(x, dd.median(), yerr=[[dd.median() - dd.min()], [dd.max() - dd.median()]], fmt="o", ms=4,
-                         mfc=fc, mec=ec, mew=0.9, ecolor="black", elinewidth=0.7, capsize=1.5)
-        e = cc(f)[lambda c: c.config == "ew_fixed"].merge(
-            H[H.config == "ew_fixed"], on=["cell", "model"], suffixes=("_f", "_h"))
-        e = e[e.land_ha_h >= MIN_HA]
-        e["d"] = e.cap_mwp_f / e.land_ha_f - e.cap_mwp_h / e.land_ha_h
-        dm = e.groupby("cell").d.median().rename("v").reset_index()
-        g = grid.set_index("cell_id").loc[dm.cell]
-        ax = axs[k]
-        pm = draw_cells(ax, g.lon.values, g.lat.values, dm.v.values, cmap, norm)
-        india_axes(ax, states, True, k == 0)
-        ax.set_title(names[f], fontsize=9, pad=3)
-        panel_label(ax, "CD"[k])
+                         mfc=fc, mec=ec, mew=0.9, ecolor="black", elinewidth=0.7, capsize=1.5, label=lab if i == 0 else None)
+        if (h0, f, lab, fc, ec) in maps:
+            m = maps.index((h0, f, lab, fc, ec))
+            e = F[F.config == "ew_fixed"].merge(H[H.config == "ew_fixed"], on=["cell", "model"], suffixes=("_f", "_h"))
+            e = e[e.land_ha_h >= MIN_HA]
+            e["d"] = e.cap_mwp_f / e.land_ha_f - e.cap_mwp_h / e.land_ha_h
+            dm = e.groupby("cell").d.median().rename("v").reset_index()
+            g = grid.set_index("cell_id").loc[dm.cell]
+            ax = axs[m]
+            pm = draw_cells(ax, g.lon.values, g.lat.values, dm.v.values, cmap, norm)
+            india_axes(ax, states, True, m == 0)
+            ax.set_title(lab, fontsize=9, pad=3)
+            panel_label(ax, "CD"[m])
     axA.axhline(0, color="black", lw=0.5)
     axA.set_xticks(range(3)); axA.set_xticklabels(["South-facing", "East-west", "Vertical"], fontsize=8)
     axA.set_ylabel("Capacity change (%)", fontsize=8.5); axA.tick_params(labelsize=7.5)
-    axA.legend(fontsize=7.5, loc="lower right"); panel_label(axA, "A")
+    if n <= 2:   # with three series the legend in B serves both panels (A has no free corner)
+        axA.legend(fontsize=7.5, loc="lower right")
+    panel_label(axA, "A")
     axB.axhline(0, color="black", lw=0.5)
     axB.set_xticks(range(len(CROPS))); axB.set_xticklabels([c.replace("Pearl millet", "Pearl\nmillet") for _, c in CROPS], fontsize=8)
     axB.set_ylabel("Change in mean GCR$_{max}$ (–)", fontsize=8.5); axB.tick_params(labelsize=7.5)
-    hd = [mpl.lines.Line2D([], [], marker="o", ls="none", ms=4, mfc=fills[x][0], mec=fills[x][1], mew=0.9, label=names[x])
-          for x in futs]
-    axB.legend(handles=hd, fontsize=7.5, loc="lower left")
+    axB.legend(fontsize=7 if n > 2 else 7.5, loc="lower left")
     panel_label(axB, "B")
     cb = fig.colorbar(pm, ax=axs, orientation="horizontal", shrink=0.7, aspect=35, pad=0.02, extend="both")
     cb.set_ticks([-0.3, -0.2, -0.1, -0.05, 0.05, 0.1, 0.2, 0.3],
@@ -437,6 +445,8 @@ if __name__ == "__main__":
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--thr", type=float, default=0.8)
     ap.add_argument("--future", nargs="*", default=[])
+    ap.add_argument("--future-robust", help="robust-nitrogen future stage, e.g. ssp585_current_robust")
+    ap.add_argument("--robust-base", help="its 1995-2014 base, e.g. historical_current_robust")
     ap.add_argument("--calib", help="calibrated stage: with a robust --stage, also draw fig_india_cases_<stage>")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
@@ -456,7 +466,9 @@ if __name__ == "__main__":
     if a.calib:
         fig_cases(a.pp, a.calib, a.stage, a.out)
     if a.future:
-        fig_deltamain(a.pp, a.stage, a.future, grid, states, a.thr, a.out)
+        fig_deltamain(a.pp, a.stage, a.future, grid, states, a.thr, a.out, a.future_robust, a.robust_base)
     for f in a.future:
         fig_delta(a.pp, a.stage, f, grid, states, a.thr, a.out)
+    if a.future_robust:
+        fig_delta(a.pp, a.robust_base, a.future_robust, grid, states, a.thr, a.out)
     print("figures in", a.out)

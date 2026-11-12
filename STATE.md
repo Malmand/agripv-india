@@ -181,3 +181,14 @@
   Pilot SSP2-4.5 RY change is at most 0.04 (text had 0.03).
 - results_summary.py GCR_max table now uses the same definition as the manuscript (area-weighted mean of 5-GCM median map).
 - Open: stage-1 summaries contain no GCR 0.05 rows for the legumes although Methods/Table S1 say 0.05 was simulated.
+
+## 2026-11-12 robust nitrogen at mid-century (VM mode futrobust)
+- prod/pipeline_india.sh mode `futrobust`: one stage, ssp585 recommended (SSP2-4.5 stays calibrated N only).
+  Launched by MO 2026-11-12 ~21:00 CET (`bash update_india.sh futrobust`), ~36 h. Output ry_crop_ssp585_recommended.csv.gz.
+- When done: `bash finish_futrobust.sh gs` (or the file path) -> run_results.sh adds ssp585_current_robust
+  (robust with ssp585_recommended), Fig. 7 gets a black robust series and maps C/D = SSP5-8.5 calibrated/robust,
+  make_numbers.py writes ssp585r.* and fut.* (headline mid-century case, plus fut.size / kp_phrase / n_compare that
+  steer the wording), then rebuilds paper/ef manuscript, SI and cover letter. Text in paper/ef switches on
+  fill.has("ssp585r.change_pct"); Key Point 3, abstract, plain summary, conclusions, cover letter follow fut.*.
+- Pearl millet: Discussion 4.2 rewritten against the runs (RY >= 1 at 20-30% light reduction even at recommended N;
+  Jodhpur soil test = water balance); range field 0.23 to robust 0.53 in Results and Conclusions, flagged least certain.
