@@ -922,6 +922,10 @@ def kharif_numbers(N, pp, summary):
         N.put("rice.calib_states", len(best), f"{len(best)}")
         N.put("rice.calib_n_lo", best.n.min(), f"{best.n.min():.0f}"); N.put("rice.calib_n_hi", best.n.max(), f"{best.n.max():.0f}")
         rg = f"{best.n.min():.0f}" if best.n.min() == best.n.max() else f"{best.n.min():.0f}–{best.n.max():.0f}"
+        lv = c.n.min(); fl = 100 * best.obs_area[best.n == lv].sum() / best.obs_area.sum()
+        N.put("rice.calib_floor_share", fl, f"{fl:.0f}"); N.put("rice.calib_floor_n", lv, f"{lv:.0f}")
+        ov = best[best.n == lv]; ov = 100 * np.average(ov.sim / ov.obs - 1, weights=ov.obs_area) if len(ov) else 0.0
+        N.put("rice.calib_floor_over", ov, pct(ov))
         N.put("rice.calib_n_range", best.n.min(), rg)
         n = wmedian(best.n, best.obs_area); N.put("rice.calib_n_med", n, f"{n:.0f}")
         best = best.sort_values("obs_area", ascending=False).reset_index(drop=True)
