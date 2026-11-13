@@ -24,7 +24,7 @@ import pandas as pd
 
 DATA = os.environ.get("AGRIPV_DATA", "/data")
 PLAUSIBLE = {"wheat": (800, 7000), "chickpea": (200, 3000), "groundnut": (200, 5000),
-             "pearl_millet": (150, 4500)}
+             "pearl_millet": (150, 4500), "rice": (1200, 9000)}   # rice: paddy (rough rice) dry weight
 EUR_PER_H = 0.33   # e2-custom-12 (12 vCPU, 24 GB), europe-west1, approximate
 
 

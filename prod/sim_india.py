@@ -33,12 +33,15 @@ import sim  # noqa: E402  (make_station, _imports, geometry helpers, retry wrapp
 CO2 = sim.CO2
 CONFIGS = ["south_fixed", "ew_fixed", "vertical"]
 BASE_GCR = [0.1, 0.2, 0.3, 0.4, 0.5]
-EXTRA_GCR = {"wheat": [0.6, 0.7], "pearl_millet": [0.6, 0.7], "chickpea": [0.05], "groundnut": [0.05]}
+EXTRA_GCR = {"wheat": [0.6, 0.7], "pearl_millet": [0.6, 0.7], "chickpea": [0.05], "groundnut": [0.05],
+             "rice": [0.05]}
 MIN_SHARE = 0.10
 
 # crop -> (DSSAT class, cultivar, plants m-2, row spacing cm)
 CULT = {"wheat": ("WheatV", "AW0071", 225, 22.5), "chickpea": ("Chickpea", "IB0004", 33, 30),
-        "groundnut": ("Peanut", "IB0024", 33, 30), "pearl_millet": ("PearlMilletV", "IB0071", 11, 45)}
+        "groundnut": ("Peanut", "IB0024", 33, 30), "pearl_millet": ("PearlMilletV", "IB0071", 11, 45),
+        "rice": ("Rice", "IB0003", 33, 20)}       # rice (kharif, after wheat/chickpea): IR 36, transplanted
+RICE_N = {"ir": 120, "rf": 80}                     # recommended N (kg/ha) for transplanted rice, in three / two splits
 # (crop, water) -> management: N schedule [(days after sowing, kg N/ha)], irrigation threshold (% ASW)
 MGMT = {
     "recommended": {("wheat", "ir"): ([(0, 60), (30, 60)], 50), ("wheat", "rf"): ([(0, 60)], None),
@@ -69,6 +72,17 @@ def mgmt_for(mgmt, crop, water, state):
     'farmer' / 'recommended': fixed national rules (MGMT).
     'nXXX': calibration sweep, XXX kg N/ha for wheat and pearl millet (legumes as farmer).
     'current': state-calibrated N for wheat and pearl millet (legumes as farmer)."""
+    if crop == "rice":
+        if mgmt in ("recommended", "farmer"):
+            n = RICE_N[water] if mgmt == "recommended" else RICE_N[water] / 2
+        elif mgmt.startswith("n") and mgmt[1:].isdigit():
+            n = float(mgmt[1:])
+        elif mgmt == "current":
+            n = calib_table().get((state, crop), calib_table().get(("ALL", crop), 80.0))
+        else:
+            raise ValueError(mgmt)
+        split = [(0, n / 3), (25, n / 3), (50, n / 3)] if water == "ir" else [(0, n / 2), (30, n / 2)]
+        return [x for x in split if x[1] > 0], None      # paddy water is set by flood events, not auto-irrigation
     if mgmt in MGMT:
         return MGMT[mgmt][(crop, water)]
     if crop in ("chickpea", "groundnut"):
@@ -98,7 +112,9 @@ def systems_for(cell):
     for crop in CULT:
         if CROPS_ONLY and crop not in CROPS_ONLY:
             continue
-        if not bool(cell[f"sim_{crop}"]):
+        if crop == "rice" and not CROPS_ONLY:      # rice runs only in its own stage (rice grid columns)
+            continue
+        if f"sim_{crop}" not in cell or not bool(cell[f"sim_{crop}"]):
             continue
         irr = float(cell[f"{crop}_irr_share"]) if pd.notna(cell[f"{crop}_irr_share"]) else 0.0
         waters = [w for w, sh in (("ir", irr), ("rf", 1 - irr)) if sh >= MIN_SHARE]
@@ -135,6 +151,22 @@ def run_one(L, crop, water, doy, mg, ws, soil, y0, nyears):
     nyers = (last_wth_year - sdate.year) if rabi else (last_wth_year - sdate.year + 1)
     nsched, ithrl = mg
     auto = (water == "rf" and crop in ("pearl_millet", "groundnut") and not rabi)
+    if crop == "rice":
+        try:
+            return run_rice(L, cls, cul, ppop, plrs, water, nsched, ws, soil, pdate, sdate, nyers)
+        except Exception:
+            # CERES-Rice can stop with a floating-point error in a failed (drought) season, which ends the
+            # whole multi-season run: rerun season by season and drop only the season that fails
+            out = []
+            for k in range(nyers):
+                try:
+                    out.append(run_rice(L, cls, cul, ppop, plrs, water, nsched, ws, soil,
+                                        pdate.replace(year=pdate.year + k), sdate.replace(year=sdate.year + k), 1))
+                except Exception:
+                    sim.FAILS.append((crop, water, f"rice season {sdate.year + k} failed"))
+            if not out:
+                raise
+            return pd.concat(out, ignore_index=True)
     field = L["Field"](id_field="CELL0001", wsta=ws, id_soil=soil, flsa=0, flob=0, fldt="DR000",
                        fldd=0, flds=0)
     planting = L["Planting"](pdate=pdate, ppop=ppop, ppoe=ppop, plrs=plrs, plrd=0, pldp=5,
@@ -168,6 +200,45 @@ def run_one(L, crop, water, doy, mg, ws, soil, y0, nyears):
     finally:
         dssat.close()
     return dp.parse_summary(summ)[["season", "hwam", "irri"]]
+
+
+def run_rice(L, cls, cul, ppop, plrs, water, nsched, ws, soil, pdate, sdate, nyers):
+    """Transplanted lowland rice: 25-day seedlings, puddled and bunded field; irrigated rice kept flooded
+    (50 mm) from transplanting until 15 days before maturity (about 95 days), rainfed rice bunded on rain only."""
+    from DSSATTools.filex import Irrigation, IrrigationEvent
+    field = L["Field"](id_field="CELL0001", wsta=ws, id_soil=soil, flsa=0, flob=0, fldt="DR000", fldd=0, flds=0)
+    planting = L["Planting"](pdate=pdate, ppop=ppop, ppoe=ppop, plrs=plrs, plrd=0, pldp=3, plme="T", plds="R",
+                             page=25, penv=25.0)
+    ev = [IrrigationEvent(pdate - timedelta(days=1), 0, "IR010"),          # puddling
+          IrrigationEvent(pdate - timedelta(days=1), 150, "IR009"),        # bund height, mm
+          IrrigationEvent(pdate - timedelta(days=1), 2, "IR008")]          # percolation, mm/day
+    if water == "ir":
+        ev += [IrrigationEvent(pdate, 50, "IR011"), IrrigationEvent(pdate + timedelta(days=95), 0, "IR011")]
+    irr = Irrigation(table=ev, efir=1.0)
+    fert = (L["Fertilizer"](table=[L["FertilizerEvent"](fdate=pdate + timedelta(days=d), fmcd="FE005",
+                                                        facd="AP002", fdep=5, famn=a) for d, a in nsched])
+            if nsched else None)
+    ic = L["InitialConditions"](pcr=cls.code, icdat=sdate, table=[
+        L["InitialConditionsLayer"](icbl=l["slb"], sh2o=round(l["slll"] + 0.8 * (l["sdul"] - l["slll"]), 3),
+                                    snh4=0.5, sno3=1.0) for l in soil.table])
+    sc = L["SimulationControls"](
+        general=L["SCGeneral"](sdate=sdate, nyers=nyers),
+        options=L["SCOptions"](water="Y", nitro="Y", symbi="N", co2="W"),
+        methods=L["SCMethods"](evapo="F"),
+        management=L["SCManagement"](plant="R", irrig="R", ferti="R" if nsched else "N", harvs="M"),
+        outputs=L["SCOutputs"](grout="N", caout="N", waout="N", niout="N", miout="N", diout="N",
+                               vbose="N", chout="N", opout="N"))
+    dssat = L["DSSAT"]()
+    try:
+        kw = dict(field=field, cultivar=cls(cul), planting=planting, initial_conditions=ic, irrigation=irr,
+                  simulation_controls=sc, verbose=False)
+        if fert is not None:
+            kw["fertilizer"] = fert
+        dssat.run_treatment(**kw)
+        summ = dssat.output_files.get("Summary", "")
+    finally:
+        dssat.close()
+    return L["dp"].parse_summary(summ)[["season", "hwam", "irri"]]
 
 
 def run_retry(L, *a, tries=3):

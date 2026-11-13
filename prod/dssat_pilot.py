@@ -27,6 +27,7 @@ from dssat_inputs import soil_from_soilgrids, weather_station  # noqa: E402
 
 from DSSATTools import DSSAT                              # noqa: E402
 from DSSATTools.crop import Wheat, PearlMillet, DryBean, GENOTYPE_PATH, VERSION  # noqa: E402
+from DSSATTools.crop import Rice as _Rice  # noqa: E402
 from DSSATTools.filex import (Field, Planting, Fertilizer, FertilizerEvent,  # noqa: E402
                               InitialConditions, InitialConditionsLayer, SimulationControls,
                               SCGeneral, SCOptions, SCMethods, SCManagement, SCOutputs,
@@ -68,6 +69,12 @@ class WheatV(VerbatimGenotype, Wheat):
 
 class PearlMilletV(VerbatimGenotype, PearlMillet):
     pass
+
+
+class Rice(_Rice):
+    """CERES-Rice with the distributed .CUL copied verbatim (rice has no ecotype file)."""
+    def _write_cul(self):
+        return open(self.spe_path[:-3] + "CUL", encoding="latin-1").read()
 
 
 # season start (sdate), sowing, management; years: number of seasons in 1995-2014

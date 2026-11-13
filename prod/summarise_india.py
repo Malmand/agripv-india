@@ -64,7 +64,7 @@ def ry_file(f):
 
 
 def add_crop_level(t, grid):
-    crops = ["wheat", "chickpea", "groundnut", "pearl_millet"]
+    crops = [c for c in ["wheat", "chickpea", "groundnut", "pearl_millet", "rice"] if f"{c}_irr_share" in grid]
     irr = grid.melt(id_vars="cell_id", value_vars=[f"{c}_irr_share" for c in crops],
                     var_name="crop", value_name="irr")
     irr["crop"] = irr.crop.str.replace("_irr_share", "")
