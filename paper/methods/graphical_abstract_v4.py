@@ -165,91 +165,87 @@ def main():
     GRN, GRN2, SHD = "#3E8E41", "#A9D19A", "#C4C4C4"
     TOP, BOT = 49.0, 26.0                            # top row band (mm)
 
-    # (1) sketch: sun, east-west module pairs on posts, crop rows, shade strips under each row
-    SX, SWD = LX, 27.5
-    box(SX, BOT, SWD, TOP - BOT, PALE, PALE_EC, 0.5, rs=1.6)
-    ax.text(SX + 1.6, TOP - 2.4, "Light + crop models", ha="left", va="center", fontsize=7.5, fontweight="bold", color=INK)
+    # (1) cross-section: east-west module pairs, incoming light, shaded and sunlit crop strips (technical sketch)
+    SX, SWD = LX, 23.0
+    box(SX, BOT, SWD, TOP - BOT, "#F4F6F8", "#C9D2DC", 0.5, rs=1.0)
+    ax.text(SX + 1.4, TOP - 2.4, "Crop under panels", ha="left", va="center", fontsize=7.5, fontweight="bold", color=INK)
     nc = "5" if "rice.cap_twp" in num else "4"
-    ax.text(SX + 1.6, TOP - 5.0, f"3 layouts · {nc} crops · 5 GCMs", ha="left", va="center", fontsize=6.5, color=MID)
-    sx, sy = SX + SWD - 3.0, TOP - 8.6
-    ax.add_patch(plt.Circle((sx, sy), 1.4, fc="#E69F00", ec="none"))
-    for k in range(8):
-        an = k * np.pi / 4
-        ax.plot([sx + 1.9 * np.cos(an), sx + 2.5 * np.cos(an)], [sy + 1.9 * np.sin(an), sy + 2.5 * np.sin(an)],
-                color="#E69F00", lw=0.7)
-    gy = BOT + 3.2
-    ax.plot([SX + 1.2, SX + SWD - 1.2], [gy, gy], color="#8A6D3B", lw=0.8)
-    posts = [SX + 6.0, SX + 13.75, SX + 21.5]
+    ax.text(SX + 1.4, TOP - 5.0, f"3 layouts, {nc} crops", ha="left", va="center", fontsize=6.5, color=MID)
+    gy = BOT + 4.0
+    posts = [SX + 5.5, SX + 11.25, SX + 17.0]
+    for k in range(5):                                                     # light from above, slightly inclined
+        x0 = SX + 2.6 + k * 4.0
+        ax.annotate("", xy=(x0 + 1.0, gy + 8.6), xytext=(x0 + 1.8, gy + 11.6),
+                    arrowprops=dict(arrowstyle="-|>", lw=0.5, color="#B8862B", mutation_scale=4, shrinkA=0, shrinkB=0))
+    ax.add_patch(plt.Rectangle((SX + 1.2, gy - 1.6), SWD - 2.4, 1.6, fc="#E3D9C6", ec="none"))  # soil
+    for x in np.arange(SX + 1.6, SX + SWD - 1.4, 0.9):                     # crop canopy: darker where sunlit
+        shaded = any(abs(x - c) < 2.0 for c in posts)
+        ax.add_patch(plt.Rectangle((x, gy), 0.7, 1.3 if shaded else 2.0, fc="#9CC79A" if shaded else "#3E8E41", ec="none"))
     for cx in posts:
-        top = gy + 8.4
-        ax.plot([cx - 2.9, cx, cx + 2.9], [top - 1.4, top, top - 1.4], color=NAVY, lw=2.0, solid_joinstyle="round")
-        ax.plot([cx, cx], [gy, top], color="#7A7A7A", lw=0.6)
-        ax.add_patch(plt.Polygon([[cx - 3.3, gy], [cx + 3.3, gy], [cx + 2.0, gy + 0.9], [cx - 2.0, gy + 0.9]],
-                                 fc=SHD, ec="none", zorder=1))
-    for x in np.arange(SX + 2.2, SX + SWD - 1.5, 1.45):
-        shaded = any(abs(x - c) < 2.6 for c in posts)
-        col, h = (GRN2, 1.5) if shaded else (GRN, 2.3)
-        ax.plot([x, x], [gy, gy + h], color=col, lw=1.0, solid_capstyle="round", zorder=2)
-        ax.plot([x, x - 0.45], [gy + h * 0.55, gy + h * 0.85], color=col, lw=0.7, zorder=2)
-        ax.plot([x, x + 0.45], [gy + h * 0.5, gy + h * 0.8], color=col, lw=0.7, zorder=2)
-    ax.text(SX + SWD / 2, BOT + 1.4, "shade on every crop strip", ha="center", va="center", fontsize=6.5, color=MID)
+        top = gy + 7.6
+        ax.plot([cx, cx], [gy, top], color="#6E6E6E", lw=0.6)
+        ax.plot([cx - 2.4, cx, cx + 2.4], [top - 1.2, top, top - 1.2], color=NAVY, lw=1.8, solid_joinstyle="miter")
+    ax.text(SX + SWD / 2, BOT + 1.3, "light per crop strip", ha="center", va="center", fontsize=6.5, color=MID)
 
     # (2) the rule: relative yield against panel cover, national means (east-west, recommended N, 1995-2014)
     RX0 = SX + SWD + 2.0
-    ax.text(RX0, TOP - 2.4, f"Rule: keep {pct}% of the yield", ha="left", va="center", fontsize=7.5,
+    ax.text(RX0, TOP - 2.4, f"Panel limit at {pct}% yield", ha="left", va="center", fontsize=7.5,
             fontweight="bold", color=INK)
-    PX, PY, PW, PHH = RX0 + 8.2, BOT + 5.6, LX + LW - (RX0 + 8.2) - 1.0, TOP - BOT - 10.2
+    PX, PY = RX0 + 7.6, BOT + 5.4
+    PW, PHH = LX + LW - PX - 0.6, TOP - BOT - 9.6
     rax = axes_mm(PX, PY, PW, PHH)
     curves = rule_curves(a)
-    lab_xy = {"wheat": (0.22, 1.045), "chickpea": (0.03, 0.56)}
-    for crop_, col in (("wheat", C_W), ("chickpea", C_L)):
+    rax.axhspan(a.thr, 1.08, color="#EAF2EA", lw=0, zorder=0)
+    rax.text(0.715, 1.065, "allowed", fontsize=6.5, color="#4F7F52", ha="right", va="top", style="italic")
+    rax.axhline(a.thr, color=INK, lw=0.7, ls="--", zorder=1)
+    for crop_, col, lx, ly, ha in (("wheat", C_W, 0.16, 1.058, "left"), ("chickpea", C_L, 0.02, 0.6, "left")):
         if crop_ in curves:
             gx, ry = curves[crop_]
-            rax.plot(gx, ry, color=col, lw=1.4)
+            rax.plot(gx, ry, color=col, lw=1.6, zorder=3)
             xc = float(np.interp(a.thr, ry[::-1], gx[::-1])) if ry.min() < a.thr else float(gx.max())
-            rax.plot([xc, xc], [0.45, a.thr], color=col, lw=0.8, ls=":")
-            rax.plot(xc, a.thr, "o", ms=3.0, mfc="white", mec=col, mew=1.0, zorder=5)
-            rax.text(*lab_xy[crop_], crop_, color=col, fontsize=7, va="center", ha="left", fontweight="bold")
-    rax.axhline(a.thr, color=INK, lw=0.7, ls="--")
-    rax.set_xlim(0, 0.72); rax.set_ylim(0.45, 1.08)
-    rax.set_xticks([0, 0.35, 0.7]); rax.set_xticklabels(["0", "35%", "70%"])
-    rax.set_yticks([0.5, 0.8, 1.0]); rax.set_yticklabels(["50%", "80%", "100%"])
-    rax.tick_params(labelsize=6.5, length=2, width=0.5, pad=1, colors=MID)
+            rax.plot([xc, xc], [0.5, a.thr], color=col, lw=0.8, ls=":", zorder=2)
+            rax.plot(xc, a.thr, "o", ms=3.4, mfc="white", mec=col, mew=1.1, zorder=5)
+            rax.text(xc + 0.01, 0.508, f"{100 * xc:.0f}%", color=col, fontsize=6.5, fontweight="bold", ha="left", va="bottom")
+            rax.text(lx, ly, crop_, color=col, fontsize=7, fontweight="bold", ha=ha, va="center")
+    rax.set_xlim(0, 0.72); rax.set_ylim(0.5, 1.08)
+    rax.set_xticks([0, 0.2, 0.4, 0.6]); rax.set_xticklabels(["0", "20%", "40%", "60%"])
+    rax.set_yticks([0.6, 0.8, 1.0]); rax.set_yticklabels(["60%", "80%", "100%"])
+    rax.tick_params(labelsize=6.5, length=2, width=0.5, pad=1, colors=INK)
     for sp_ in ("top", "right"):
         rax.spines[sp_].set_visible(False)
     for sp_ in ("left", "bottom"):
         rax.spines[sp_].set_linewidth(0.6)
-    rax.set_xlabel("land under panels", fontsize=6.5, color=MID, labelpad=0.5)
-    rax.set_ylabel("yield kept", fontsize=6.5, color=MID, labelpad=1.5)
+    rax.set_xlabel("land covered by panels", fontsize=6.5, color=INK, labelpad=1)
+    rax.set_ylabel("yield kept", fontsize=6.5, color=INK, labelpad=1.5)
 
-    # ---- bottom: three results, one number and two short lines each
+    # ---- bottom: three results, same structure each: label, number, unit, one-line takeaway
     cy, chh = 1.5, 21.5
-    NUM = dict(fontweight="bold", color=ACC, ha="center", va="center")
+    NUM = dict(fontweight="bold", color=NAVY, ha="center", va="center")
     sz = num.get("fut.size", "small")
-    cards = [("HOW MUCH?", f"{num.get('field.ew.t80.cap_twp', '[X]')}–{num.get('head.cap_twp_m', '[Y]')}",
-              "TWp of agrivoltaics", f"{mult}× India's use"),
-             ("HOW DENSE?", None, "of each field", "set by the crop"),
-             ("BY 2050?", f"{ch}%", f"capacity, {scen}",
-              {"small": "rules beat climate", "moderate": "climate matters too"}.get(sz, "climate shifts limit"))]
+    cards = [("POTENTIAL", f"{num.get('field.ew.t80.cap_twp', '[X]')}–{num.get('head.cap_twp_m', '[Y]')}",
+              "TWp at 80% yield", f"{mult}× India's use"),
+             ("PANEL COVER", None, "of each field", "set by the crop"),
+             ("2041–2060", f"{ch}%", f"capacity, {scen}",
+              {"small": "climate: minor", "moderate": "climate: moderate"}.get(sz, "climate: major"))]
     if "rice.cap_twp" in num:
-        cards[0] = cards[0][:3] + (f"{num['rice.cap_twp']} TWp with rice",)
+        cards[0] = cards[0][:3] + (f"{num['rice.cap_twp']} with rice",)
     for k, (q, n, l1, l2) in enumerate(cards):
         cx = LX + k * (cw + gap)
         mid = cx + cw / 2
-        box(cx, cy, cw, chh, "white", PILL_EC, 0.6, rs=1.4)
-        ax.add_patch(FancyBboxPatch((cx, cy + chh - 0.9), cw, 0.9, boxstyle="round,pad=0,rounding_size=0.45", fc=ACC, ec="none"))
-        ax.text(mid, cy + chh - 3.2, q, ha="center", va="center", fontsize=7, fontweight="bold", color=MID)
+        box(cx, cy, cw, chh, "white", "#B8C4D0", 0.6, rs=1.0)
+        fit(cx + 1.3, cy + chh - 2.5, q, cw - 2.4, 6.5, ha="left", va="center", fontweight="bold", color=MID)
         if n is None:
             for jj, (v, nm) in enumerate(((cer, "cereals"), (leg, "legumes"))):
-                xx = cx + cw * (0.26 + 0.48 * jj)
-                fit(xx, 12.6, v, cw * 0.46, 13, **NUM)
-                ax.text(xx, 9.0, nm, fontsize=6.5, color=MID, ha="center", va="center")
-            ax.plot([mid, mid], [8.4, 14.8], color=PILL_EC, lw=0.5)
-            fit(mid, 6.2, l1, cw - 1.6, 7, color=MID, ha="center", va="center")
+                xx = cx + cw * (0.27 + 0.46 * jj)
+                fit(xx, 13.0, v, cw * 0.44, 14, **NUM)
+                ax.text(xx, 9.6, nm, fontsize=6.5, color=MID, ha="center", va="center")
+            ax.plot([mid, mid], [9.0, 15.2], color="#C9D2DC", lw=0.5)
+            fit(mid, 7.0, l1, cw - 2.0, 7, color=INK, ha="center", va="center")
         else:
-            fit(mid, 12.3, n, cw - 1.6, 15, **NUM)
-            fit(mid, 7.6, l1, cw - 1.6, 7, color=MID, ha="center", va="center")
-        fit(mid, 3.6, l2, cw - 1.6, 7.5, fontweight="bold", color=ACC, ha="center", va="center")
+            fit(mid, 12.6, n, cw - 2.0, 15, **NUM)
+            fit(mid, 7.6, l1, cw - 2.0, 7, color=INK, ha="center", va="center")
+        ax.plot([cx + 1.3, cx + cw - 1.3], [5.2, 5.2], color="#DDE3EA", lw=0.5)
+        fit(mid, 3.3, l2, cw - 2.0, 7, color=ACC, ha="center", va="center", fontweight="bold")
 
     # ---- map: the answer, everywhere
     MX, MY, MH = 70.5, 1.0, 48.0
