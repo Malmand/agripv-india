@@ -17,7 +17,7 @@ state, decisions and findings. `TASKS.md` lists the open tasks, one per cloud se
   `results.js`, `discussion.js`, `conclusions.js`, `sens_table.js`, `build_supp.js`, `cover_ef.js`, `highlights.js`,
   `fig1.py`, `fig2.py`. `node build_methods.js` etc. builds the Earth's Future version in paper/ef.
 - `paper/methods/build_ae.sh` builds the Applied Energy version (manuscript, supplementary material, cover letter,
-  highlights, graphical abstract `graphical_abstract_v3.py`) into paper/methods from the same sources.
+  highlights, graphical abstract `graphical_abstract_v4.py`) into paper/methods from the same sources.
 
 ## Rules from MO (always)
 - Writing: no em dashes; mixed sentence lengths; plain, precise wording; define each equation symbol

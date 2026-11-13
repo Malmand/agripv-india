@@ -33,7 +33,7 @@ function addAbstract(add) {
     add(P("*Keywords:* " + KEYWORDS.join("; ")));
     // graphical abstract (full-resolution 600 dpi PNG from paper/methods/graphical_abstract_v3.py), unnumbered
     const fs = require("fs"), path = require("path"), { ImageRun, Paragraph, AlignmentType } = require("docx");
-    const ga = path.join(__dirname, "..", "methods", "graphical_abstract_v3.png");
+    const ga = path.join(__dirname, "..", "methods", "graphical_abstract_v4.png");
     if (fs.existsSync(ga)) {
       const b = fs.readFileSync(ga), w = 620, h = Math.round(w * b.readUInt32BE(20) / b.readUInt32BE(16));
       add(H3("Graphical abstract"));

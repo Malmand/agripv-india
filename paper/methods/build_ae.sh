@@ -7,7 +7,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 # graphical abstract first: the manuscript embeds it
 cd "$HERE"
 FUT=ssp585_current; [ -f ../../results/potential/india_combined_ssp585_current_robust.csv ] && FUT=ssp585_current_robust
-python3 graphical_abstract_v3.py --future $FUT >/dev/null 2>&1 && echo "graphical abstract: graphical_abstract_v3.png ($FUT, 600 dpi)"
+python3 graphical_abstract_v4.py --future $FUT >/dev/null 2>&1 && echo "graphical abstract: graphical_abstract_v4.png ($FUT, 600 dpi)"
 cd "$HERE/../ef"
 export AGRIPV_STYLE=ae
 AGRIPV_OUT=$HERE/Manuscript_AgriPV_India.docx node build_methods.js
