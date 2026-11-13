@@ -31,6 +31,15 @@ function addAbstract(add) {
   if (L.STYLE === "ae") {          // Applied Energy: abstract and keywords; highlights and graphical abstract are separate files
     add(H3("Abstract")); add(P(text));
     add(P("*Keywords:* " + KEYWORDS.join("; ")));
+    // graphical abstract (full-resolution 600 dpi PNG from paper/methods/graphical_abstract_v3.py), unnumbered
+    const fs = require("fs"), path = require("path"), { ImageRun, Paragraph, AlignmentType } = require("docx");
+    const ga = path.join(__dirname, "..", "methods", "graphical_abstract_v3.png");
+    if (fs.existsSync(ga)) {
+      const b = fs.readFileSync(ga), w = 620, h = Math.round(w * b.readUInt32BE(20) / b.readUInt32BE(16));
+      add(H3("Graphical abstract"));
+      add(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
+        children: [new ImageRun({ type: "png", data: b, transformation: { width: w, height: h } })] }));
+    }
     return;
   }
   keyPoints().forEach((k, i) => { const t = fill(k); console.log(`key point ${i + 1}: ${t.length} characters${t.length > 140 ? "  TOO LONG" : ""}`); });
