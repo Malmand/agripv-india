@@ -218,34 +218,34 @@ def main():
     rax.set_xlabel("land covered by panels", fontsize=6.5, color=INK, labelpad=1)
     rax.set_ylabel("yield kept", fontsize=6.5, color=INK, labelpad=1.5)
 
-    # ---- bottom: three results, same structure each: label, number, unit, one-line takeaway
-    cy, chh = 1.5, 21.5
-    NUM = dict(fontweight="bold", color=NAVY, ha="center", va="center")
+    # ---- bottom: one results panel, three columns (label, number, unit, takeaway), left-aligned
+    py0, ph = 1.5, 21.5
+    box(LX, py0, LW, ph, "#F4F6F8", "#C9D2DC", 0.5, rs=1.0)
+    colw = LW / 3
+    NUM = dict(fontweight="bold", color=NAVY, ha="left", va="center")
     sz = num.get("fut.size", "small")
-    cards = [("POTENTIAL", f"{num.get('field.ew.t80.cap_twp', '[X]')}–{num.get('head.cap_twp_m', '[Y]')}",
-              "TWp at 80% yield", f"{mult}× India's use"),
-             ("PANEL COVER", None, "of each field", "set by the crop"),
-             ("2041–2060", f"{ch}%", f"capacity, {scen}",
-              {"small": "climate: minor", "moderate": "climate: moderate"}.get(sz, "climate: major"))]
-    if "rice.cap_twp" in num:
-        cards[0] = cards[0][:3] + (f"{num['rice.cap_twp']} with rice",)
-    for k, (q, n, l1, l2) in enumerate(cards):
-        cx = LX + k * (cw + gap)
-        mid = cx + cw / 2
-        box(cx, cy, cw, chh, "white", "#B8C4D0", 0.6, rs=1.0)
-        fit(cx + 1.3, cy + chh - 2.5, q, cw - 2.4, 6.5, ha="left", va="center", fontweight="bold", color=MID)
-        if n is None:
-            for jj, (v, nm) in enumerate(((cer, "cereals"), (leg, "legumes"))):
-                xx = cx + cw * (0.27 + 0.46 * jj)
-                fit(xx, 13.0, v, cw * 0.44, 14, **NUM)
-                ax.text(xx, 9.6, nm, fontsize=6.5, color=MID, ha="center", va="center")
-            ax.plot([mid, mid], [9.0, 15.2], color="#C9D2DC", lw=0.5)
-            fit(mid, 7.0, l1, cw - 2.0, 7, color=INK, ha="center", va="center")
+    take1 = f"{num['rice.cap_twp']} with rice" if "rice.cap_twp" in num else f"{mult}× India's use"
+    cols = [("POTENTIAL", [(f"{num.get('field.ew.t80.cap_twp', '[X]')}–{num.get('head.cap_twp_m', '[Y]')}", None)],
+             "TWp at 80% yield", take1),
+            ("PANEL COVER", [(cer, "cereals"), (leg, "legumes")], None, "set by the crop"),
+            ("2041–2060", [(f"{ch}%", None)], f"capacity, {scen}",
+             {"small": "small change", "moderate": "moderate change"}.get(sz, "large change"))]
+    for k, (lab, nums, unit, take) in enumerate(cols):
+        x0 = LX + k * colw + 2.2
+        if k:
+            ax.plot([LX + k * colw, LX + k * colw], [py0 + 2.0, py0 + ph - 2.0], color="#C9D2DC", lw=0.5)
+        ax.add_patch(plt.Rectangle((x0, py0 + ph - 3.6), 0.5, 1.9, fc=ACC, ec="none"))       # small accent tick
+        fit(x0 + 1.2, py0 + ph - 2.65, lab, colw - 4.0, 6.5, ha="left", va="center", fontweight="bold", color=MID)
+        if len(nums) == 1:
+            fit(x0, 13.4, nums[0][0], colw - 3.4, 16, **NUM)
         else:
-            fit(mid, 12.6, n, cw - 2.0, 15, **NUM)
-            fit(mid, 7.6, l1, cw - 2.0, 7, color=INK, ha="center", va="center")
-        ax.plot([cx + 1.3, cx + cw - 1.3], [5.2, 5.2], color="#DDE3EA", lw=0.5)
-        fit(mid, 3.3, l2, cw - 2.0, 7, color=ACC, ha="center", va="center", fontweight="bold")
+            for jj, (v, nm) in enumerate(nums):
+                xx = x0 + jj * (colw - 3.4) / 2
+                fit(xx, 13.4, v, (colw - 3.4) / 2 - 0.8, 16, **NUM)
+                ax.text(xx, 8.6, nm, fontsize=7, color=INK, ha="left", va="center")
+        if unit:
+            fit(x0, 8.6, unit, colw - 3.4, 7, color=INK, ha="left", va="center")
+        fit(x0, 4.4, take, colw - 3.4, 7, color=ACC, ha="left", va="center", fontweight="bold")
 
     # ---- map: the answer, everywhere
     MX, MY, MH = 70.5, 1.0, 48.0
