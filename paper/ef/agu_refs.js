@@ -21,6 +21,7 @@ const JOURNAL = {
   "Agric Water Manag": "Agricultural Water Management", "Proc Natl Acad Sci USA": "Proceedings of the National Academy of Sciences of the United States of America",
   "Sustain Energy Technol Assess": "Sustainable Energy Technologies and Assessments", "Energy Sustain Dev": "Energy for Sustainable Development",
   "Sustain Prod Consum": "Sustainable Production and Consumption",
+  "Energy Convers Manag": "Energy Conversion and Management", "Environ Res Lett": "Environmental Research Letters",
 };
 const AGU_MANUAL = {
   datameet: "DataMeet India Community. (2021). *India state boundaries (States/Admin2)* [Dataset]. GitHub. https://github.com/datameet/maps/tree/master/States",
