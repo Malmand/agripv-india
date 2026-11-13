@@ -59,7 +59,7 @@ def write_caption(a, hlabel, scen):
             "robust case, in which each cell, crop and GCM takes the smaller panel cover of the calibrated and "
             "recommended nitrogen runs")
     txt = (
-        "Graphical abstract. A light model for three array layouts and the DSSAT crop model for wheat, chickpea, "
+        "Graphical abstract. The cross-section is drawn to scale for the east-west layout at GCR 0.5 (10° tilt, 3 m clearance); canopy shade and height follow the simulated light at crop height across the row pitch (Jodhpur, January to March), 36–65% of the open-field light. A light model for three array layouts and the DSSAT crop model for wheat, chickpea, "
         "pearl millet and groundnut give, for every 0.25° cell, the largest panel cover (ground coverage ratio, "
         f"the share of land covered by modules) that keeps at least {a.thr:.0%} of the open-field yield. The map "
         f"shows it for east-west elevated arrays under 1995–2014 climate, {case}: the median over five GCMs, "
@@ -104,6 +104,20 @@ def region_cover(a):
         if len(d):
             out[k] = 100 * np.average(d.gcr_med, weights=d.elig_ha)
     return out
+
+
+def light_profile(gcr=0.5, nstrip=24):
+    """Simulated ground light (fraction of open field) across one pitch of the east-west layout, from the
+    model's own light code (prod/pv_shading.py): Jodhpur, 1 Jan to 31 Mar, 17 MJ m-2 d-1."""
+    sys.path.insert(0, str(ROOT / "prod"))
+    import pv_shading as ps
+    cfg = ps.make_config("ew_fixed")
+    geo = ps.strip_geometry(cfg, gcr, nstrip=nstrip)
+    dates = pd.date_range("2010-01-01", "2010-03-31")
+    f = ps.daily_factors(ps.hourly_from_daily(26.3, 73.0, dates, np.full(len(dates), 17.0)), cfg, geo)
+    seg = [(float(a), float(b), float(c), float(d)) for a, b, c, d in cfg.segments]
+    xs_row = float(np.mean([g[0] for g in cfg.segments] + [g[2] for g in cfg.segments]))   # strips start at the row centre
+    return seg, cfg.module_width / gcr, np.asarray(f).mean(axis=0), xs_row
 
 
 def rule_curves(a):
@@ -169,27 +183,42 @@ def main():
     GRN, GRN2, SHD = "#3E8E41", "#A9D19A", "#C4C4C4"
     TOP, BOT = 49.0, 26.0                            # top row band (mm)
 
-    # (1) cross-section: east-west module pairs, incoming light, shaded and sunlit crop strips (technical sketch)
+    # (1) cross-section to scale: the model's east-west geometry (10 deg tilt, 3 m clearance, GCR 0.5) and the
+    #     simulated light at crop height across two row pitches (Jan-Mar, Jodhpur); canopy colour follows the light
     SX, SWD = LX, 23.0
     box(SX, BOT, SWD, TOP - BOT, "#F4F6F8", "#C9D2DC", 0.5, rs=1.0)
     ax.text(SX + 1.4, TOP - 2.4, "Crop under panels", ha="left", va="center", fontsize=7.5, fontweight="bold", color=INK)
     nc = "5" if "rice.cap_twp" in num else "4"
     ax.text(SX + 1.4, TOP - 5.0, f"3 layouts, {nc} crops", ha="left", va="center", fontsize=6.5, color=MID)
-    gy = BOT + 4.0
-    posts = [SX + 5.5, SX + 11.25, SX + 17.0]
-    for k in range(5):                                                     # light from above, slightly inclined
-        x0 = SX + 2.6 + k * 4.0
-        ax.annotate("", xy=(x0 + 1.0, gy + 8.6), xytext=(x0 + 1.8, gy + 11.6),
+    seg, pitch, prof, xs_row = light_profile()
+    xa_, xb_ = SX + 1.2, SX + SWD - 1.2                   # drawing window: 1.5 row pitches, to scale
+    sc = (xb_ - xa_) / (1.5 * pitch)
+    x0m = (xa_ + xb_) / 2 - xs_row * sc                  # one row in the centre, open strips on both sides
+    gy = BOT + 4.2                                        # crop base
+    clip = plt.Rectangle((xa_, BOT + 2.5), xb_ - xa_, TOP - BOT - 8.0, transform=ax.transData)
+    ax.add_patch(plt.Rectangle((xa_, gy - 1.3), xb_ - xa_, 1.3, fc="#E3D9C6", ec="none"))
+    lo_c, hi_c = np.array(mpl.colors.to_rgb("#C5DDB4")), np.array(mpl.colors.to_rgb("#2E6B30"))
+    n = len(prof)
+    arts = []
+    for rep in (-1, 0, 1, 2):
+        for k, f in enumerate(prof):
+            xm = x0m + (rep * pitch + (xs_row + k * pitch / n) % pitch) * sc
+            t = np.clip((f - 0.3) / 0.4, 0, 1)
+            arts.append(ax.add_patch(plt.Rectangle((xm, gy), pitch / n * sc * 1.03, 0.6 + 1.7 * f,
+                                                   fc=tuple(lo_c + t * (hi_c - lo_c)), ec="none", zorder=2)))
+        for (xa, ya, xb, yb) in seg:                     # modules to scale (line weight sets the thickness)
+            arts += ax.plot([x0m + (rep * pitch + xa) * sc, x0m + (rep * pitch + xb) * sc], [gy + ya * sc, gy + yb * sc],
+                            color=NAVY, lw=2.2, solid_capstyle="butt", zorder=4)
+        xp = x0m + (rep * pitch + seg[0][2]) * sc
+        arts += ax.plot([xp, xp], [gy, gy + seg[0][3] * sc], color="#6E6E6E", lw=0.7, zorder=3)
+    for art in arts:
+        art.set_clip_path(clip)
+    for k in range(3):                                    # direct light, low winter sun
+        xs = SX + 5.0 + k * 6.0
+        ax.annotate("", xy=(xs + 0.9, gy + 7.4), xytext=(xs + 2.3, gy + 10.6),
                     arrowprops=dict(arrowstyle="-|>", lw=0.5, color="#B8862B", mutation_scale=4, shrinkA=0, shrinkB=0))
-    ax.add_patch(plt.Rectangle((SX + 1.2, gy - 1.6), SWD - 2.4, 1.6, fc="#E3D9C6", ec="none"))  # soil
-    for x in np.arange(SX + 1.6, SX + SWD - 1.4, 0.9):                     # crop canopy: darker where sunlit
-        shaded = any(abs(x - c) < 2.0 for c in posts)
-        ax.add_patch(plt.Rectangle((x, gy), 0.7, 1.3 if shaded else 2.0, fc="#9CC79A" if shaded else "#3E8E41", ec="none"))
-    for cx in posts:
-        top = gy + 7.6
-        ax.plot([cx, cx], [gy, top], color="#6E6E6E", lw=0.6)
-        ax.plot([cx - 2.4, cx, cx + 2.4], [top - 1.2, top, top - 1.2], color=NAVY, lw=1.8, solid_joinstyle="miter")
-    ax.text(SX + SWD / 2, BOT + 1.3, "light per crop strip", ha="center", va="center", fontsize=6.5, color=MID)
+    ax.text(SX + SWD / 2, BOT + 1.4, f"light at crop {100 * prof.min():.0f}–{100 * prof.max():.0f}%", ha="center",
+            va="center", fontsize=6.5, color=MID)
 
     # (2) the rule: relative yield against panel cover, national means (east-west, recommended N, 1995-2014)
     RX0 = SX + SWD + 2.0
