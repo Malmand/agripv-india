@@ -19,7 +19,7 @@ gcloud config set project \$PROJECT >/dev/null
 TMP=\$(mktemp -d)
 echo '$CODE' > \$TMP/code.b64
 echo '$START' | base64 -d > \$TMP/startup.sh
-gcloud compute instances create \$VM --zone \$ZONE --machine-type e2-custom-12-24576 \\
+gcloud compute instances create \$VM --zone \$ZONE --machine-type e2-custom-16-32768 \\
   --image-family debian-12 --image-project debian-cloud --boot-disk-size 80GB --boot-disk-type pd-balanced \\
   --scopes storage-rw --metadata bucket=\$BUCKET/india_rice,mode=rice,soilsrc=\$BUCKET/india/soil \\
   --metadata-from-file startup-script=\$TMP/startup.sh,code=\$TMP/code.b64
