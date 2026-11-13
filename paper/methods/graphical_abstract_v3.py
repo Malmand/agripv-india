@@ -15,6 +15,7 @@ renders the same text widths.
 Usage (from paper/methods): python graphical_abstract_v3.py [--future ssp585_current]
 Writes graphical_abstract_v3.pdf / .png (600 dpi) and graphical_abstract_v3_caption.txt.
 """
+import json
 import sys
 from pathlib import Path
 
@@ -30,6 +31,7 @@ from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 import graphical_abstract as GA  # noqa: E402
 import graphical_abstract_simple as GS  # noqa: E402
@@ -67,7 +69,9 @@ def write_caption(a, hlabel, scen):
         "field observations of yield under reduced light, and the upper end is the crop-model case. Cereal and legume "
         "values are eligible-area-weighted means; the call-outs give the share of the field covered by panels, the same mean, for the wheat belt (24–31°N, "
         "74–88°E) and the Deccan (12–21°N, 73–80°E); the scale bar holds at 22°N. The 2050 values are the changes by 2041–2060 under "
-        f"{scen} against 1995–2014 (five-GCM median, calibrated nitrogen). " + GA.BOUNDARY_SRC)
+        f"{scen} against 1995–2014 (five-GCM median, "
+        + ("robust case" if "ssp585r.change_pct" in json.load(open(ROOT / "results/potential/numbers.json"))["values"] else "calibrated nitrogen")
+        + "). " + GA.BOUNDARY_SRC)
     (HERE / "graphical_abstract_v3_caption.txt").write_text(txt + "\n")
 
 
@@ -134,7 +138,7 @@ def main():
     # ---- the method: three steps, one line each
     ax.text(LX + 0.3, 37.7, "METHOD", ha="left", va="center", **LBL)
     steps = [("Light model", "shade on crops,\n3 panel layouts"),
-             ("Crop model", "DSSAT, 4 crops,\n5 climate models"),
+             ("Crop model", ("DSSAT, 5 crops,\n5 climate models" if "rice.cap_twp" in num else "DSSAT, 4 crops,\n5 climate models")),
              ("Yield rule", f"densest panels\nstill keeping {pct}%")]
     py, ph = 26.8, 9.4
     for k, (h1, h2) in enumerate(steps):
@@ -153,7 +157,7 @@ def main():
     mult = num.get("frame.head_multiple", num.get("frame.main_multiple", "[N]"))
     p = a.future.split("_")[0]
     scen = {"ssp585": "SSP5-8.5", "ssp245": "SSP2-4.5"}.get(p, "SSP5-8.5")
-    ch = num.get(f"{p}.change_pct", "[±X]")
+    ch = num.get("fut.change_pct", num.get(f"{p}.change_pct", "[±X]"))   # robust nitrogen when the run exists
     cer = f"{grp['cereals']:.0f}%" if "cereals" in grp else "[x]%"
     leg = f"{grp['legumes']:.0f}%" if "legumes" in grp else "[y]%"
     cy, chh = 1.5, 21.4
@@ -188,7 +192,8 @@ def main():
         else:
             ax.text(mid, YN, f"{ch}%", fontsize=13, **NUM)
             ax.text(mid, G1, f"capacity change\nvs today, {scen}", **CAP)
-            ax.text(mid, G2, "Small change", **BOLD)
+            _sz = num.get("fut.size", "small")
+            ax.text(mid, G2, {"small": "Small change", "moderate": "Moderate change"}.get(_sz, "Large change"), **BOLD)
 
     # ---- map: the answer, everywhere
     MX, MY, MH = 70.5, 1.0, 48.0

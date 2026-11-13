@@ -28,6 +28,11 @@ function addAbstract(add) {
   const wc = t => t.replace(/\^[^^]*\^|~[^~]*~/g, "").split(/\s+/).filter(Boolean).length;
   const text = fill(abstractText());
   console.log(wc(text) > 249 ? `WARNING abstract ${wc(text)} words` : `abstract: ${wc(text)} words`);
+  if (L.STYLE === "ae") {          // Applied Energy: abstract and keywords; highlights and graphical abstract are separate files
+    add(H3("Abstract")); add(P(text));
+    add(P("*Keywords:* " + KEYWORDS.join("; ")));
+    return;
+  }
   keyPoints().forEach((k, i) => { const t = fill(k); console.log(`key point ${i + 1}: ${t.length} characters${t.length > 140 ? "  TOO LONG" : ""}`); });
   console.log(`plain language summary: ${wc(fill(plainSummary()))} words`);
   add(H3("Key Points:"));

@@ -204,3 +204,11 @@
   numbers rice.*, sens.rice; text switches on rice.cap_twp (abstract, methods 2.4/2.5 + Table 2 row, results 3.4,
   tornado + Table S11, discussion 4.5, conclusions, SI Text S16 + Tables S12-S13). Headline stays the four-crop robust case.
 - Tested end to end with synthetic rice curves (scratch); real rice not yet in.
+
+## 13 Nov 2026: one source for both journals
+- paper/ef holds the only manuscript sources; Applied Energy version = `bash paper/methods/build_ae.sh`
+  (AGRIPV_STYLE=ae: numbered refs in order of citation, first 6 authors + et al., Supplementary Notes,
+  "2.1." headings, Elsevier front/back matter: highlights, keywords, CRediT, competing interest, funding,
+  data availability, Appendix A, acknowledgements before references). Old paper/methods js removed.
+- Discussion shortened ~10% (3.1k -> 2.7k words); duplicated economics and sensitivity numbers removed.
+- finish_futrobust.sh and finish_rice.sh rebuild both versions.

@@ -122,15 +122,32 @@ function labelBase(k) {
   else name = sur(parts[0]);
   return { name, year: +y };
 }
+// Journal style: AGRIPV_STYLE=ae gives the Applied Energy (Elsevier) version: numbered citations in order of first
+// appearance, numbered reference list (first 6 authors, then et al.), "Supplementary Note" for "Text S", headings "2.1."
+const STYLE = process.env.AGRIPV_STYLE === "ae" ? "ae" : "agu";
+function numcite(keys) {
+  const n = keys.map(k => { if (!REF[k]) throw new Error(k); if (!order.includes(k)) order.push(k); return order.indexOf(k) + 1; });
+  n.sort((a, b) => a - b);
+  const parts = []; let i = 0;
+  while (i < n.length) { let j = i; while (j + 1 < n.length && n[j + 1] === n[j] + 1) j++;
+    parts.push(j - i >= 2 ? `${n[i]}–${n[j]}` : n.slice(i, j + 1).join(",")); i = j + 1; }
+  return `[${parts.join(",")}]`;
+}
 function cite(...keys) {
+  if (STYLE === "ae") return numcite(keys);
   keys.forEach(k => { if (!REF[k]) throw new Error(k); if (!order.includes(k)) order.push(k); });
   const items = keys.map(k => ({ k, ...labelOf(k) })).sort((a, b) => parseInt(a.year) - parseInt(b.year) || String(a.year).localeCompare(String(b.year)) || a.name.localeCompare(b.name));
   return "(" + items.map(i => `${i.name}, ${i.year}`).join("; ") + ")";
 }
-function ncite(k) { if (!REF[k]) throw new Error(k); if (!order.includes(k)) order.push(k); const l = labelOf(k); return `${l.name.replace(" & ", " and ")} (${l.year})`; }
+function ncite(k) { if (STYLE === "ae") { const l = labelOf(k); return `${l.name.replace(" & ", " and ")} ${numcite([k])}`; } if (!REF[k]) throw new Error(k); if (!order.includes(k)) order.push(k); const l = labelOf(k); return `${l.name.replace(" & ", " and ")} (${l.year})`; }
 
 // ---------- inline markup: *bold*  _italic_  ~sub~  ^sup^ ----------
+function aeText(t) {
+  return t.replace(/\bTexts S(\d+)/g, "Supplementary Notes S$1").replace(/\bText S(\d+)/g, "Supplementary Note S$1")
+    .replace(/Supporting Information/g, "Supplementary Material");
+}
 function runs(text, base = {}) {
+  if (STYLE === "ae") text = aeText(text);
   const out = [];
   const re = /(\*[^*]+\*|_[^_]+_|~[^~]+~|\^[^^]+\^)/g;
   let last = 0, m;
@@ -150,8 +167,9 @@ function runs(text, base = {}) {
 }
 const SP = { line: 360, lineRule: LineRuleType.AUTO };   // 1.5 line spacing
 const P = (t, o = {}) => new Paragraph({ children: runs(t), spacing: { after: 140, ...SP }, alignment: AlignmentType.JUSTIFIED, ...o });
-const H1 = t => new Paragraph({ heading: HeadingLevel.HEADING_1, children: runs(t), spacing: { before: 240, after: 160 } });
-const H2 = t => new Paragraph({ heading: HeadingLevel.HEADING_2, children: runs(t), spacing: { before: 220, after: 120 } });
+const aeHead = t => STYLE === "ae" ? t.replace(/^(\d+(?:\.\d+)*) /, "$1. ") : t;
+const H1 = t => new Paragraph({ heading: HeadingLevel.HEADING_1, children: runs(aeHead(t)), spacing: { before: 240, after: 160 } });
+const H2 = t => new Paragraph({ heading: HeadingLevel.HEADING_2, children: runs(aeHead(t)), spacing: { before: 220, after: 120 } });
 const H3 = t => new Paragraph({ heading: HeadingLevel.HEADING_3, children: runs(t), spacing: { before: 160, after: 100 } });
 
 // ---------- equations ----------
@@ -241,7 +259,14 @@ function FIG(path, w, h, cap) {
 
 const nextFig = () => fign + 1;   // number the next FIG/FIGAUTO will get (for "Fig. N shows ...")
 function resetCounters(){ order = []; eqn = 0; tabn = 0; fign = 0; }
-function refsList(){ const ks = [...order].sort((a, b) => { const A = labelOf(a), B = labelOf(b); return A.name.replace(/[^A-Za-z]/g, "").toLowerCase().localeCompare(B.name.replace(/[^A-Za-z]/g, "").toLowerCase()) || parseInt(A.year) - parseInt(B.year) || String(A.year).localeCompare(String(B.year)); });
+function refsListAE() {        // Elsevier: numbered in order of citation, first 6 authors then et al.
+  const six = v => { const i = v.indexOf(". "); const au = v.slice(0, i).split(/,\s*/);
+    return au.length > 6 ? au.slice(0, 6).join(", ") + ", et al" + v.slice(i) : v; };
+  return order.map((k, i) => new Paragraph({ spacing: { after: 80 }, indent: { left: 440, hanging: 440 },
+    tabStops: [{ type: TabStopType.LEFT, position: 440 }],
+    children: [new TextRun({ text: `[${i + 1}]\t`, font: FONT, size: 20 }), new TextRun({ text: six(REF[k]), font: FONT, size: 20 })] }));
+}
+function refsList(){ if (STYLE === "ae") return refsListAE(); const ks = [...order].sort((a, b) => { const A = labelOf(a), B = labelOf(b); return A.name.replace(/[^A-Za-z]/g, "").toLowerCase().localeCompare(B.name.replace(/[^A-Za-z]/g, "").toLowerCase()) || parseInt(A.year) - parseInt(B.year) || String(A.year).localeCompare(String(B.year)); });
   const { agu } = require("./agu_refs.js");   // AGU style; *...* marks italics (journal names, report titles)
   return ks.map(k => new Paragraph({ spacing: { after: 80 }, indent: { left: 440, hanging: 440 },
     children: agu(k, REF[k], labelOf(k).year).split(/(\*[^*]+\*)/).filter(Boolean).map(t => t.startsWith("*")
@@ -263,4 +288,4 @@ function save(body, file){
     if (fill.missing.size) console.log(`${nf}; [pending] keys (${fill.missing.size}): ${[...fill.missing].sort().join(", ")}`);
     else console.log(`${nf}; no [pending] keys`); });
 }
-module.exports = { ncite, labelOf, nextFig, fill, PF, FIGAUTO, d, REF, cite, runs, P, H1, H2, H3, R, sub, frac, sum, EQ, TABLE, FIG, resetCounters, refsList, setPrefix, save, Paragraph, TextRun, PageBreak, FONT };
+module.exports = { STYLE, ncite, labelOf, nextFig, fill, PF, FIGAUTO, d, REF, cite, runs, P, H1, H2, H3, R, sub, frac, sum, EQ, TABLE, FIG, resetCounters, refsList, setPrefix, save, Paragraph, TextRun, PageBreak, FONT };

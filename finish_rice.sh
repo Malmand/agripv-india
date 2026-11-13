@@ -30,6 +30,7 @@ for m in ("current", "recommended"):
 PY
 bash run_results.sh runs/s1
 ( cd paper/ef && node build_methods.js && node build_supp.js && node cover_ef.js )
+bash paper/methods/build_ae.sh      # Applied Energy version from the same sources
 bash make_zenodo.sh
 python3 - <<'PY'
 import json

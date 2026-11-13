@@ -27,6 +27,7 @@ if not ok or d.cell.nunique() < 2900 or d.model.nunique() < 5:
 PY
 bash run_results.sh runs/s1
 ( cd paper/ef && node build_methods.js && node build_supp.js && node cover_ef.js )
+bash paper/methods/build_ae.sh      # Applied Energy version from the same sources
 python3 - <<'PY'
 import json
 v = json.load(open("results/potential/numbers.json"))["values"]

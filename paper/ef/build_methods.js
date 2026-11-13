@@ -6,10 +6,19 @@ const body = [];
 const add = (...x) => x.flat().forEach(e => body.push(e));
 const { Paragraph, TextRun, FONT } = L;
 
-add(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Yield-Constrained Agrivoltaic Potential of India Under Current and Mid-Century Climate", bold: true, size: 32, font: FONT })] }));
-add(P("M. Al-Mandhari^1^ and A. Ghosh^1*^"));
-add(P("^1^Renewable Energy, Electric and Electronic Engineering, Faculty of Environment, Science and Economy, University of Exeter, Penryn TR10 9FE, UK"));
-add(P("*Corresponding author: Aritra Ghosh (a.ghosh@exeter.ac.uk)"));
+const AE = L.STYLE === "ae";   // AGRIPV_STYLE=ae: Applied Energy version (run through paper/methods/build_ae.sh)
+const AFF = "Renewable Energy, Electric and Electronic Engineering, Faculty of Environment, Science and Economy, University of Exeter, Penryn TR10 9FE, UK";
+if (AE) {
+  add(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Yield-constrained agrivoltaic potential of India under current and mid-century climate", bold: true, size: 32, font: FONT })] }));
+  add(P("Mohamed Al-Mandhari^a^, Aritra Ghosh^a,*^"));
+  add(P("^a^ " + AFF));
+  add(P("* Corresponding author. E-mail address: a.ghosh@exeter.ac.uk (A. Ghosh)."));
+} else {
+  add(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Yield-Constrained Agrivoltaic Potential of India Under Current and Mid-Century Climate", bold: true, size: 32, font: FONT })] }));
+  add(P("M. Al-Mandhari^1^ and A. Ghosh^1*^"));
+  add(P("^1^" + AFF));
+  add(P("*Corresponding author: Aritra Ghosh (a.ghosh@exeter.ac.uk)"));
+}
 require("./abstract.js").addAbstract(add);
 require("./intro.js").addIntro(add);
 
@@ -74,15 +83,39 @@ require("./results.js").addResults(add);
 require("./discussion.js").addDiscussion(add);
 require("./conclusions.js").addConclusions(add);
 
+const DATA1 = `The data behind every figure and table (cell, state and national results, the simulated relative-yield curves, PV specific yields and the derived input grid) and the code that produced them (simulation, analysis and figure scripts) are available at Zenodo via [DOI to be added] under CC BY 4.0 (data) and MIT (code) licences [reference to be added after the DOI is reserved]. Simulations used DSSAT 4.8 ${cite("jones", "hoogenboom")} through DSSATTools 3.0.2, and pvlib 0.16.1 ${cite("pvlib")}.`;
+const DATA2 = () => `All input data are public: climate from NEX-GDDP-CMIP6 ${cite("thrasher")}, crop area from MapSPAM ${cite("yu")}, crop calendars from GGCMI Phase 3 ${cite("jagermeyr")}, soils from SoilGrids 2.0 ${cite("poggio")}, terrain from the Copernicus digital elevation model ${cite("copdem")}, observed yields from the ICRISAT District Level Database ${cite("icrisat")}, radiation for the energy correction from NASA POWER ${cite("nasapower")}, food energy from the Indian Food Composition Tables ${cite("ifct")} and state boundaries from DataMeet ${cite("datameet")} (CC BY 4.0).`;
+const THANKS = () => `We thank the DataMeet India community for the India state boundaries ${cite("datameet")}, shared under a Creative Commons Attribution 4.0 (CC BY 4.0) licence, and the teams behind the other open data sets used here: NEX-GDDP-CMIP6, MapSPAM, SoilGrids, the Copernicus digital elevation model, the GGCMI crop calendar, the ICRISAT District Level Database and NASA POWER.`;
+const RRS = "For the purpose of open access, the authors have applied a Creative Commons Attribution (CC BY) licence to any Author Accepted Manuscript version arising from this submission.";
+const CREDIT = "Mohamed Al-Mandhari: Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Visualization, Writing – original draft. Aritra Ghosh: Conceptualization, Methodology, Supervision, Project administration, Writing – review & editing.";
+if (AE) {
+  // Elsevier order: CRediT, competing interests, funding, data availability, acknowledgements (directly before the references)
+  add(H1("CRediT authorship contribution statement"));
+  add(P(CREDIT));
+  add(H1("Declaration of competing interest"));
+  add(P("The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper."));
+  add(H1("Funding"));
+  add(P("This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors."));
+  add(H1("Data availability"));
+  add(P(DATA1)); add(P(DATA2()));
+  add(H1("Appendix A. Supplementary data"));
+  add(P("Supplementary data to this article (Supplementary Notes S1–S16, Tables S1–S13 and Figs. S1–S12) are provided in a separate file."));
+  add(H1("Acknowledgements"));
+  add(P(THANKS() + " " + RRS));
+  add(H1("References"));
+  add(refsList());
+  save(body, process.env.AGRIPV_OUT || "Manuscript_AgriPV_India.docx");
+  return;
+}
 add(H1("Author Contributions"));
-add(P("Mohamed Al-Mandhari: Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Visualization, Writing – original draft. Aritra Ghosh: Conceptualization, Methodology, Supervision, Project administration, Funding acquisition, Writing – review & editing."));
+add(P(CREDIT));
 add(H1("Conflict of Interest Statement"));
 add(P("The authors declare there are no conflicts of interest for this manuscript."));
 add(H1("Acknowledgments"));
-add(P(`We thank the DataMeet India community for the India state boundaries ${cite("datameet")}, shared under a Creative Commons Attribution 4.0 (CC BY 4.0) licence, and the teams behind the other open data sets used here: NEX-GDDP-CMIP6, MapSPAM, SoilGrids, the Copernicus digital elevation model, the GGCMI crop calendar, the ICRISAT District Level Database and NASA POWER. The authors received no specific funding for this work. For the purpose of open access, the authors have applied a Creative Commons Attribution (CC BY) licence to any Author Accepted Manuscript version arising from this submission.`));
+add(P(THANKS() + " The authors received no specific funding for this work. " + RRS));
 add(H1("Open Research"));
-add(P(`The data behind every figure and table (cell, state and national results, the simulated relative-yield curves, PV specific yields and the derived input grid) and the code that produced them (simulation, analysis and figure scripts) are available at Zenodo via [DOI to be added] under CC BY 4.0 (data) and MIT (code) licences [reference to be added after the DOI is reserved]. Simulations used DSSAT 4.8 ${cite("jones", "hoogenboom")} through DSSATTools 3.0.2, and pvlib 0.16.1 ${cite("pvlib")}.`));
-add(P(`All input data are public: climate from NEX-GDDP-CMIP6 ${cite("thrasher")}, crop area from MapSPAM ${cite("yu")}, crop calendars from GGCMI Phase 3 ${cite("jagermeyr")}, soils from SoilGrids 2.0 ${cite("poggio")}, terrain from the Copernicus digital elevation model ${cite("copdem")}, observed yields from the ICRISAT District Level Database ${cite("icrisat")}, radiation for the energy correction from NASA POWER ${cite("nasapower")}, food energy from the Indian Food Composition Tables ${cite("ifct")} and state boundaries from DataMeet ${cite("datameet")} (CC BY 4.0).`));
+add(P(DATA1));
+add(P(DATA2()));
 add(H1("References"));
 add(refsList());
 save(body, "Manuscript_AgriPV_India_EarthsFuture.docx");

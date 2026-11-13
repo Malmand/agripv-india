@@ -6,7 +6,7 @@ L.setPrefix("S", "S", "S");
 const body = [];
 const add = (...x) => x.flat().forEach(e => body.push(e));
 
-add(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: "Supporting Information for Yield-Constrained Agrivoltaic Potential of India Under Current and Mid-Century Climate", bold: true, size: 32, font: FONT })] }));
+add(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: (L.STYLE === "ae" ? "Supplementary Material for Yield-constrained agrivoltaic potential of India under current and mid-century climate" : "Supporting Information for Yield-Constrained Agrivoltaic Potential of India Under Current and Mid-Century Climate"), bold: true, size: 32, font: FONT })] }));
 add(P("Yield-constrained agrivoltaic potential of India under current and mid-century climate. Texts S1 to S7 give the detail behind Section 2 of the main text, Text S8 shows the validation of the crop and light models, and Text S9 describes the Rajasthan pilot and the Jodhpur soil test that the Discussion cites."));
 
 // S1
@@ -192,4 +192,4 @@ if (fill.has("kh.up_pct")) {
 }
 add(H1("References From the Supporting Information"));
 add(refsList());
-save(body, "Supporting_Information_AgriPV_India_EarthsFuture.docx");
+save(body, process.env.AGRIPV_OUT || "Supporting_Information_AgriPV_India_EarthsFuture.docx");

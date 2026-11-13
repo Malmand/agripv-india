@@ -12,10 +12,12 @@ state, decisions and findings. `TASKS.md` lists the open tasks, one per cloud se
 - `results/` validation tables (calibration, pvlib benchmark, CAZRI light) and figures.
 - `runs/` small summaries: `india_test/it/summary` (40-cell test run), `calib/`, Rajasthan pilot.
 - `data/` grid, slope, India state boundaries (`boundaries/Admin2.shp`), MapSPAM, yields.
-- `paper/methods/` manuscript builders (Node `docx`): `lib.js` (helpers, reference list REF, numbered
-  citations), `intro.js`, `build_methods.js` (title + Introduction + Methodology ->
-  Manuscript_AgriPV_India.docx), `build_supp.js` (Supplementary_Methods_AgriPV_India.docx), `fig1.py`, `fig2.py`.
-  Add new sections as new JS modules called from build_methods.js; add references to REF in lib.js.
+- `paper/ef/` manuscript sources (Node `docx`), one set for both journals: `lib.js` (helpers, REF, citations;
+  AGRIPV_STYLE=ae switches to numbered Elsevier references), `abstract.js`, `intro.js`, `build_methods.js`,
+  `results.js`, `discussion.js`, `conclusions.js`, `sens_table.js`, `build_supp.js`, `cover_ef.js`, `highlights.js`,
+  `fig1.py`, `fig2.py`. `node build_methods.js` etc. builds the Earth's Future version in paper/ef.
+- `paper/methods/build_ae.sh` builds the Applied Energy version (manuscript, supplementary material, cover letter,
+  highlights, graphical abstract `graphical_abstract_v3.py`) into paper/methods from the same sources.
 
 ## Rules from MO (always)
 - Writing: no em dashes; mixed sentence lengths; plain, precise wording; define each equation symbol
