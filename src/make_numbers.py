@@ -829,8 +829,107 @@ def sens_numbers(N, pp):
         r = sel(pd.read_csv(f), MAIN_LAYOUT, MAIN_THR)
         if r is not None:
             row("season", r.cap_mwp_median, r.energy_gwh_median)
+    f = pp / "india_combined_historical_current_robust_rice.csv"
+    if rob and f.exists():                 # rice after wheat/chickpea must also keep the threshold
+        r = sel(pd.read_csv(f), MAIN_LAYOUT, MAIN_THR)
+        if r is not None:
+            row("rice", r.cap_mwp_median, r.energy_gwh_median)
     if "rad.sy_change_pct" in N.raw:     # main energy is radiation-corrected; the uncorrected energy for comparison
         row("rad_off", b_cap, b_en / (1 + N.raw["rad.sy_change_pct"] / 100))
+
+
+def kharif_numbers(N, pp, summary):
+    """Kharif crops after wheat/chickpea (src/kharif_overlap_spam.py, MapSPAM 2010) and, when the rice machine has
+    run, the rice-constrained potential (postprocess --rice-stage: stage historical_current_robust_rice)."""
+    f = pp.parent / "kharif_overlap_spam.json"
+    if f.exists():
+        k = json.load(open(f))
+        sh = k["share_pct"]
+        N.put("kh.up_pct", sh["up"], f"{sh['up']:.0f}"); N.put("kh.prop_pct", sh["prop"], f"{sh['prop']:.0f}")
+        for c in ("rice", "soybean", "maize", "cotton", "sorghum", "pigeonpea"):
+            N.put(f"kh.{c}_pct", sh[f"up_{c}"], f"{sh[f'up_{c}']:.0f}")
+        x = sh["up"] - sh["up_rice"]; N.put("kh.nonrice_pct", x, f"{x:.0f}")
+        y = sh["prop"] - sh["up_rice"]; N.put("kh.nonrice_prop_pct", y, f"{y:.0f}")
+        N.put("kh.rabi_mha", k["elig_rabi_mha"], f"{k['elig_rabi_mha']:.1f}")
+        gk = Path("data/grid_india_025_kharif.csv")
+        if gk.exists():
+            gk = pd.read_csv(gk); d = gk[gk.sim_rice]
+            N.put("kh.rice_cells", len(d), f"{len(d)}")
+            N.put("kh.rice_area_mha", d.rice_ha.sum() / 1e6, f"{d.rice_ha.sum() / 1e6:.1f}")
+            v = np.average(d.rice_irr_share.fillna(0), weights=d.rice_ha); N.put("kh.rice_irr", v, f"{v:.2f}")
+        cu, cp = k["cap_twp"]["up"], k["cap_twp"]["prop"]
+        N.put("kh.cap_on_lo", cu["on_land"], f"{min(cu['on_land'], cp['on_land']):.0f}")
+        N.put("kh.cap_on_hi", cp["on_land"], f"{max(cu['on_land'], cp['on_land']):.0f}")
+        N.put("kh.cap_rest_lo", cp["remaining"], f"{min(cu['remaining'], cp['remaining']):.0f}")
+        N.put("kh.cap_rest_hi", cu["remaining"], f"{max(cu['remaining'], cp['remaining']):.0f}")
+    fr, fb = pp / "india_combined_historical_current_robust_rice.csv", pp / "india_combined_historical_current_robust.csv"
+    if not (fr.exists() and fb.exists()):
+        return
+    r, b = pd.read_csv(fr), pd.read_csv(fb)
+    for lk, cfg in LAYOUTS.items():
+        for tk, thr in THRS.items():
+            x, y = sel(r, cfg, thr), sel(b, cfg, thr)
+            if x is None or y is None:
+                continue
+            k = f"rice.{lk}.{tk}"
+            N.put(f"{k}.cap_twp", x.cap_mwp_median / 1e6, f"{x.cap_mwp_median / 1e6:.1f}")
+            ch = 100 * (x.cap_mwp_median / y.cap_mwp_median - 1); N.put(f"{k}.change_pct", ch, pct(ch, True))
+    x, y = sel(r, MAIN_LAYOUT, MAIN_THR), sel(b, MAIN_LAYOUT, MAIN_THR)
+    md, lo, hi = twp_range(x.cap_mwp_median, x.cap_mwp_min, x.cap_mwp_max)
+    N.put("rice.cap_twp", x.cap_mwp_median / 1e6, f"{x.cap_mwp_median / 1e6:.1f}")
+    N.put("rice.cap_twp_lo", x.cap_mwp_min, lo); N.put("rice.cap_twp_hi", x.cap_mwp_max, hi)
+    N.put("rice.energy_pwh", x.energy_gwh_median / 1e6, f"{x.energy_gwh_median / 1e6:.1f}")
+    ch = 100 * (x.cap_mwp_median / y.cap_mwp_median - 1)
+    N.put("rice.change_pct", ch, pct(ch, True)); N.put("rice.reduction_pct", -ch, pct(-ch))
+    if "rice_ov_ha_median" in x:
+        N.put("rice.ov_mha", x.rice_ov_ha_median / 1e6, f"{x.rice_ov_ha_median / 1e6:.1f}")
+        if "kh.rabi_mha" in N.raw:
+            s = 100 * x.rice_ov_ha_median / 1e6 / N.raw["kh.rabi_mha"]; N.put("rice.ov_share", s, pct(s))
+    x = x.energy_gwh_median / 1000 / CEA_TWH; N.put("rice.multiple", x, f"{x:.0f}")
+    m = pp / "map_gcr_historical_current_robust_rice.csv.gz"
+    if m.exists():
+        m = pd.read_csv(m); m = m[(m.config == MAIN_LAYOUT) & (m.thr.round(2) == MAIN_THR) & (m.elig_ha > 0)]
+        for crop in ("rice", "wheat"):
+            d = m[(m.crop == crop) & m.cell.isin(m[m.crop == "rice"].cell)]
+            if len(d):
+                v = np.average(d.gcr_med, weights=d.elig_ha); N.put(f"rice.gcr_{crop}", v, f"{v:.2f}")
+    sr = pp / "state_combined_historical_current_robust_rice.csv"
+    sb = pp / "state_combined_historical_current_robust.csv"
+    if sr.exists() and sb.exists():
+        kk = ["state", "config", "thr", "slope_rule"]
+        z = pd.read_csv(sb).merge(pd.read_csv(sr), on=kk, suffixes=("_b", "_r"))
+        z = z[(z.config == MAIN_LAYOUT) & (z.thr.round(2) == MAIN_THR) & (z.slope_rule == "le5")]
+        z = z.assign(loss=z.cap_mwp_median_b - z.cap_mwp_median_r).sort_values("loss", ascending=False)
+        top = z[z.loss > 0].head(3)
+        if len(top):
+            N.put("rice.top_states", ", ".join(top.state[:-1]) + " and " + top.state.iloc[-1] if len(top) > 1 else top.state.iloc[0],
+                  ", ".join(top.state[:-1]) + " and " + top.state.iloc[-1] if len(top) > 1 else top.state.iloc[0])
+            v = 100 * top.loss.sum() / z.loss[z.loss > 0].sum(); N.put("rice.top_states_share", v, pct(v))
+    f = summary / "ry_crop_historical_recommended_rice.csv.gz"
+    if f.exists():
+        q = pd.read_csv(f); q = q[(q.config == MAIN_LAYOUT) & np.isclose(q.gcr, 0.3)]
+        v = float(q.ry.median()); N.put("rice.ry03_rec", v, f"{v:.2f}")
+    f = summary / "ry_crop_historical_current_rice.csv.gz"
+    if f.exists():
+        q = pd.read_csv(f); q = q[(q.config == MAIN_LAYOUT) & np.isclose(q.gcr, 0.3)]
+        v = float(q.ry.median()); N.put("rice.ry03_cur", v, f"{v:.2f}")
+    f = summary / "calib_rice_state_yields.csv"
+    if f.exists():
+        c = pd.read_csv(f)
+        best = c.loc[c.groupby("state").err.idxmin()]
+        best = best[best.obs_area >= 20]
+        e = 100 * np.average(best.err, weights=best.obs_area); N.put("rice.calib_err_pct", e, f"{e:.0f}")
+        N.put("rice.calib_states", len(best), f"{len(best)}")
+        N.put("rice.calib_n_lo", best.n.min(), f"{best.n.min():.0f}"); N.put("rice.calib_n_hi", best.n.max(), f"{best.n.max():.0f}")
+        rg = f"{best.n.min():.0f}" if best.n.min() == best.n.max() else f"{best.n.min():.0f}–{best.n.max():.0f}"
+        N.put("rice.calib_n_range", best.n.min(), rg)
+        n = wmedian(best.n, best.obs_area); N.put("rice.calib_n_med", n, f"{n:.0f}")
+        best = best.sort_values("obs_area", ascending=False).reset_index(drop=True)
+        N.put("rice.cal.count", len(best), f"{len(best)}")
+        for i, r in best.iterrows():
+            N.put(f"rice.cal.s{i}.state", r.state, r.state); N.put(f"rice.cal.s{i}.n", r.n, f"{r.n:.0f}")
+            N.put(f"rice.cal.s{i}.sim", r.sim, f"{r.sim:,.0f}"); N.put(f"rice.cal.s{i}.obs", r.obs, f"{r.obs:,.0f}")
+            N.put(f"rice.cal.s{i}.area", r.obs_area, f"{r.obs_area:,.0f}")
 
 
 def main():
@@ -893,6 +992,7 @@ def main():
     spearman_numbers(N, a.validation, a.nuse)
     pilot_numbers(N, a.pilot, a.jodhpur)
     review_numbers(N, a.pp, a.summary)
+    kharif_numbers(N, a.pp, a.summary)
     sens_numbers(N, a.pp)
     f = a.pp.parent / "shade_response_check.csv"          # simulated RY against mean ground-light reduction
     if f.exists():

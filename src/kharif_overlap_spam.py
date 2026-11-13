@@ -6,6 +6,7 @@ rabi land, min(R, Ks + Ko), is shared by simulated and other kharif crops in pro
 Other kharif: rice, maize, soybean, cotton, sorghum, pigeonpea (sugarcane is annual and excluded).
 Writes results/kharif_overlap_spam.csv; prints national shares and the capacity they carry.
 """
+import json
 import numpy as np
 import pandas as pd
 
@@ -20,8 +21,11 @@ den = (Ks + Ko).where(Ks + Ko > 0)
 sh = pd.DataFrame(index=g.index)
 sh["up"] = np.minimum(rest, Ko) / R.where(R > 0)
 sh["prop"] = (dbl * Ko / den).fillna(0) / R.where(R > 0)
-for c in oth:
-    sh[f"up_{c}"] = (sh.up * g[f"{c}_ha"] / Ko.where(Ko > 0)).fillna(0)        # split the upper share by crop area
+# rice first (as in the potential with rice, postprocess --rice-stage), the rest split by area among the others
+sh["up_rice"] = (np.minimum(rest, g.rice_ha) / R.where(R > 0)).fillna(0)
+Kn = Ko - g.rice_ha
+for c in oth[1:]:
+    sh[f"up_{c}"] = ((sh.up - sh.up_rice) * g[f"{c}_ha"] / Kn.where(Kn > 0)).fillna(0)
 sh = sh.fillna(0)
 c = pd.read_csv("results/potential/cell_crop_historical_current_robust.csv.gz")
 c = c[(c.config == "ew_fixed") & (c.thr == 0.8) & (c.slope_rule == "le5") & c.crop.isin(["wheat", "chickpea"])]
@@ -39,6 +43,8 @@ for k in ["up", "prop", "up_rice"]:
     cap[k] = (round(float((ex / 1e6).median()), 1), round(float(((tot - ex) / 1e6).median()), 1))
 out = sh.join(el.rename("elig_rabi_ha"), how="left")
 out.to_csv("results/kharif_overlap_spam.csv")
+json.dump({"share_pct": res, "cap_twp": {k: {"on_land": v[0], "remaining": v[1]} for k, v in cap.items()},
+           "elig_rabi_mha": float(el.sum() / 1e6)}, open("results/kharif_overlap_spam.json", "w"), indent=1)
 print("eligible rabi land Mha", round(el.sum() / 1e6, 1))
 print("share of eligible rabi land followed by an unsimulated kharif crop (%):", {k: round(v, 1) for k, v in res.items()})
 print("capacity on that land / remaining (TWp, GCM median) of", round(float(tot.median() / 1e6), 1), ":", cap)

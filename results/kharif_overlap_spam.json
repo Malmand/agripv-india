@@ -1,0 +1,27 @@
+{
+ "share_pct": {
+  "up": 64.7957547213653,
+  "prop": 69.6836992343069,
+  "up_rice": 39.72877621872918,
+  "up_maize": 4.2519765645822565,
+  "up_soybean": 11.36622185787952,
+  "up_cotton": 4.632877609525049,
+  "up_sorghum": 2.6379442889660356,
+  "up_pigeonpea": 2.1779581816832616
+ },
+ "cap_twp": {
+  "up": {
+   "on_land": 21.6,
+   "remaining": 17.7
+  },
+  "prop": {
+   "on_land": 23.0,
+   "remaining": 16.3
+  },
+  "up_rice": {
+   "on_land": 14.1,
+   "remaining": 25.2
+  }
+ },
+ "elig_rabi_mha": 32.723266631
+}

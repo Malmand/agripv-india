@@ -21,6 +21,10 @@ capped at --din-cap (default 0.6; 0 switches the cap off). cell_crop keeps the u
 yield_raw) and the flag din_capped; the uncapped totals are written as the sensitivity case
 india_combined_<stage>_nodin.csv (also india_by_crop_* and state_combined_*).
 
+Rice (optional, --rice-stage): rice transplanted in kharif after wheat or chickpea (separate rice machine, stages
+*_rice). It adds no land: on the rabi land left after the pearl millet/groundnut overlap, rice takes up to its own
+eligible area, and that land must satisfy both rabi and rice (lower GCR_max). Output stage gets the suffix _rice.
+
 Usage: python postprocess_india.py --summary <dir> --stage historical_current --grid grid.csv
        --slope slope_india.csv [--energy energy_historical.csv] --outdir results/potential [--din-cap 0.6]
 Rebuild without the crop runs (e.g. to change the DIN cap): --from-cell-crop results/potential/cell_crop_<stage>.csv.gz
@@ -116,11 +120,11 @@ def write_outputs(g, stage, outdir, has_energy, full=True):
 
     # crops combined, double-cropped overlap counted once (vectorised over cell x model x layout x thr x rule)
     k = ["cell", "state", "model", "config", "thr", "slope_rule"]
-    e = g[g.elig_ha > 0].assign(season=lambda d: np.where(d.crop.isin(RABI), "rabi", "kharif"))
+    e = g[g.elig_ha > 0].assign(season=lambda d: np.select([d.crop.isin(RABI), d.crop == "rice"], ["rabi", "rice"], "kharif"))
     e = e.assign(ga=e.gcr_max * e.elig_ha, ya=e.yield_kwh_kwp * e.elig_ha)
     s = e.groupby(k + ["season"]).agg(A=("elig_ha", "sum"), ga=("ga", "sum"), ya=("ya", "sum")).unstack("season")
     s.columns = [f"{v}_{c}" for v, c in s.columns]
-    for c in ("rabi", "kharif"):
+    for c in ("rabi", "kharif", "rice"):
         for v in ("A", "ga", "ya"):
             s[f"{v}_{c}"] = s.get(f"{v}_{c}", pd.Series(0.0, index=s.index)).fillna(0.0)
         A = s[f"A_{c}"]
@@ -132,13 +136,19 @@ def write_outputs(g, stage, outdir, has_energy, full=True):
     rabi_lim = s.g_rabi <= s.g_kharif
     g_ov = np.minimum(s.g_rabi, s.g_kharif)
     y_ov = np.where(rabi_lim, s.y_rabi, s.y_kharif)
-    cap_parts = [ov * g_ov, (s.A_rabi - ov) * s.g_rabi, (s.A_kharif - ov) * s.g_kharif]
-    y_parts = [y_ov, s.y_rabi, s.y_kharif]
+    # rice (if run): on the rabi land left after that overlap, up to the rice area; both seasons, lower GCR_max
+    r2 = s.A_rabi - ov
+    ovr = np.minimum(r2, s.A_rice)
+    g_ovr = np.minimum(s.g_rabi, np.where(s.A_rice > 0, s.g_rice, s.g_rabi))
+    y_ovr = np.where(s.g_rabi <= s.g_rice, s.y_rabi, s.y_rice)
+    cap_parts = [ov * g_ov, ovr * g_ovr, (r2 - ovr) * s.g_rabi, (s.A_kharif - ov) * s.g_kharif]
+    y_parts = [y_ov, y_ovr, s.y_rabi, s.y_kharif]
+    s["rice_ov_ha"] = ovr
     s["land_ha"] = s.A_rabi + s.A_kharif - ov
     s["cap_mwp"] = sum(cap_parts) * ETA * 10
     s["energy_gwh"] = sum(np.nan_to_num(c * ETA * 10 * y / 1000) for c, y in zip(cap_parts, y_parts)) \
         if has_energy else 0.0
-    comb = s[["land_ha", "cap_mwp", "energy_gwh"]].reset_index()
+    comb = s[["land_ha", "cap_mwp", "energy_gwh"] + (["rice_ov_ha"] if (s.A_rice > 0).any() else [])].reset_index()
     if full:
         comb.to_csv(os.path.join(outdir, f"cell_combined_{stage}.csv.gz"), index=False, float_format="%.5g")
 
@@ -154,6 +164,8 @@ def write_outputs(g, stage, outdir, has_energy, full=True):
     ti.to_csv(os.path.join(outdir, f"india_by_crop_{stage}.csv"), index=False, float_format="%.5g")
     by = ["config", "thr", "slope_rule"]
     tc = totals(comb, by, "cap_mwp").merge(totals(comb, by, "energy_gwh"), on=by).merge(totals(comb, by, "land_ha"), on=by)
+    if "rice_ov_ha" in comb:
+        tc = tc.merge(totals(comb, by, "rice_ov_ha"), on=by)
     tc.to_csv(os.path.join(outdir, f"india_combined_{stage}.csv"), index=False, float_format="%.5g")
     ts = totals(comb, ["state"] + by, "cap_mwp").merge(totals(comb, ["state"] + by, "energy_gwh"), on=["state"] + by)
     ts.to_csv(os.path.join(outdir, f"state_combined_{stage}.csv"), index=False, float_format="%.5g")
@@ -179,6 +191,10 @@ def main():
     ap.add_argument("--energy")
     ap.add_argument("--outdir", required=True)
     ap.add_argument("--robust-with", help="second stage (e.g. historical_recommended): GCR_max = min of both")
+    ap.add_argument("--rice-stage", help="rice stage (e.g. historical_current_rice): rice must also meet the threshold")
+    ap.add_argument("--rice-robust-with", help="second rice stage (e.g. historical_recommended_rice): min of both")
+    ap.add_argument("--rice-summary", help="folder of the rice ry_crop files (default: --summary)")
+    ap.add_argument("--kharif-grid", default="data/grid_india_025_kharif.csv", help="grid with rice_ha")
     ap.add_argument("--din-cap", type=float, default=0.6,
                     help="cap on vertical GCR_max (DIN SPEC 91434, 15%% land loss); 0 = no cap")
     ap.add_argument("--from-cell-crop", help="rebuild from an existing cell_crop_<stage>.csv.gz instead of ry_crop")
@@ -209,7 +225,22 @@ def main():
             g["at_cap"] = g.at_cap & g.c2.fillna(True).astype(bool)
             g = g.drop(columns=["g2", "c2"])
             stage = f"{a.stage}_robust"
-        area = grid.melt(id_vars=["cell_id", "state"], value_vars=[f"{c}_ha" for c in RABI + KHARIF],
+        if a.rice_stage:
+            rs = a.rice_summary or a.summary
+            gr = gcr_table(pd.read_csv(os.path.join(rs, f"ry_crop_{a.rice_stage}.csv.gz")))
+            if a.rice_robust_with:
+                g2 = gcr_table(pd.read_csv(os.path.join(rs, f"ry_crop_{a.rice_robust_with}.csv.gz")))
+                k = ["cell", "model", "crop", "config", "thr"]
+                gr = gr.merge(g2[k + ["gcr_max", "at_cap"]].rename(columns={"gcr_max": "g2", "at_cap": "c2"}), on=k, how="left")
+                gr["gcr_max"] = np.fmin(gr.gcr_max, gr.g2)
+                gr["at_cap"] = gr.at_cap & gr.c2.fillna(True).astype(bool)
+                gr = gr.drop(columns=["g2", "c2"])
+            gr = gr[gr.crop == "rice"]
+            g = pd.concat([g, gr], ignore_index=True)
+            kg = pd.read_csv(a.kharif_grid)[["cell_id", "rice_ha"]].rename(columns={"cell_id": "cell"})
+            grid = grid.merge(kg.rename(columns={"cell": "cell_id"}), on="cell_id", how="left")
+            stage = f"{stage}_rice"
+        area = grid.melt(id_vars=["cell_id", "state"], value_vars=[f"{c}_ha" for c in RABI + KHARIF + (["rice"] if a.rice_stage else [])],
                          var_name="crop", value_name="area_ha")
         area["crop"] = area.crop.str.replace("_ha", "")
         g = g.merge(area.rename(columns={"cell_id": "cell"}), on=["cell", "crop"], how="left")

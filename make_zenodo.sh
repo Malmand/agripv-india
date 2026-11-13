@@ -24,16 +24,20 @@ cp runs/s1/summary/ry_crop_*.csv.gz runs/s1/summary/energy_*.csv runs/s1/summary
 mkdir -p $STG/data/simulation_summaries/rajasthan_pilot && cp runs/rajasthan_final/*.csv $STG/data/simulation_summaries/rajasthan_pilot/ 2>/dev/null || true
 # inputs we derived (grid with MapSPAM 2010 crop areas and state, slope shares, calibrated nitrogen)
 cp data/grid_india_025.csv data/slope_india.csv prod/calib_n.csv $STG/data/inputs/
+cp data/grid_india_025_kharif.csv $STG/data/inputs/
+for f in calib_rice_state_yields.csv calib_n_with_rice.csv; do [ -f runs/s1/summary/$f ] && cp runs/s1/summary/$f $STG/data/simulation_summaries/; done
+cp results/kharif_overlap_spam.csv results/kharif_overlap_spam.json $STG/data/results/
 
 # ---- code: simulation (DSSAT via DSSATTools, light model, PV energy) and analysis (tables, figures, numbers)
 for f in sim_india.py run_cells_india.py dssat_inputs.py pv_shading.py energy_india.py postprocess_india.py summarise_india.py \
          fetch_india_inputs.py fetch_slope.py fetch_soil.py fast_soil.py get_nex_gddp.py nex_to_cells.py radiation_ref.py \
-         season_check.py sim.py run_cells.py summarise.py dssat_pilot.py; do
+         season_check.py sim.py run_cells.py summarise.py dssat_pilot.py calibrate_rice.py fetch_kharif_inputs.py; do
   cp prod/$f $STG/code/simulation/
 done
 for f in build_india_grid.py grid.py calibrate_n.py benchmark_pvlib.py field_response.py shade_response_check.py \
          validate_shade_jha.py economics.py food_tradeoff.py reconcile.py results_summary.py make_numbers.py \
-         fig_india.py fig_food.py fig_economics.py fig_supply.py fig_tornado.py fig_supp_validation.py; do
+         fig_india.py fig_food.py fig_economics.py fig_supply.py fig_tornado.py fig_supp_validation.py \
+         add_kharif_grid.py kharif_overlap_spam.py; do
   cp src/$f $STG/code/analysis/
 done
 cp run_results.sh $STG/code/analysis/

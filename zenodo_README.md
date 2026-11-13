@@ -22,7 +22,9 @@ National, state and cell results for India (0.25° grid, 2977 cells), three arra
 and five climate models (`model`). Stage names: `historical_current` = 1995–2014 with calibrated nitrogen;
 `historical_current_robust` = robust case (smaller GCR_max of calibrated and recommended nitrogen in each cell);
 `ssp245_current`, `ssp585_current` = 2041–2060 with calibrated nitrogen; `ssp585_current_robust` = 2041–2060 robust
-case (SSP5-8.5); `_season` = threshold met in at least 16 of 20 seasons; `_nodin` = vertical rows without the 0.6 cap.
+case (SSP5-8.5); `_season` = threshold met in at least 16 of 20 seasons; `_nodin` = vertical rows without the 0.6 cap;
+`historical_current_robust_rice` = robust case with the rice that follows wheat or chickpea also held to the threshold
+(present when the rice runs are included).
 
 | File pattern | Content | Key columns and units |
 |---|---|---|
@@ -31,6 +33,7 @@ case (SSP5-8.5); `_season` = threshold met in at least 16 of 20 seasons; `_nodin
 | `india_combined_<stage>.csv`, `india_by_crop_<stage>.csv`, `state_combined_<stage>.csv` | national and state totals | `*_median`, `*_min`, `*_max` over the five models |
 | `map_gcr_<stage>.csv.gz` | five-model median GCR_max per cell, crop and layout (maps) | `gcr_med` |
 | `food_by_crop.csv`, `food_cell.csv.gz`, `food_curve.csv` | crop given up under the arrays (Fig. 6) | t, Mt, PJ, kg MWh⁻¹; `mgmt`: `cur` calibrated N, `rec` recommended N |
+| `kharif_overlap_spam.csv`, `.json` | share of eligible rabi land followed by kharif crops other than pearl millet and groundnut (MapSPAM 2010) | %, ha |
 | `reconcile.csv` | fixed-density to yield-constrained steps (reconciliation figure) | GWp, Mha |
 | `numbers.json` | every number quoted in the article text | `values` (as printed), `raw` |
 | `field_response/` | field-response scenario (shade response rescaled to observations) | as above |
@@ -43,6 +46,8 @@ case (SSP5-8.5); `_season` = threshold met in at least 16 of 20 seasons; `_nodin
   `apv` (kg ha⁻¹), `ry` (–). These curves give GCR_max for any threshold.
 - `energy_<period>[_rc].csv`: PV specific yield per cell, layout and GCR (`_rc` = radiation corrected to NASA POWER).
 - `rad_factors.csv`: monthly radiation correction factors per cell.
+- `ry_crop_historical_<management>_rice.csv.gz`: as above for transplanted rice after wheat or chickpea (CERES-Rice);
+  `calib_rice_state_yields.csv` and `calib_n_with_rice.csv`: rice nitrogen calibration against ICRISAT state yields.
 - `rajasthan_pilot/`: Rajasthan pilot results (Text S9).
 
 ### data/inputs
@@ -50,6 +55,8 @@ case (SSP5-8.5); `_season` = threshold met in at least 16 of 20 seasons; `_nodin
   and sowing dates (GGCMI Phase 3).
 - `slope_india.csv`: share of each cell with terrain slope ≤ 5% and ≤ 10% (Copernicus GLO-90).
 - `calib_n.csv`: calibrated nitrogen level by state and crop (Table S6).
+- `grid_india_025_kharif.csv`: the grid with MapSPAM 2010 areas of rice, maize, soybean, cotton, sorghum, pigeonpea and
+  sugarcane, rice irrigated share and rice transplanting day (GGCMI Phase 3, main rice season).
 
 ### code/simulation
 Crop and light simulation run on a cloud machine: `sim_india.py`, `run_cells_india.py` (DSSAT runs per cell),

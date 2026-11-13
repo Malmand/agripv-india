@@ -172,6 +172,24 @@ add(PF(`*Field-response scenario.* For each crop we fitted a decreasing (isotoni
 add(H1("Text S15. Sensitivity cases"));
 add(PF(`Table S11 gives each sensitivity case of the main text (Section 3) with the basis of the tested value; the main text shows the same cases as a ranking.`));
 require("./sens_table.js").addSensTable(add);
+if (fill.has("kh.up_pct")) {
+  add(H1("Text S16. Kharif crops after wheat and chickpea"));
+  add(PF(`An array stands all year, so whatever grows on a field in kharif also grows under it. The potential pairs wheat and chickpea (rabi) with pearl millet and groundnut (kharif) as far as their areas allow (Section 2.5), but much of the remaining rabi land carries other kharif crops. We estimated how much from the MapSPAM 2010 harvested area of rice, maize, soybean, cotton, sorghum and pigeonpea ${cite("yu")} (sugarcane, an annual crop, excluded), aggregated to the same cells. In each cell, the rabi area left after the pearl millet and groundnut overlap was assigned to the other kharif crops as far as their area reaches, the same rule as in the potential (upper estimate); alternatively, the double-cropped part of the rabi area was shared by all kharif crops in proportion to their area. Cell shares were weighted by the eligible rabi land of the headline case ({kh.rabi_mha} Mha). Table S12 gives the result: {kh.up_pct}–{kh.prop_pct}% of the eligible rabi land is followed by a kharif crop that the four-crop potential does not test, carrying {kh.cap_on_lo}–{kh.cap_on_hi} TWp of the {head.cap_twp_m} TWp robust potential. The same calculation with district statistics of the ICRISAT database ${cite("icrisat")} gave 68–74%, rice 39–41%.`));
+  add(TABLE("Share of the eligible rabi land (wheat, chickpea; east-west, τ = 0.80, slope ≤ 5%) followed by a kharif crop other than pearl millet and groundnut (MapSPAM 2010, upper estimate).",
+    ["Kharif crop", "Share of eligible rabi land (%)"],
+    [["Rice", fill("{kh.rice_pct}")], ["Soybean", fill("{kh.soybean_pct}")], ["Maize", fill("{kh.maize_pct}")], ["Cotton", fill("{kh.cotton_pct}")],
+     ["Sorghum", fill("{kh.sorghum_pct}")], ["Pigeonpea", fill("{kh.pigeonpea_pct}")], ["All of these", fill("{kh.up_pct} (proportional sharing: {kh.prop_pct})")]],
+    [4000, 3000], "Upper estimate: these crops take the rabi land left after the pearl millet and groundnut overlap as far as their area reaches."));
+  if (fill.has("rice.cap_twp", "rice.cal.count")) {
+    add(PF(`*Rice.* Rice was simulated in the {kh.rice_cells} cells where it covers at least 1000 ha beside a simulated rabi crop ({kh.rice_area_mha} Mha of rice, irrigated share {kh.rice_irr}), with CERES-Rice in DSSAT 4.8 ${cite("jones", "hoogenboom")} and the same weather, soil and light model as the other crops. The cultivar was IR 36, a medium-duration variety widely grown in South Asia. Seedlings were transplanted 25 days after sowing at 33 plants m^−2^ in rows 20 cm apart, on the GGCMI Phase 3 rice calendar (main season) ${cite("jagermeyr")}. Fields were puddled and bunded (150 mm bunds, percolation 2 mm d^−1^); irrigated rice was kept flooded to 50 mm from transplanting until 95 days after, and rainfed rice received rain only. Nitrogen was split in three doses (irrigated) or two (rainfed). For the state calibration, open-field yields were simulated at 30, 60, 90, 120, 150 and 180 kg N ha^−1^ with GFDL-ESM4 and MPI-ESM1-2-HR, and the level closest to the observed 1995–2014 state yield was kept (Table S13); observed milled rice was converted to paddy with the usual factor of 1.5. Where CERES-Rice stopped in a failed rainfed season, that season was rerun alone and dropped if it failed again. GCR was simulated from 0.1 to 0.7. On the rabi land left after the pearl millet and groundnut overlap, rice takes up to its own eligible area, and that land enters the potential at the lower of the rabi and rice GCR~max~.`));
+    const n = +fill("{rice.cal.count}");
+    const rows = [];
+    for (let i = 0; i < n; i++) rows.push([fill(`{rice.cal.s${i}.state}`), fill(`{rice.cal.s${i}.area}`), fill(`{rice.cal.s${i}.n}`), fill(`{rice.cal.s${i}.sim}`), fill(`{rice.cal.s${i}.obs}`)]);
+    add(TABLE("Rice nitrogen calibration: chosen level and open-field state yield (paddy), 1995–2014.",
+      ["State", "Rice area (kha)", "N (kg ha^−1^)", "Simulated (kg ha^−1^)", "Observed (kg ha^−1^)"], rows, [2600, 1500, 1300, 1600, 1600],
+      "States with at least 20 kha of rice; observed, ICRISAT District Level Database, milled rice × 1.5. Simulated, mean of GFDL-ESM4 and MPI-ESM1-2-HR, MapSPAM area and irrigated share weighted."));
+  }
+}
 add(H1("References From the Supporting Information"));
 add(refsList());
 save(body, "Supporting_Information_AgriPV_India_EarthsFuture.docx");

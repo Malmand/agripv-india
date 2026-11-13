@@ -30,6 +30,7 @@ def main():
             ("Yield threshold τ", tw("sens.thr90.cap"), "0.90", tw("sens.thr66.cap"), "0.66"),
             ("Nitrogen management", None, None, tw("sens.n_calib.cap"), "calibrated alone"),
             ("Season rule", tw("sens.season.cap") if "sens.season.cap" in r else None, "16 of 20 seasons", None, None),
+            ("Rice yield rule", tw("sens.rice.cap") if "sens.rice.cap" in r else None, "rice after wheat", None, None),
             ("Module efficiency", tw("sens.eta20.cap"), "20%", tw("sens.eta24.cap"), "24%"),
             ("Terrain slope limit", None, None, tw("sens.slope_none.cap"), "none"),
             ("Climate model (GCM)", lo_g, "", hi_g, ""),

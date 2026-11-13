@@ -76,6 +76,13 @@ if [ $HAVE_REC != 0 ]; then
   SUMSTAGES=(historical_current historical_current_robust "${STAGES[@]:1}")
   [ $HAVE_REC = 1 ] && SUMSTAGES+=(historical_recommended)
 fi
+# rice after wheat/chickpea (VM mode rice, separate machine): the robust case with rice also held to the threshold
+if [ $HAVE_REC = 1 ] && [ -f "$SUM/ry_crop_historical_current_rice.csv.gz" ] && [ -f "$SUM/ry_crop_historical_recommended_rice.csv.gz" ]; then
+  echo "== postprocess historical_current robust, rice also constrained"
+  pp historical_current --robust-with historical_recommended --rice-stage historical_current_rice \
+    --rice-robust-with historical_recommended_rice --kharif-grid data/grid_india_025_kharif.csv
+  : # (headline_numbers.md keeps the four-crop stages)
+fi
 # robust nitrogen at mid-century (VM mode futrobust): ssp585_current with ssp585_recommended
 FUTROB=0
 [ $HAVE_REC != 0 ] && [ -f "$SUM/ry_crop_ssp585_recommended.csv.gz" ] && [ -f "$SUM/ry_crop_ssp585_current.csv.gz" ] && FUTROB=1
@@ -123,6 +130,8 @@ if [ -f "$PP/cell_crop_historical_current_robust.csv.gz" ] && [ -f "$SUM/ry_crop
   $PY src/fig_food.py --pp $PP --out $FIG --grid $GRID
 fi
 
+echo "== kharif crops after wheat/chickpea (MapSPAM 2010 overlap)"
+[ -f data/grid_india_025_kharif.csv ] && $PY src/kharif_overlap_spam.py | tail -2
 echo "== manuscript numbers"
 $PY src/make_numbers.py --pp $PP
 $PY src/fig_tornado.py --numbers $PP/numbers.json --out $FIG   # sensitivity ranking (main-text figure), reads numbers.json

@@ -192,3 +192,15 @@
   fill.has("ssp585r.change_pct"); Key Point 3, abstract, plain summary, conclusions, cover letter follow fut.*.
 - Pearl millet: Discussion 4.2 rewritten against the runs (RY >= 1 at 20-30% light reduction even at recommended N;
   Jodhpur soil test = water balance); range field 0.23 to robust 0.53 in Results and Conclusions, flagged least certain.
+
+## Rice after wheat/chickpea (13 Nov 2026)
+- MapSPAM 2010 kharif crops (data/kharif_inputs, fetched in Cloud Shell): 65-70% of eligible rabi land is followed by a
+  kharif crop other than pearl millet/groundnut; rice 40% (rice-first), soybean 11%, maize 4%, cotton 5% (src/kharif_overlap_spam.py).
+- Second VM agripv-rice (16 vCPU, no external IP, Cloud NAT agripv-router; bucket .../india_rice), VM mode rice:
+  N sweep 30-180 open field (2 GCMs) -> prod/calibrate_rice.py -> historical_current_rice, historical_recommended_rice.
+  Launched 13 Nov ~02:16 CET, expected ~Sun 15 Nov night. Delete agripv-router after it ends.
+- Integration: bash finish_rice.sh gs|<folder|zip>. postprocess --rice-stage: rice takes the rabi land left after the
+  pearl millet/groundnut overlap (up to its eligible area), both seasons must meet tau. Stage historical_current_robust_rice;
+  numbers rice.*, sens.rice; text switches on rice.cap_twp (abstract, methods 2.4/2.5 + Table 2 row, results 3.4,
+  tornado + Table S11, discussion 4.5, conclusions, SI Text S16 + Tables S12-S13). Headline stays the four-crop robust case.
+- Tested end to end with synthetic rice curves (scratch); real rice not yet in.
