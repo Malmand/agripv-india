@@ -72,6 +72,10 @@ def write_caption(a, hlabel, scen):
         f"{scen} against 1995–2014 (five-GCM median, "
         + ("robust case" if "ssp585r.change_pct" in json.load(open(ROOT / "results/potential/numbers.json"))["values"] else "calibrated nitrogen")
         + "). " + GA.BOUNDARY_SRC)
+    _v = json.load(open(a.pp / "numbers.json"))["values"] if (a.pp / "numbers.json").exists() else {}
+    if "rice.cap_twp" in _v:
+        txt += (f" With the rice that follows wheat or chickpea also held to {a.thr:.0%} of its yield (CERES-Rice), "
+                f"the robust capacity is {_v['rice.cap_twp']} TWp.")
     txt += (" The curves are the area-weighted national mean relative yield of wheat and chickpea against the share of "
             "land under panels (east-west layout, recommended nitrogen, 1995–2014); the panel limit is where a curve "
             f"crosses {a.thr:.0%}. GCMs, global climate models.")
@@ -224,7 +228,7 @@ def main():
     colw = LW / 3
     NUM = dict(fontweight="bold", color=NAVY, ha="left", va="center")
     sz = num.get("fut.size", "small")
-    take1 = f"{num['rice.cap_twp']} with rice" if "rice.cap_twp" in num else f"{mult}× India's use"
+    take1 = f"{num['rice.cap_twp']} TWp with rice" if "rice.cap_twp" in num else f"{mult}× India's use"
     cols = [("POTENTIAL", [(f"{num.get('field.ew.t80.cap_twp', '[X]')}–{num.get('head.cap_twp_m', '[Y]')}", None)],
              "TWp at 80% yield", take1),
             ("PANEL COVER", [(cer, "cereals"), (leg, "legumes")], None, "set by the crop"),
