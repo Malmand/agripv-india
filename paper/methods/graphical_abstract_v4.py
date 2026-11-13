@@ -68,7 +68,7 @@ def write_caption(a, hlabel, scen):
         "with double-cropped land counted once (median of five GCMs); the lower end of the range rescales the simulated relative yield to "
         "field observations of yield under reduced light, and the upper end is the crop-model case. Cereal and legume "
         "values are eligible-area-weighted means; the call-outs give the share of the field covered by panels, the same mean, for the wheat belt (24–31°N, "
-        "74–88°E) and the Deccan (12–21°N, 73–80°E); the scale bar holds at 22°N. The 2050 values are the changes by 2041–2060 under "
+        "74–88°E) and the Deccan (12–21°N, 73–80°E); The 2050 values are the changes by 2041–2060 under "
         f"{scen} against 1995–2014 (five-GCM median, "
         + ("robust case" if "ssp585r.change_pct" in json.load(open(ROOT / "results/potential/numbers.json"))["values"] else "calibrated nitrogen")
         + "). " + GA.BOUNDARY_SRC)
@@ -215,8 +215,8 @@ def main():
         rax.spines[sp_].set_visible(False)
     for sp_ in ("left", "bottom"):
         rax.spines[sp_].set_linewidth(0.6)
-    rax.set_xlabel("land covered by panels", fontsize=6.5, color=INK, labelpad=1)
-    rax.set_ylabel("yield kept", fontsize=6.5, color=INK, labelpad=1.5)
+    rax.set_xlabel("land covered by panels", fontsize=6.5, color=INK, labelpad=0.2)
+    rax.set_ylabel("yield kept", fontsize=6.5, color=INK, labelpad=0.4)
 
     # ---- bottom: one results panel, three columns (label, number, unit, takeaway), left-aligned
     py0, ph = 1.5, 21.5
@@ -271,19 +271,7 @@ def main():
     b.set_xlim(68, 97.5); b.set_ylim(6.5, 37.3); b.set_aspect(1 / np.cos(np.radians(22)))
     b.set_xticks([]); b.set_yticks([]); b.set_xlabel(""); b.set_ylabel("")
 
-    # north arrow (top-left, empty land west of Jammu & Kashmir) and 500 km scale bar (Arabian Sea, north of Lakshadweep)
-    nx, ny0 = geo_to_mm(ax, b, 69.6, 31.0)
-    _, ny1 = geo_to_mm(ax, b, 69.6, 34.0)
-    ax.add_patch(FancyArrowPatch((nx, ny0), (nx, ny1), arrowstyle="-|>", mutation_scale=7, lw=0.8, color=INK,
-                                 shrinkA=0, shrinkB=0))
-    ax.text(nx, ny1 + 0.5, "N", ha="center", va="bottom", fontsize=7, fontweight="bold", color=INK)
-    km_deg = 111.32 * np.cos(np.radians(22))          # km per degree of longitude at the map's reference latitude
-    sx0, sy = geo_to_mm(ax, b, 68.0, 14.0)
-    sx1, _ = geo_to_mm(ax, b, 68.0 + 500 / km_deg, 14.0)
-    ax.plot([sx0, sx1], [sy, sy], color=INK, lw=1.0, solid_capstyle="butt")
-    for xx in (sx0, sx1):
-        ax.plot([xx, xx], [sy - 0.4, sy + 0.4], color=INK, lw=0.8)
-    ax.text(sx0, sy + 0.6, "500 km", ha="left", va="bottom", fontsize=7, color=MID)
+    # no north arrow or scale bar (less clutter; India's outline is self-explanatory)
 
     # two call-outs carry the map's story (values computed from the same map file)
     def callout(key, label, txt_lonlat, pt_lonlat):
