@@ -38,9 +38,9 @@ const AGU_MANUAL = {
   mnre25: "Economic Times EnergyWorld. (2026, October). *Govt framing policy to enhance farmers' income via adoption of agrivoltaics*. https://energy.economictimes.indiatimes.com/news/renewable/govt-framing-policy-to-enhance-farmers-income-via-adoption-of-agrivoltaics/135120304",
   gerc: "Gujarat Electricity Regulatory Commission. (2026). *Order in Petition No. 2603 of 2026: Adoption of tariff discovered by reverse auction for PM-KUSUM Component A solar plants (DGVCL)*. https://jmkresearch.com/wp-content/uploads/2026/03/2603-of-2026-DGVCL.pdf",
   itrpv: "VDMA Photovoltaic Equipment. (2026). *International Technology Roadmap for Photovoltaic (ITRPV): Results 2025* (17th ed.). VDMA. https://www.vdma.org/international-technology-roadmap-photovoltaic",
-  hoogenboom: "Hoogenboom, G., Porter, C. H., Boote, K. J., Shelia, V., Wilkens, P. W., Singh, U., et al. (2021). *Decision Support System for Agrotechnology Transfer (DSSAT)* (Version 4.8) [Software]. DSSAT Foundation. https://dssat.net",
+  hoogenboom: "Hoogenboom, G., Porter, C. H., Shelia, V., Boote, K. J., Singh, U., White, J. W., Pavan, W., Oliveira, F. A. A., Moreno-Cadena, L. P., Lizaso, J. I., Asseng, S., Pequeno, D. N. L., Kimball, B. A., Alderman, P. D., Thorp, K. R., Jones, M. R., Cuadra, S. V., Vianna, M. S., Villalobos, F. J., … Jones, J. W. (2021). *Decision Support System for Agrotechnology Transfer (DSSAT)* (Version 4.8) [Software]. DSSAT Foundation. https://dssat.net",
   copdem: "European Space Agency, & Airbus. (2022). *Copernicus DEM, global 90 m (GLO-90)* [Dataset]. https://doi.org/10.5270/ESA-c5d3d65",
-  icrisat: "Swamikannu, N., Pingali, P. R., Padmanabhan, J., Ravula, P., Gumma, M. K., Mohammed, I. A., et al. (2021). *District Level Data (DLD) and dashboard for agriculture and allied sectors in India* (Version 1) [Dataset]. ICRISAT Dataverse. https://doi.org/10.21421/D2/XFB1BZ",
+  icrisat: "Swamikannu, N., Pingali, P. R., Padmanabhan, J., Ravula, P., Gumma, M. K., Mohammed, I. A., & Rathore, A. (2021). *District Level Data (DLD) and dashboard for agriculture and allied sectors in India* [Dataset]. ICRISAT Dataverse. https://doi.org/10.21421/D2/XFB1BZ",
   allen: "Allen, R. G., Pereira, L. S., Raes, D., & Smith, M. (1998). *Crop evapotranspiration: Guidelines for computing crop water requirements* (FAO Irrigation and Drainage Paper 56). FAO. https://www.fao.org/4/x0490e/x0490e00.htm",
   din: "DIN. (2021). *DIN SPEC 91434:2021-05. Agri-photovoltaic systems – Requirements for primary agricultural use*. Beuth Verlag. https://doi.org/10.31030/3257526",
   maff: "Ministry of Agriculture, Forestry and Fisheries of Japan. (2024). *Handling under the farmland conversion permit system of solar power generation facilities installed on supporting pillars while farming continues* (Notice 24-Noshin-2657 of 31 March 2013, superseded by a guideline in 2024; in Japanese). https://www.maff.go.jp/j/nousin/noukei/totiriyo/einogata.html",
@@ -57,11 +57,12 @@ const AGU_MANUAL = {
 function authors(s) {
   const etal = /,? et al$/.test(s); s = s.replace(/,? et al$/, "");
   const parts = s.split(/, /).map(a => {
-    const m = a.match(/^(.+?) ([A-Z]{1,4})$/);           // "Wu GC" -> "Wu, G. C."
+    const m = a.match(/^(.+?) (\p{Lu}{1,4})$/u);        // "Wu GC" -> "Wu, G. C."
     return m ? `${m[1]}, ${m[2].split("").map(c => c + ".").join(" ")}` : a;
   });
   if (etal) return parts.join(", ") + ", et al.";
   if (parts.length === 1) return parts[0];
+  if (parts.length > 20) return parts.slice(0, 19).join(", ") + ", … " + parts[parts.length - 1];   // AGU: first 19, ellipsis, last
   return parts.slice(0, -1).join(", ") + ", & " + parts[parts.length - 1];
 }
 function pages(p) {   // "117–32" -> "117–132"
