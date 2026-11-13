@@ -19,7 +19,15 @@ gcloud config set project \$PROJECT >/dev/null
 TMP=\$(mktemp -d)
 echo '$CODE' > \$TMP/code.b64
 echo '$START' | base64 -d > \$TMP/startup.sh
-gcloud compute instances create \$VM --zone \$ZONE --machine-type e2-custom-16-32768 \\
+# the project's policy denies external IPs to new machines: the rice machine gets none and reaches the internet
+# (climate data, Python packages, Cloud Storage) through a Cloud NAT gateway; machines with their own IP are unaffected
+gcloud compute networks subnets update default --region europe-west1 --enable-private-ip-google-access >/dev/null 2>&1 || true
+gcloud compute routers describe agripv-router --region europe-west1 >/dev/null 2>&1 || \\
+  gcloud compute routers create agripv-router --network default --region europe-west1
+gcloud compute routers nats describe agripv-nat --router agripv-router --region europe-west1 >/dev/null 2>&1 || \\
+  gcloud compute routers nats create agripv-nat --router agripv-router --region europe-west1 \\
+    --auto-allocate-nat-external-ips --nat-all-subnet-ip-ranges
+gcloud compute instances create \$VM --zone \$ZONE --machine-type e2-custom-16-32768 --no-address \\
   --image-family debian-12 --image-project debian-cloud --boot-disk-size 80GB --boot-disk-type pd-balanced \\
   --scopes storage-rw --metadata bucket=\$BUCKET/india_rice,mode=rice,soilsrc=\$BUCKET/india/soil \\
   --metadata-from-file startup-script=\$TMP/startup.sh,code=\$TMP/code.b64
@@ -31,6 +39,8 @@ Progress and health:   gsutil cat gs://\$BUCKET/india_rice/status.txt
 Calibration result:    gsutil cat gs://\$BUCKET/india_rice/out/summary/calib_n_with_rice.csv
 Finished when:         gsutil ls gs://\$BUCKET/india_rice/RICE_DONE
 Stopped by health check if this exists: gsutil cat gs://\$BUCKET/india_rice/HALT
+After it has finished, remove the NAT gateway (small hourly charge):
+  gcloud compute routers delete agripv-router --region europe-west1 --quiet
 MSG
 LAUNCH
 echo "launch_rice.sh $(wc -c < launch_rice.sh) bytes"
