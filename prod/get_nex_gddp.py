@@ -29,6 +29,8 @@ ROOT = "AMES/NEX/GDDP-CMIP6"
 MODELS = {"GFDL-ESM4": "r1i1p1f1", "IPSL-CM6A-LR": "r1i1p1f1", "MPI-ESM1-2-HR": "r1i1p1f1",
           "MRI-ESM2-0": "r1i1p1f1", "UKESM1-0-LL": "r1i1p1f2"}
 PERIODS = {"historical": range(1995, 2015), "ssp245": range(2041, 2061), "ssp585": range(2041, 2061)}
+if os.environ.get("AGRIPV_PERIODS"):                             # e.g. "historical" (rice VM)
+    PERIODS = {k: v for k, v in PERIODS.items() if k in os.environ["AGRIPV_PERIODS"].split(",")}
 VARS = ["rsds", "tasmax", "tasmin", "pr", "hurs", "sfcWind"]
 BBOX = dict(north=30.25, south=23.0, west=69.5, east=78.25)   # Rajasthan (default)
 if os.environ.get("AGRIPV_BBOX"):                                # "north,south,west,east"

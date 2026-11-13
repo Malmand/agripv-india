@@ -8,6 +8,7 @@ MODE=$(md mode)
 [ -f /data/TEST_DONE ] && [ "$MODE" = "test" ] && exit 0
 [ -f /data/CALIB_DONE ] && [ "$MODE" = "calib" ] && exit 0
 [ -f /data/EXTRA_DONE ] && [ "$MODE" = "extra" ] && exit 0
+[ -f /data/RICE_DONE ] && [ "$MODE" = "rice" ] && exit 0
 if [ -f /data/HALT ]; then   # stopped by a health check: resume only when acknowledged
   [ "$(md halt_ack)" = "yes" ] || exit 0
   mv /data/HALT /data/HALT.$(date +%s)

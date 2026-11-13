@@ -15,6 +15,10 @@ GRID=$APP/grid_india_025.csv
 MODELS=(GFDL-ESM4 IPSL-CM6A-LR MPI-ESM1-2-HR MRI-ESM2-0 UKESM1-0-LL)
 export PYTHONWARNINGS=ignore
 export AGRIPV_BBOX="37.25,6.5,68.0,97.5"
+SCENS="historical ssp245 ssp585"
+if [ "$MODE" = "rice" ]; then   # separate rice machine: 1995-2014 only, grid with the kharif crops
+  GRID=$APP/grid_india_025_kharif.csv; SCENS="historical"; export AGRIPV_PERIODS=historical
+fi
 mkdir -p $DATA/nex $DATA/cells $DATA/soil $DATA/out
 exec >>"$LOG" 2>&1
 say() { echo "[$(date -u +%F' '%T)] $*"; }
@@ -35,6 +39,12 @@ say "=== pipeline start ($(nproc) vCPU), mode=$MODE"
 SYNC_PID=$!
 trap 'kill $SYNC_PID 2>/dev/null' EXIT
 
+# rice machine: reuse the soil profiles of the main run (same cells)
+if [ "$MODE" = "rice" ] && [ ! -f $DATA/soil/.done ]; then
+  gsutil -q -m rsync -r "gs://$(md soilsrc)" $DATA/soil
+  [ $(ls $DATA/soil | wc -l) -ge 2977 ] && touch $DATA/soil/.done
+  say "soil copied from gs://$(md soilsrc): $(ls $DATA/soil | wc -l) files"
+fi
 # 1. climate download and soil fetch in parallel (explicit PIDs: never a bare wait)
 PIDS=""
 if [ ! -f $DATA/nex/.done ]; then
@@ -63,7 +73,7 @@ if [ ! -f $DATA/nex/.done ] || [ ! -f $DATA/soil/.done ]; then
 fi
 
 # 2. NetCDF -> per-cell arrays (uncompressed .npy, memory-mapped by the workers)
-for m in "${MODELS[@]}"; do for s in historical ssp245 ssp585; do
+for m in "${MODELS[@]}"; do for s in $SCENS; do
   [ -f $DATA/cells/cells_${m}_${s}.npy ] && continue
   echo "$m $s"
 done; done | xargs -P 3 -L 1 bash -c \
@@ -160,6 +170,33 @@ if [ "$MODE" = "radsample" ]; then
   unset AGRIPV_SRAD_FACTORS AGRIPV_STAGE_SUFFIX
   touch $DATA/RADSAMPLE_DONE && gsutil -q cp $DATA/RADSAMPLE_DONE "gs://$BUCKET/RADSAMPLE_DONE"
   say "=== radiation sample finished; shutting down"
+  push; shutdown -h now; exit 0
+fi
+
+if [ "$MODE" = "rice" ]; then
+  # 3g. rice after wheat/chickpea (separate machine, bucket .../india_rice): N calibration sweep (open field, two
+  #     climate models), state calibration against ICRISAT, then the APV stages with calibrated and recommended N.
+  #     Stages carry the suffix _rice; each step skips finished work.
+  S=$DATA/out/summary
+  $PY -c "import pandas as pd; g = pd.read_csv('$GRID'); print('\n'.join(g[g.sim_rice].cell_id))" > $DATA/rice_cells.txt
+  say "rice cells: $(wc -l < $DATA/rice_cells.txt)"
+  for n in 30 60 90 120 150 180; do
+    [ -f $S/ry_system_historical_n${n}_open.csv.gz ] && continue
+    run historical n$n --open-only --crops rice --models GFDL-ESM4,MPI-ESM1-2-HR --only $DATA/rice_cells.txt
+    $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage historical_n${n}_open | tail -2
+  done
+  $PY $APP/calibrate_rice.py --summary $S --grid $GRID --app $APP | tee $DATA/calib_rice.log
+  cp $APP/calib_n.csv $S/calib_n_with_rice.csv
+  push
+  export AGRIPV_STAGE_SUFFIX=_rice
+  for g in current recommended; do
+    run historical $g --crops rice --only $DATA/rice_cells.txt
+    $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage historical_${g}_rice | tail -5
+    status; push
+  done
+  unset AGRIPV_STAGE_SUFFIX
+  touch $DATA/RICE_DONE && gsutil -q cp $DATA/RICE_DONE "gs://$BUCKET/RICE_DONE"
+  say "=== rice stages finished; shutting down"
   push; shutdown -h now; exit 0
 fi
 

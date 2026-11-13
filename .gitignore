@@ -7,3 +7,4 @@ update_india*.sh
 node_modules/
 paper/ef/node_modules
 zenodo/
+prod/launch_rice.sh

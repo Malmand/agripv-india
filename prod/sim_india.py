@@ -34,7 +34,7 @@ CO2 = sim.CO2
 CONFIGS = ["south_fixed", "ew_fixed", "vertical"]
 BASE_GCR = [0.1, 0.2, 0.3, 0.4, 0.5]
 EXTRA_GCR = {"wheat": [0.6, 0.7], "pearl_millet": [0.6, 0.7], "chickpea": [0.05], "groundnut": [0.05],
-             "rice": [0.05]}
+             "rice": [0.05, 0.6, 0.7]}
 MIN_SHARE = 0.10
 
 # crop -> (DSSAT class, cultivar, plants m-2, row spacing cm)
