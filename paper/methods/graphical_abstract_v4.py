@@ -257,7 +257,7 @@ def main():
     colw = LW / 3
     NUM = dict(fontweight="bold", color=NAVY, ha="left", va="center")
     sz = num.get("fut.size", "small")
-    take1 = f"{num['rice.cap_twp']} TWp with rice" if "rice.cap_twp" in num else f"{mult}× India's use"
+    take1 = f"{mult}× India's use"         # one message per column; the rice case stays in the caption and text
     cols = [("POTENTIAL", [(f"{num.get('field.ew.t80.cap_twp', '[X]')}–{num.get('head.cap_twp_m', '[Y]')}", None)],
              "TWp at 80% yield", take1),
             ("PANEL COVER", [(cer, "cereals"), (leg, "legumes")], None, "set by the crop"),
