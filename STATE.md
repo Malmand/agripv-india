@@ -212,3 +212,6 @@
   data availability, Appendix A, acknowledgements before references). Old paper/methods js removed.
 - Discussion shortened ~10% (3.1k -> 2.7k words); duplicated economics and sensitivity numbers removed.
 - finish_futrobust.sh and finish_rice.sh rebuild both versions.
+- 14 Nov: rice in (finish_rice.sh). Rice-constrained robust potential 34.8 TWp (34.3-35.1), -11% vs 39.2; rice follows
+  rabi crops on 13.0 Mha (40% of eligible rabi land); mean GCR_max rice 0.36 vs wheat 0.51 on those cells; UP, Bihar,
+  Haryana = 92% of the reduction. Rice N calibration at the 30 kg floor in states with 87% of rice area (yields +10% vs obs).

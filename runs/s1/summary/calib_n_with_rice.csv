@@ -1,0 +1,46 @@
+state,crop,n
+Andhra Pradesh,pearl_millet,10
+Assam,wheat,30
+Bihar,wheat,30
+Chhattisgarh,wheat,30
+Gujarat,pearl_millet,30
+Gujarat,wheat,180
+Haryana,pearl_millet,30
+Haryana,wheat,90
+Himachal Pradesh,wheat,30
+Jharkhand,wheat,30
+Karnataka,pearl_millet,10
+Karnataka,wheat,90
+Madhya Pradesh,pearl_millet,30
+Madhya Pradesh,wheat,60
+Maharashtra,pearl_millet,10
+Maharashtra,wheat,30
+Punjab,wheat,180
+Rajasthan,pearl_millet,10
+Rajasthan,wheat,90
+Tamil Nadu,pearl_millet,10
+Uttar Pradesh,pearl_millet,30
+Uttar Pradesh,wheat,60
+Uttarakhand,wheat,30
+West Bengal,wheat,30
+ALL,pearl_millet,10
+ALL,wheat,60
+Andhra Pradesh,rice,30
+Assam,rice,30
+Bihar,rice,30
+Chhattisgarh,rice,30
+Gujarat,rice,30
+Haryana,rice,60
+Himachal Pradesh,rice,30
+Jharkhand,rice,30
+Karnataka,rice,30
+Madhya Pradesh,rice,30
+Maharashtra,rice,30
+Odisha,rice,30
+Punjab,rice,90
+Rajasthan,rice,30
+Telangana,rice,60
+Uttar Pradesh,rice,30
+Uttarakhand,rice,30
+West Bengal,rice,30
+ALL,rice,30

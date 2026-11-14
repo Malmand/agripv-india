@@ -1,5 +1,5 @@
 Coupled light and crop models find the panel cover that keeps 80% of crop yield.
 India's farmland could host 22.6–39.2 TWp of agrivoltaics at 80% crop yield.
 Panel cover that keeps 80% of yield: 0.52 for wheat and 0.27 for chickpea.
-Low nitrogen hides shade losses; robust management cuts the potential by 14%.
+Holding rice after wheat to the same rule gives 34.8 TWp.
 Under high emissions, mid-century climate changes the potential by −1%.
