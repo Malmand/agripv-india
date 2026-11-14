@@ -769,6 +769,44 @@ def review_numbers(N, pp, summ, grid_file="data/grid_india_025.csv"):
             N.put("rad.crop_n_cells", b.cell.nunique(), f"{b.cell.nunique()}")
             N.put("rad.gcr_change", dd.mean(), f"{dd.mean():+.2f}".replace("-", "−"))
             N.put("rad.gcr_change_abs_max", dd.abs().max(), f"{dd.abs().max():.2f}")
+    # radiation sample (VM mode radsample): 200 cells drawn by crop area, corrected radiation in the crop model too,
+    # both nitrogen cases; robust GCR_max (min of the two) compared with the production runs on the same cells
+    rs = {m: summ / f"ry_crop_historical_{m}_rs.csv.gz" for m in ("current", "recommended")}
+    if all(f.exists() for f in rs.values()):
+        g = pd.read_csv(Path("data/grid_india_025.csv")).set_index("cell_id")
+        def robust_g(files):
+            out = []
+            for f in files:
+                d = pd.read_csv(f); d = d[d.config == MAIN_LAYOUT]
+                rows = [(c, m, cr, _gcr_at(x.sort_values("gcr").gcr.values, x.sort_values("gcr").ry.values, MAIN_THR))
+                        for (c, m, cr), x in d.groupby(["cell", "model", "crop"])]
+                out.append(pd.DataFrame(rows, columns=["cell", "model", "crop", "g"]).set_index(["cell", "model", "crop"]).g)
+            return pd.concat(out, axis=1).min(axis=1)
+        cells = pd.read_csv(rs["current"], usecols=["cell"]).cell.unique()
+        new = robust_g(rs.values())
+        base = []
+        for m in ("current", "recommended"):
+            d = pd.read_csv(summ / f"ry_crop_historical_{m}.csv.gz"); base.append(d[d.cell.isin(cells)])
+        tmp = Path("/tmp/_rs_base")
+        tmp.mkdir(exist_ok=True)
+        fs = []
+        for m, d in zip(("current", "recommended"), base):
+            f = tmp / f"{m}.csv.gz"; d.to_csv(f, index=False); fs.append(f)
+        old = robust_g(fs)
+        j = pd.concat([old.rename("old"), new.rename("new")], axis=1).dropna().reset_index()
+        j["w"] = [g.at[c, f"{cr}_ha"] for c, cr in zip(j.cell, j.crop)]
+        j = j.groupby(["cell", "crop"]).agg(old=("old", "median"), new=("new", "median"), w=("w", "first")).reset_index()
+        ch = 100 * (np.average(j.new, weights=j.w) / np.average(j.old, weights=j.w) - 1)
+        rng = np.random.default_rng(2026); cs = j.cell.unique(); bs = []
+        for _ in range(1000):                       # bootstrap over the sampled cells
+            k = j[j.cell.isin(rng.choice(cs, len(cs)))]
+            bs.append(100 * (np.average(k.new, weights=k.w) / np.average(k.old, weights=k.w) - 1))
+        lo, hi = np.percentile(bs, [2.5, 97.5])
+        N.put("rad.rs_n_cells", len(cs), f"{len(cs)}")
+        N.put("rad.rs_gcr_change_pct", ch, pct(ch, True))
+        N.put("rad.rs_ci", lo, f"{pct(lo, True)} to {pct(hi, True)}")
+        N.put("rad.rs_gcr_old", np.average(j.old, weights=j.w), f"{np.average(j.old, weights=j.w):.2f}")
+        N.put("rad.rs_gcr_new", np.average(j.new, weights=j.w), f"{np.average(j.new, weights=j.w):.2f}")
     s0, s1 = pp / "india_combined_historical_current_robust.csv", pp / "india_combined_historical_current_season_robust.csv"
     if not s1.exists():
         s0, s1 = pp / "india_combined_historical_current.csv", pp / "india_combined_historical_current_season.csv"
