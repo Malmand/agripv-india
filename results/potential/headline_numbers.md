@@ -168,6 +168,48 @@
 - Gujarat: 2328
 - Maharashtra: 2166
 
+## ssp585_current_robust: crops combined, slope ≤ 5%
+
+| Layout | τ | Land (Mha) | Capacity (TWp) | Energy (PWh/yr) |
+|---|---|---|---|---|
+| ew_fixed | 0.66 | 39.67 | 46.61 (45.65–48.48) | 69.17 (67.64–71.56) |
+| south_fixed | 0.66 | 39.67 | 35.66 (35.08–38.10) | 56.03 (55.06–59.43) |
+| vertical | 0.66 | 39.67 | 47.67 (47.28–48.07) | 48.24 (47.90–48.53) |
+| ew_fixed | 0.80 | 39.67 | 37.97 (36.69–40.86) | 57.08 (54.96–60.95) |
+| south_fixed | 0.80 | 39.67 | 27.85 (27.23–31.00) | 44.48 (43.35–49.01) |
+| vertical | 0.80 | 39.67 | 39.62 (39.31–42.19) | 41.72 (41.23–43.65) |
+| ew_fixed | 0.90 | 39.67 | 28.94 (27.56–32.76) | 44.05 (41.65–49.33) |
+| south_fixed | 0.90 | 39.67 | 20.46 (20.01–24.06) | 33.15 (32.22–38.48) |
+| vertical | 0.90 | 39.67 | 28.25 (27.79–33.23) | 31.22 (31.03–35.71) |
+
+### ssp585_current_robust: area-weighted mean of the five-GCM median GCR_max at τ = 0.80
+
+| Crop | Layout | GCR_max | Share of area at simulated GCR limit |
+|---|---|---|---|
+| chickpea | ew_fixed | 0.27 | 3% |
+| chickpea | south_fixed | 0.19 | 0% |
+| chickpea | vertical | 0.27 | 5% |
+| groundnut | ew_fixed | 0.31 | 5% |
+| groundnut | south_fixed | 0.31 | 2% |
+| groundnut | vertical | 0.32 | 7% |
+| pearl_millet | ew_fixed | 0.47 | 0% |
+| pearl_millet | south_fixed | 0.43 | 0% |
+| pearl_millet | vertical | 0.58 | 38% |
+| wheat | ew_fixed | 0.52 | 1% |
+| wheat | south_fixed | 0.35 | 0% |
+| wheat | vertical | 0.52 | 14% |
+
+### ssp585_current_robust: top states, best layout, τ = 0.80 (GWp)
+
+- Uttar Pradesh: 12248
+- Rajasthan: 7271
+- Madhya Pradesh: 5512
+- Haryana: 3238
+- Punjab: 2729
+- Bihar: 2499
+- Gujarat: 2312
+- Maharashtra: 1830
+
 ## Change historical_current → ssp245_current (capacity, %)
 
 - ew_fixed, τ 0.66: -1%
@@ -204,6 +246,18 @@
 - vertical, τ 0.80: -3.7%
 - vertical, τ 0.90: -20.1%
 
+## Robust vs calibrated N, ssp585_current (capacity, %)
+
+- ew_fixed, τ 0.66: -8.0%
+- ew_fixed, τ 0.80: -15.4%
+- ew_fixed, τ 0.90: -25.4%
+- south_fixed, τ 0.66: -11.3%
+- south_fixed, τ 0.80: -17.5%
+- south_fixed, τ 0.90: -26.5%
+- vertical, τ 0.66: -0.5%
+- vertical, τ 0.80: -7.3%
+- vertical, τ 0.90: -24.8%
+
 ## Vertical layout, DIN cap GCR_max ≤ 0.6 (main) vs uncapped, historical_current (TWp)
 
 - τ 0.66: capped 47.72, uncapped 53.23 (-10%)
@@ -227,6 +281,12 @@
 - τ 0.66: capped 47.90, uncapped 53.35 (-10%)
 - τ 0.80: capped 42.72, uncapped 47.80 (-11%)
 - τ 0.90: capped 37.59, uncapped 41.47 (-9%)
+
+## Vertical layout, DIN cap GCR_max ≤ 0.6 (main) vs uncapped, ssp585_current_robust (TWp)
+
+- τ 0.66: capped 47.67, uncapped 52.52 (-9%)
+- τ 0.80: capped 39.62, uncapped 40.69 (-3%)
+- τ 0.90: capped 28.25, uncapped 28.43 (-1%)
 
 ## Sanity checks
 
@@ -293,6 +353,22 @@
 | vertical | 0.90 | 0.95 | 1040 |
 
 - ssp585_current: vertical layout, share of eligible area with uncapped GCR_max > 0.6 (DIN 15% land loss, capped at 0.6 in the main case): τ 0.66 68%, τ 0.80 61%, τ 0.90 52%
+
+### ssp585_current_robust: capacity density and specific yield (slope ≤ 5%)
+
+| Layout | τ | MWp per ha of land | kWh/kWp/yr |
+|---|---|---|---|
+| ew_fixed | 0.66 | 1.18 | 1484 |
+| south_fixed | 0.66 | 0.90 | 1571 |
+| vertical | 0.66 | 1.20 | 1012 |
+| ew_fixed | 0.80 | 0.96 | 1503 |
+| south_fixed | 0.80 | 0.70 | 1597 |
+| vertical | 0.80 | 1.00 | 1053 |
+| ew_fixed | 0.90 | 0.73 | 1522 |
+| south_fixed | 0.90 | 0.52 | 1620 |
+| vertical | 0.90 | 0.71 | 1105 |
+
+- ssp585_current_robust: vertical layout, share of eligible area with uncapped GCR_max > 0.6 (DIN 15% land loss, capped at 0.6 in the main case): τ 0.66 65%, τ 0.80 36%, τ 0.90 9%
 
 ### historical_current: open-field yield (kg/ha, 5-GCM median, SPAM-area weighted)
 
