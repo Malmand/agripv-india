@@ -168,6 +168,17 @@ if [ "$MODE" = "radsample" ]; then
     status; push
   done
   unset AGRIPV_SRAD_FACTORS AGRIPV_STAGE_SUFFIX
+  # same 200 cells: (i) SSP2-4.5 with recommended N (the robust case was run for SSP5-8.5 only);
+  # (ii) SSP5-8.5 with recommended N and CO2 held at the 1995-2014 level (378 ppm), to separate the CO2 effect
+  export AGRIPV_STAGE_SUFFIX=_rs
+  run ssp245 recommended --only $APP/rs_cells.txt
+  $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage ssp245_recommended_rs | tail -3
+  status; push
+  export AGRIPV_CO2=378 AGRIPV_STAGE_SUFFIX=_co2fix
+  run ssp585 recommended --only $APP/rs_cells.txt
+  $PY $APP/summarise_india.py --out $DATA/out --grid $GRID --stage ssp585_recommended_co2fix | tail -3
+  status; push
+  unset AGRIPV_CO2 AGRIPV_STAGE_SUFFIX
   touch $DATA/RADSAMPLE_DONE && gsutil -q cp $DATA/RADSAMPLE_DONE "gs://$BUCKET/RADSAMPLE_DONE"
   say "=== radiation sample finished; shutting down"
   push; shutdown -h now; exit 0

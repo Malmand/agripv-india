@@ -265,7 +265,7 @@ def task(npy_path, meta, cell, soil_json, period, mgmt, model, out_csv):
     wdf.attrs.update(lat=lat, lon=lon, tag=f"{cid}|{model}|{period}")
     soil = L["soil_from_soilgrids"](soil_json, soil_id=f"IN{int(cid[1:]):08d}")
     y0, nyears = dates[0].year, dates[-1].year - dates[0].year + 1
-    co2 = CO2[period]
+    co2 = float(os.environ.get("AGRIPV_CO2", CO2[period]))   # AGRIPV_CO2: CO2 held fixed (sensitivity test)
     kf = os.environ.get("AGRIPV_SRAD_FACTORS")   # radiation bias test (radiation_ref.py); unset in production
     if kf:
         f = pd.read_csv(kf)

@@ -807,6 +807,32 @@ def review_numbers(N, pp, summ, grid_file="data/grid_india_025.csv"):
         N.put("rad.rs_ci", lo, f"{pct(lo, True)} to {pct(hi, True)}")
         N.put("rad.rs_gcr_old", np.average(j.old, weights=j.w), f"{np.average(j.old, weights=j.w):.2f}")
         N.put("rad.rs_gcr_new", np.average(j.new, weights=j.w), f"{np.average(j.new, weights=j.w):.2f}")
+    # same 200 cells, recommended N: SSP2-4.5 (rs) and SSP5-8.5 with CO2 fixed at 378 ppm (co2fix), against the
+    # production stages on the same cells (historical_recommended, ssp585_recommended)
+    def gcr_cells(f, cells):
+        d = pd.read_csv(f); d = d[(d.config == MAIN_LAYOUT) & d.cell.isin(cells)]
+        rows = [(c, m, cr, _gcr_at(x.sort_values("gcr").gcr.values, x.sort_values("gcr").ry.values, MAIN_THR),
+                 x.open.median()) for (c, m, cr), x in d.groupby(["cell", "model", "crop"])]
+        return pd.DataFrame(rows, columns=["cell", "model", "crop", "g", "open"]).groupby(["cell", "crop"])[["g", "open"]].median()
+    def wchange(new, old, col):
+        g = pd.read_csv(Path("data/grid_india_025.csv")).set_index("cell_id")
+        j = new[[col]].join(old[[col]], rsuffix="_o").dropna().reset_index()
+        w = [g.at[c, f"{cr}_ha"] for c, cr in zip(j.cell, j.crop)]
+        return 100 * (np.average(j[col], weights=w) / np.average(j[col + "_o"], weights=w) - 1)
+    f245, fco2 = summ / "ry_crop_ssp245_recommended_rs.csv.gz", summ / "ry_crop_ssp585_recommended_co2fix.csv.gz"
+    fh, f585 = summ / "ry_crop_historical_recommended.csv.gz", summ / "ry_crop_ssp585_recommended.csv.gz"
+    if f245.exists() and fh.exists() and f585.exists():
+        cells = pd.read_csv(f245, usecols=["cell"]).cell.unique()
+        h, a245, a585 = gcr_cells(fh, cells), gcr_cells(f245, cells), gcr_cells(f585, cells)
+        x, y = wchange(a245, h, "g"), wchange(a585, h, "g")
+        N.put("s245r.n_cells", len(cells), f"{len(cells)}")
+        N.put("s245r.gcr_change_pct", x, pct(x, True)); N.put("s245r.gcr_change_585_pct", y, pct(y, True))
+    if fco2.exists() and f585.exists():
+        cells = pd.read_csv(fco2, usecols=["cell"]).cell.unique()
+        a, b = gcr_cells(fco2, cells), gcr_cells(f585, cells)
+        x, y = wchange(a, b, "g"), wchange(a, b, "open")
+        N.put("co2.n_cells", len(cells), f"{len(cells)}")
+        N.put("co2.gcr_change_pct", x, pct(x, True)); N.put("co2.open_change_pct", y, pct(y, True))
     s0, s1 = pp / "india_combined_historical_current_robust.csv", pp / "india_combined_historical_current_season_robust.csv"
     if not s1.exists():
         s0, s1 = pp / "india_combined_historical_current.csv", pp / "india_combined_historical_current_season.csv"
