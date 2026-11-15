@@ -100,7 +100,7 @@ if (AE) {
   add(H1("Data availability"));
   add(P(DATA1_AE)); add(P(DATA2()));
   add(H1("Appendix A. Supplementary data"));
-  add(P("Supplementary data to this article (Supplementary Notes S1–S16, Tables S1–S13 and Figs. S1–S12) are provided in a separate file."));
+  add(P(fill.has("co2.n_cells") ? "Supplementary data to this article (Supplementary Notes S1–S17, Tables S1–S14 and Figs. S1–S12) are provided in a separate file." : "Supplementary data to this article (Supplementary Notes S1–S16, Tables S1–S13 and Figs. S1–S12) are provided in a separate file."));
   add(H1("Acknowledgements"));
   add(P(THANKS() + " " + RRS));
   add(H1("References"));
