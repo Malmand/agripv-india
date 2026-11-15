@@ -805,6 +805,9 @@ def review_numbers(N, pp, summ, grid_file="data/grid_india_025.csv"):
         N.put("rad.rs_n_cells", len(cs), f"{len(cs)}")
         N.put("rad.rs_gcr_change_pct", ch, pct(ch, True))
         N.put("rad.rs_ci", lo, f"{pct(lo, True)} to {pct(hi, True)}")
+        hc = N.raw.get("head.cap_twp_m")
+        if hc:   # indicative only: capacity density scales with GCR_max, so the sample change is applied to the headline
+            N.put("rad.rs_cap_twp", hc * (1 + ch / 100) / 1e6, f"{hc * (1 + ch / 100) / 1e6:.0f}")
         N.put("rad.rs_gcr_old", np.average(j.old, weights=j.w), f"{np.average(j.old, weights=j.w):.2f}")
         N.put("rad.rs_gcr_new", np.average(j.new, weights=j.w), f"{np.average(j.new, weights=j.w):.2f}")
     # same 200 cells, recommended N: SSP2-4.5 (rs) and SSP5-8.5 with CO2 fixed at 378 ppm (co2fix), against the
@@ -833,6 +836,15 @@ def review_numbers(N, pp, summ, grid_file="data/grid_india_025.csv"):
         x, y = wchange(a, b, "g"), wchange(a, b, "open")
         N.put("co2.n_cells", len(cells), f"{len(cells)}")
         N.put("co2.gcr_change_pct", x, pct(x, True)); N.put("co2.open_change_pct", y, pct(y, True))
+        gg = pd.read_csv(Path("data/grid_india_025.csv")).set_index("cell_id")
+        for cr in ("wheat", "chickpea", "pearl_millet", "groundnut"):
+            ja = a.xs(cr, level="crop"); jb = b.xs(cr, level="crop")
+            j = ja[["g", "open"]].join(jb[["g", "open"]], rsuffix="_o").dropna()
+            if len(j):
+                w = [gg.at[c, f"{cr}_ha"] for c in j.index]
+                for col, tag in (("g", "gcr"), ("open", "open")):
+                    v = 100 * (np.average(j[col], weights=w) / np.average(j[col + "_o"], weights=w) - 1)
+                    N.put(f"co2.{tag}_{cr}", v, pct(v, True))
     s0, s1 = pp / "india_combined_historical_current_robust.csv", pp / "india_combined_historical_current_season_robust.csv"
     if not s1.exists():
         s0, s1 = pp / "india_combined_historical_current.csv", pp / "india_combined_historical_current_season.csv"
