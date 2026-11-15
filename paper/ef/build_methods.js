@@ -84,6 +84,7 @@ require("./discussion.js").addDiscussion(add);
 require("./conclusions.js").addConclusions(add);
 
 const DATA1 = `The data behind every figure and table (cell, state and national results, the simulated relative-yield curves, PV specific yields and the derived input grid) and the code that produced them (simulation, analysis and figure scripts) are available at Zenodo via [DOI to be added] under CC BY 4.0 (data) and MIT (code) licences [reference to be added after the DOI is reserved]. Simulations used DSSAT 4.8 ${cite("jones", "hoogenboom")} through DSSATTools 3.0.2, and pvlib 0.16.1 ${cite("pvlib")}.`;
+const DATA1_AE = `The national and state results behind the tables and figures are given in the article and the Supplementary Material. The cell-level results (relative-yield curves, largest ground coverage ratio, capacity, energy and crop given up, and the derived input grid) and the simulation and analysis scripts will be made available by the corresponding author on request. Simulations used DSSAT 4.8 ${cite("jones", "hoogenboom")} through DSSATTools 3.0.2, and pvlib 0.16.1 ${cite("pvlib")}.`;
 const DATA2 = () => `All input data are public: climate from NEX-GDDP-CMIP6 ${cite("thrasher")}, crop area from MapSPAM ${cite("yu")}, crop calendars from GGCMI Phase 3 ${cite("jagermeyr")}, soils from SoilGrids 2.0 ${cite("poggio")}, terrain from the Copernicus digital elevation model ${cite("copdem")}, observed yields from the ICRISAT District Level Database ${cite("icrisat")}, radiation for the energy correction from NASA POWER ${cite("nasapower")}, food energy from the Indian Food Composition Tables ${cite("ifct")} and state boundaries from DataMeet ${cite("datameet")} (CC BY 4.0).`;
 const THANKS = () => `We thank the DataMeet India community for the India state boundaries ${cite("datameet")}, shared under a Creative Commons Attribution 4.0 (CC BY 4.0) licence, and the teams behind the other open data sets used here: NEX-GDDP-CMIP6, MapSPAM, SoilGrids, the Copernicus digital elevation model, the GGCMI crop calendar, the ICRISAT District Level Database and NASA POWER.`;
 const RRS = "For the purpose of open access, the authors have applied a Creative Commons Attribution (CC BY) licence to any Author Accepted Manuscript version arising from this submission.";
@@ -97,7 +98,7 @@ if (AE) {
   add(H1("Funding"));
   add(P("This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors."));
   add(H1("Data availability"));
-  add(P(DATA1)); add(P(DATA2()));
+  add(P(DATA1_AE)); add(P(DATA2()));
   add(H1("Appendix A. Supplementary data"));
   add(P("Supplementary data to this article (Supplementary Notes S1–S16, Tables S1–S13 and Figs. S1–S12) are provided in a separate file."));
   add(H1("Acknowledgements"));
