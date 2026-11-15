@@ -1088,6 +1088,10 @@ def main():
     review_numbers(N, a.pp, a.summary)
     kharif_numbers(N, a.pp, a.summary)
     sens_numbers(N, a.pp)
+    if "ssp585r.change_pct" in N.raw and "co2.gcr_change_pct" in N.raw:
+        # mid-century capacity change with CO2 held at 1995-2014: the robust change combined with the CO2-fixed sample ratio
+        x = 100 * ((1 + N.raw["ssp585r.change_pct"] / 100) * (1 + N.raw["co2.gcr_change_pct"] / 100) - 1)
+        N.put("co2.climate_only_pct", x, pct(x, True))
     f = a.pp.parent / "shade_response_check.csv"          # simulated RY against mean ground-light reduction
     if f.exists():
         sr = pd.read_csv(f)
