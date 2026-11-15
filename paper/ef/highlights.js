@@ -10,7 +10,7 @@ function lines() {
     "Panel cover that keeps 80% of yield: {head.gcr_wheat} for wheat and {head.gcr_chickpea} for chickpea.",
     fill.has("rice.cap_twp") ? "Holding rice after wheat to the same rule gives {rice.cap_twp} TWp." :
       "Low nitrogen hides shade losses; robust management cuts the potential by {robust.reduction_pct}%.",
-    fill.has("co2.climate_only_pct") ? "Mid-century climate changes it by {fut.change_pct}%, or {co2.climate_only_pct}% at fixed CO2." : "Under high emissions, mid-century climate changes the potential by {fut.change_pct}%.",
+    fill.has("co2.climate_only_pct") ? "Mid-century climate changes capacity by {fut.change_pct}%, or {co2.climate_only_pct}% at fixed CO2." : "Under high emissions, mid-century climate changes the potential by {fut.change_pct}%.",
   ].map(l => fill(l));
 }
 function writeHighlights(outDir = ".") {
