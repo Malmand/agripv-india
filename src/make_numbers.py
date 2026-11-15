@@ -822,6 +822,17 @@ def review_numbers(N, pp, summ, grid_file="data/grid_india_025.csv"):
         j = new[[col]].join(old[[col]], rsuffix="_o").dropna().reset_index()
         w = [g.at[c, f"{cr}_ha"] for c, cr in zip(j.cell, j.crop)]
         return 100 * (np.average(j[col], weights=w) / np.average(j[col + "_o"], weights=w) - 1)
+    for mg in ("current", "recommended"):     # corrected-radiation sample by nitrogen case; open-field yield response
+        fa, fb = summ / f"ry_crop_historical_{mg}_rs.csv.gz", summ / f"ry_crop_historical_{mg}.csv.gz"
+        if fa.exists() and fb.exists():
+            cs_ = pd.read_csv(fa, usecols=["cell"]).cell.unique()
+            ra, rb = gcr_cells(fa, cs_), gcr_cells(fb, cs_)
+            v = wchange(ra, rb, "g"); N.put(f"rad.rs_gcr_{mg}", v, pct(v, True))
+            if mg == "current":
+                v = wchange(ra, rb, "open"); N.put("rad.rs_open_change_pct", v, pct(v, True))
+                for cr in ("wheat", "pearl_millet"):
+                    jj = ra.xs(cr, level="crop")[["open"]].join(rb.xs(cr, level="crop")[["open"]], rsuffix="_o").dropna()
+                    N.put(f"rad.rs_open_up_{cr}", 100 * (jj.open > jj.open_o).mean(), f"{100 * (jj.open > jj.open_o).mean():.0f}")
     f245, fco2 = summ / "ry_crop_ssp245_recommended_rs.csv.gz", summ / "ry_crop_ssp585_recommended_co2fix.csv.gz"
     fh, f585 = summ / "ry_crop_historical_recommended.csv.gz", summ / "ry_crop_ssp585_recommended.csv.gz"
     if f245.exists() and fh.exists() and f585.exists():
@@ -910,6 +921,9 @@ def sens_numbers(N, pp):
         r = sel(pd.read_csv(f), MAIN_LAYOUT, MAIN_THR)
         if r is not None:
             row("rice", r.cap_mwp_median, r.energy_gwh_median)
+    if "rad.rs_gcr_change_pct" in N.raw:  # crop runs with corrected radiation (200-cell sample): capacity scales with GCR_max
+        k = 1 + N.raw["rad.rs_gcr_change_pct"] / 100
+        row("rad_crop", b_cap * k, b_en * k)
     if "rad.sy_change_pct" in N.raw:     # main energy is radiation-corrected; the uncorrected energy for comparison
         row("rad_off", b_cap, b_en / (1 + N.raw["rad.sy_change_pct"] / 100))
 

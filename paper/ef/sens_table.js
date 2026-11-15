@@ -19,6 +19,7 @@ function addSensTable(add) {
     ...R("Vertical layout, no DIN cap", "vertical_nodin", `15% land-loss limit removed ${cite("din")}`),
     ...R("Rice after wheat or chickpea also held to τ", "rice", "Rice follows the rabi crop on part of the land, Section 2.5"),
     ...R("Threshold met in ≥ 16 of 20 seasons", "season", `Rules judge single seasons ${cite("din", "decret")}; one failure in five tolerated`),
+    ...R("Crop runs with corrected radiation (200-cell sample)", "rad_crop", "Sample change in robust GCR~max~ applied to the base; energy scaled with capacity, Supplementary Section S12"),
     ...R("Radiation not corrected (energy only)", "rad_off", "NEX-GDDP radiation as supplied, Supplementary Section S12"),
   ];
   if (fill.has("sens.base.range")) rows.push(["Range of five GCMs (base case)", "CMIP6 ensemble, Section 2.3", fill("{sens.base.range}"), "–", "–"]);
